@@ -1,0 +1,16 @@
+# === CPU版本依赖文件 ===
+# GPU版本请使用 requirements-gpu.txt
+
+# === PyTorch ===
+torch>=2.0.0
+
+# === 生物信息学 ===
+biopython>=1.80
+
+# === 数据处理 ===
+numpy>=1.23.0
+pandas>=1.5.0
+
+# === 工具 ===
+tqdm
+

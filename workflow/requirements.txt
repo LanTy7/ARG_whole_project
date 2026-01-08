@@ -1,0 +1,15 @@
+# ARG 分析工作流依赖
+
+# PyTorch (根据集群CUDA版本选择)
+torch>=2.0.0
+
+# 生物信息学
+biopython>=1.80
+
+# 数据处理
+numpy>=1.23.0
+pandas>=2.0.0
+
+# 进度条
+tqdm>=4.65.0
+

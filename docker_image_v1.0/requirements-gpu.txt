@@ -1,0 +1,14 @@
+# === GPU版本依赖 ===
+# PyTorch 已包含在基础镜像 pytorch/pytorch:2.0.0-cuda11.7-cudnn8-runtime 中
+# 此文件仅包含额外依赖
+
+# === 生物信息学 ===
+biopython>=1.80
+
+# === 数据处理 ===
+numpy>=1.23.0
+pandas>=1.5.0
+
+# === 工具 ===
+tqdm
+
