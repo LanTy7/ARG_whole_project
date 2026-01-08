@@ -22,8 +22,8 @@ spring:
   mail:
     host: smtp.qq.com  
     port: 587
-    username: ${MAIL_USERNAME:yourEmail}  
-    password: ${MAIL_PASSWORD:yourPASSWORD}   
+    username: ${MAIL_USERNAME:1627330037@qq.com}  
+    password: ${MAIL_PASSWORD:dpllqwzfouvsecji}   
     properties:
       mail:
         smtp:
@@ -51,7 +51,7 @@ spring:
 # 邮件调试配置
 email:
   debug-mode: ${EMAIL_DEBUG_MODE:true}
-  debug-recipient: ${EMAIL_DEBUG_RECIPIENT:yourEmail}
+  debug-recipient: ${EMAIL_DEBUG_RECIPIENT:1627330037@qq.com}
       
 jwt:
   secret: ${JWT_SECRET_KEY:springbot-jwt-secret-key-2024-secure-and-long-enough}
