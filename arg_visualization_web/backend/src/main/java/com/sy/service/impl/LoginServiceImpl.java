@@ -8,6 +8,7 @@ import com.sy.service.LoginService;
 import com.sy.service.EmailService;
 import com.sy.util.JwtUtil;
 import com.sy.util.EmailValidator;
+import com.sy.util.IpLocationUtil;
 import com.sy.vo.RegisterRequest;
 import com.sy.vo.ResetPasswordRequest;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,6 +38,9 @@ public class LoginServiceImpl implements LoginService {
     
     @Autowired
     private EmailService emailService;
+    
+    @Autowired
+    private IpLocationUtil ipLocationUtil;
     
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     
@@ -136,8 +140,16 @@ public class LoginServiceImpl implements LoginService {
         if (attributes != null) {
             HttpServletRequest request = attributes.getRequest();
             
-            // 获取IP地址
+            // 获取IP地址（优先获取真实客户端IP）
             String ip = request.getHeader("X-Forwarded-For");
+            if (ip != null && !ip.isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
+                // X-Forwarded-For 格式: 客户端IP, 代理1IP, 代理2IP...，取第一个
+                if (ip.contains(",")) {
+                    ip = ip.split(",")[0].trim();
+                }
+            } else {
+                ip = request.getHeader("X-Real-IP");
+            }
             if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
                 ip = request.getHeader("Proxy-Client-IP");
             }
@@ -145,9 +157,24 @@ public class LoginServiceImpl implements LoginService {
                 ip = request.getHeader("WL-Proxy-Client-IP");
             }
             if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+                ip = request.getHeader("HTTP_CLIENT_IP");
+            }
+            if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+                ip = request.getHeader("HTTP_X_FORWARDED_FOR");
+            }
+            if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
                 ip = request.getRemoteAddr();
             }
             log.setIpAddress(ip);
+            
+            // 获取IP地理位置
+            try {
+                String location = ipLocationUtil.getLocationByIp(ip);
+                log.setLocation(location);
+            } catch (Exception e) {
+                // 如果获取地理位置失败，记录错误但不影响登录流程
+                System.err.println("获取IP地理位置失败: IP=" + ip + ", 错误=" + e.getMessage());
+            }
             
             // 获取设备信息
             String userAgent = request.getHeader("User-Agent");

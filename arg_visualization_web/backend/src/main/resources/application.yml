@@ -61,6 +61,7 @@ jwt:
 file:
   upload:
     genome-dir: ${GENOME_UPLOAD_HOST_PATH:/home/data/uploads/genome}
+    mag-dir: ${MAG_UPLOAD_HOST_PATH:/home/data/uploads/mag}
     max-size: 524288000
 
 # Docker 配置 - 抗性基因检测
@@ -74,6 +75,12 @@ docker:
     input-mount: ${ARG_INPUT_MOUNT:/input}
     output-mount: ${ARG_OUTPUT_MOUNT:/output}
     use-gpu: ${ARG_USE_GPU:true}
+  # Prodigal 配置 (MAG 预处理)
+  prodigal:
+    image-name: ${PRODIGAL_IMAGE:prodigal:latest}
+    timeout: ${PRODIGAL_TIMEOUT:600}
+    parallel-threads: ${PRODIGAL_PARALLEL_THREADS:8}
+    use-meta-mode: ${PRODIGAL_USE_META_MODE:true}
 
 # 分析任务配置
 analysis:
