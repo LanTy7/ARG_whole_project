@@ -3,17 +3,17 @@
     <el-card class="welcome-card">
       <div class="welcome-content">
         <div class="icon">🧬</div>
-        <h1>欢迎使用抗性基因检测系统</h1>
-        <p class="subtitle">基于深度学习的抗性基因识别和可视化平台</p>
+        <h1>{{ $t('home.welcome') }}</h1>
+        <p class="subtitle">{{ $t('home.subtitle') }}</p>
         
         <div class="actions">
           <el-button type="primary" size="large" @click="router.push('/upload')">
             <el-icon><Upload /></el-icon>
-            开始上传文件
+            {{ $t('home.startUpload') }}
           </el-button>
           <el-button size="large" @click="router.push('/history')">
             <el-icon><Clock /></el-icon>
-            查看历史记录
+            {{ $t('home.viewHistory') }}
           </el-button>
         </div>
       </div>
@@ -27,7 +27,7 @@
             <el-icon class="stat-icon" color="#409eff"><Document /></el-icon>
             <div class="stat-info">
               <div class="stat-value">{{ stats.totalFiles }}</div>
-              <div class="stat-label">上传文件数</div>
+              <div class="stat-label">{{ $t('home.stats.totalFiles') }}</div>
             </div>
           </div>
         </el-card>
@@ -39,7 +39,7 @@
             <el-icon class="stat-icon" color="#67c23a"><Checked /></el-icon>
             <div class="stat-info">
               <div class="stat-value">{{ stats.completedTasks }}</div>
-              <div class="stat-label">完成任务数</div>
+              <div class="stat-label">{{ $t('home.stats.completedTasks') }}</div>
             </div>
           </div>
         </el-card>
@@ -51,7 +51,7 @@
             <el-icon class="stat-icon" color="#e6a23c"><Loading /></el-icon>
             <div class="stat-info">
               <div class="stat-value">{{ stats.runningTasks }}</div>
-              <div class="stat-label">运行中任务</div>
+              <div class="stat-label">{{ $t('home.stats.runningTasks') }}</div>
             </div>
           </div>
         </el-card>
@@ -89,7 +89,7 @@ const fetchStats = async () => {
     stats.value.completedTasks = tasks.filter(t => t.status === 'COMPLETED').length;
     stats.value.runningTasks = tasks.filter(t => t.status === 'RUNNING').length;
   } catch (error) {
-    console.error('获取统计数据失败：', error);
+    console.error('Failed to fetch stats:', error);
     // 使用模拟数据进行预览
     stats.value.totalFiles = 5;
     stats.value.completedTasks = 3;
@@ -380,4 +380,3 @@ onMounted(() => {
   }
 }
 </style>
-

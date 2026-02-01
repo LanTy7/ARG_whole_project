@@ -3,47 +3,47 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>基因序列上传</span>
+          <span>{{ $t('upload.title') }}</span>
         </div>
       </template>
       
       <el-form :model="uploadForm" label-width="120px" class="upload-form">
         <!-- 输入类型选择 -->
-        <el-form-item label="输入类型">
+        <el-form-item :label="$t('upload.inputType')">
           <el-radio-group v-model="inputType" @change="handleInputTypeChange">
-            <el-radio-button value="sequence">蛋白质序列</el-radio-button>
-            <el-radio-button value="file">FASTA 文件</el-radio-button>
-            <el-radio-button value="mag">MAG 文件夹</el-radio-button>
+            <el-radio-button value="sequence">{{ $t('upload.inputTypes.sequence') }}</el-radio-button>
+            <el-radio-button value="file">{{ $t('upload.inputTypes.file') }}</el-radio-button>
+            <el-radio-button value="mag">{{ $t('upload.inputTypes.mag') }}</el-radio-button>
           </el-radio-group>
         </el-form-item>
 
         <!-- MAG 名称（仅 MAG 模式） -->
-        <el-form-item v-if="inputType === 'mag'" label="MAG 名称">
+        <el-form-item v-if="inputType === 'mag'" :label="$t('upload.magName')">
           <el-input
             v-model="uploadForm.magName"
-            placeholder="可选，不填则自动生成"
+            :placeholder="$t('upload.magNamePlaceholder')"
           />
         </el-form-item>
         
         <!-- 文件类型（非 MAG 模式） -->
-        <el-form-item v-if="inputType !== 'mag'" label="文件类型">
-          <el-select v-model="uploadForm.fileType" placeholder="请选择文件类型" style="width: 100%">
-            <el-option label="自动检测" value="auto-detect" />
-            <el-option label="FASTA" value="fasta" />
-            <el-option label="FAA (蛋白质序列)" value="faa" />
+        <el-form-item v-if="inputType !== 'mag'" :label="$t('upload.fileType')">
+          <el-select v-model="uploadForm.fileType" :placeholder="$t('upload.fileTypePlaceholder')" style="width: 100%">
+            <el-option :label="$t('upload.fileTypes.autoDetect')" value="auto-detect" />
+            <el-option :label="$t('upload.fileTypes.fasta')" value="fasta" />
+            <el-option :label="$t('upload.fileTypes.faa')" value="faa" />
           </el-select>
         </el-form-item>
         
-        <el-form-item label="文件描述">
+        <el-form-item :label="$t('upload.description')">
           <el-input
             v-model="uploadForm.description"
             type="textarea"
             :rows="2"
-            placeholder="请输入文件描述（可选）"
+            :placeholder="$t('upload.descriptionPlaceholder')"
           />
         </el-form-item>
         
-        <el-form-item label="上传内容">
+        <el-form-item :label="$t('upload.uploadContent')">
           <div class="upload-content-wrapper">
             <!-- 序列输入模式 -->
             <div v-if="inputType === 'sequence'">
@@ -51,10 +51,10 @@
                 v-model="uploadForm.textContent"
                 type="textarea"
                 :rows="8"
-                placeholder="在此粘贴或输入蛋白质序列（FASTA格式）"
+                :placeholder="$t('upload.sequencePlaceholder')"
               />
               <div class="el-upload__tip text-upload-tip">
-                文本内容将直接被上传到服务器进行分析
+                {{ $t('upload.sequenceTip') }}
               </div>
             </div>
 
@@ -71,11 +71,11 @@
               >
                 <el-icon class="el-icon--upload"><UploadFilled /></el-icon>
                 <div class="el-upload__text">
-                  将文件拖到此处，或<em>点击上传</em>
+                  {{ $t('upload.dragText') }}<em>{{ $t('upload.clickUpload') }}</em>
                 </div>
                 <template #tip>
                   <div class="el-upload__tip">
-                    支持 .fasta / .fa / .faa 格式，文件大小不超过 500MB
+                    {{ $t('upload.fileTip') }}
                   </div>
                 </template>
               </el-upload>
@@ -86,8 +86,8 @@
               <!-- 上传方式选择 -->
               <div class="mag-upload-mode">
                 <el-radio-group v-model="magUploadMode" size="small">
-                  <el-radio-button value="folder">选择文件夹</el-radio-button>
-                  <el-radio-button value="files">选择多个文件</el-radio-button>
+                  <el-radio-button value="folder">{{ $t('upload.magUploadMode.folder') }}</el-radio-button>
+                  <el-radio-button value="files">{{ $t('upload.magUploadMode.files') }}</el-radio-button>
                 </el-radio-group>
               </div>
 
@@ -103,14 +103,14 @@
                 <el-icon class="folder-icon"><FolderOpened /></el-icon>
                 <div class="upload-text">
                   <span v-if="magUploadMode === 'folder'">
-                    点击选择 MAG 文件夹，或将文件夹拖到此处
+                    {{ $t('upload.magFolderText') }}
                   </span>
                   <span v-else>
-                    点击选择多个文件，或将文件拖到此处
+                    {{ $t('upload.magFilesText') }}
                   </span>
                 </div>
                 <div class="upload-tip">
-                  支持 .fa / .fasta / .fna 格式
+                  {{ $t('upload.magFileTip') }}
                 </div>
               </div>
               
@@ -141,10 +141,10 @@
                 <div class="mag-file-header">
                   <span>
                     <el-icon><FolderOpened /></el-icon>
-                    {{ magFolderName || '已选择' }} - {{ magFileList.length }} 个文件
+                    {{ magFolderName || $t('upload.selected') }} - {{ magFileList.length }} {{ $t('upload.filesCount', { count: '' }).replace('{count}', '') }}
                   </span>
                   <el-button type="danger" link size="small" @click="clearMagFiles">
-                    清空
+                    {{ $t('upload.clear') }}
                   </el-button>
                 </div>
                 <div class="mag-file-list">
@@ -158,7 +158,7 @@
                     {{ file.name }}
                   </el-tag>
                   <el-tag v-if="magFileList.length > 10" type="info">
-                    还有 {{ magFileList.length - 10 }} 个文件...
+                    {{ $t('upload.moreFiles', { count: magFileList.length - 10 }) }}
                   </el-tag>
                 </div>
               </div>
@@ -171,10 +171,10 @@
               >
                 <template #title>
                   <div class="mag-info-content">
-                    <strong>MAG 分析说明：</strong>
-                    <p>1. 上传包含原始核酸序列文件（.fa/.fasta/.fna）的文件夹</p>
-                    <p>2. 系统将使用 Prodigal 进行基因预测，转换为蛋白质序列</p>
-                    <p>3. 然后进行抗性基因（ARG）识别和分类</p>
+                    <strong>{{ $t('upload.magInfo.title') }}</strong>
+                    <p>{{ $t('upload.magInfo.step1') }}</p>
+                    <p>{{ $t('upload.magInfo.step2') }}</p>
+                    <p>{{ $t('upload.magInfo.step3') }}</p>
                   </div>
                 </template>
               </el-alert>
@@ -190,9 +190,9 @@
             @click="handleUpload"
           >
             <el-icon><Upload /></el-icon>
-            {{ uploading ? '上传中...' : (inputType === 'mag' ? '上传并分析 MAG' : '开始上传') }}
+            {{ uploading ? $t('upload.uploading') : (inputType === 'mag' ? $t('upload.uploadAndAnalyzeMag') : $t('upload.startUpload')) }}
           </el-button>
-          <el-button @click="handleReset">重置</el-button>
+          <el-button @click="handleReset">{{ $t('upload.reset') }}</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -201,7 +201,7 @@
     <el-card v-if="uploadProgress.show" class="progress-card">
       <template #header>
         <div class="card-header">
-          <span>{{ inputType === 'mag' ? 'MAG 分析进度' : '上传进度' }}</span>
+          <span>{{ inputType === 'mag' ? $t('upload.progress.magTitle') : $t('upload.progress.title') }}</span>
         </div>
       </template>
       
@@ -214,8 +214,8 @@
         <!-- MAG 两阶段进度显示 -->
         <div v-if="inputType === 'mag' && uploadProgress.stage" class="stage-info">
           <el-steps :active="uploadProgress.stage - 1" simple>
-            <el-step title="Prodigal 预处理" />
-            <el-step title="ARG 分析" />
+            <el-step :title="$t('upload.steps.prodigal')" />
+            <el-step :title="$t('upload.steps.arg')" />
           </el-steps>
         </div>
       </div>
@@ -225,41 +225,41 @@
     <el-card class="files-card">
       <template #header>
         <div class="card-header">
-          <span>我的文件</span>
+          <span>{{ $t('upload.myFiles') }}</span>
           <el-button type="primary" link @click="refreshFiles">
             <el-icon><Refresh /></el-icon>
-            刷新
+            {{ $t('upload.refresh') }}
           </el-button>
         </div>
       </template>
       
       <el-table :data="files" v-loading="loadingFiles">
-        <el-table-column prop="originalFilename" label="文件名" min-width="200" />
-        <el-table-column prop="fileType" label="文件类型" width="120" />
-        <el-table-column label="文件大小" width="120">
+        <el-table-column prop="originalFilename" :label="$t('upload.table.filename')" min-width="200" />
+        <el-table-column prop="fileType" :label="$t('upload.table.fileType')" width="120" />
+        <el-table-column :label="$t('upload.table.fileSize')" width="120">
           <template #default="{ row }">
             {{ formatFileSize(row.fileSize) }}
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="100">
+        <el-table-column prop="status" :label="$t('upload.table.status')" width="100">
           <template #default="{ row }">
             <el-tag :type="getStatusType(row.status)">
               {{ getStatusText(row.status) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="上传时间" width="180">
+        <el-table-column :label="$t('upload.table.uploadTime')" width="180">
           <template #default="{ row }">
             {{ formatDate(row.uploadTime) }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column :label="$t('upload.table.actions')" width="200" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click="handleAnalyze(row)">
-              分析
+              {{ $t('upload.actions.analyze') }}
             </el-button>
             <el-button type="danger" link size="small" @click="handleDelete(row)">
-              删除
+              {{ $t('upload.actions.delete') }}
             </el-button>
           </template>
         </el-table-column>
@@ -273,10 +273,12 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { UploadFilled, Upload, Refresh, FolderOpened } from '@element-plus/icons-vue'
+import { useI18n } from 'vue-i18n'
 import { uploadGenomeFile, getUserFiles, deleteFile } from '@/api/file'
 import { createTask } from '@/api/task'
 import { uploadMag } from '@/api/mag'
 
+const { t } = useI18n()
 const router = useRouter()
 
 const uploadRef = ref()
@@ -286,10 +288,10 @@ const filesInputRef = ref()
 const uploading = ref(false)
 const loadingFiles = ref(false)
 const files = ref([])
-const inputType = ref('sequence')  // 'sequence' | 'file' | 'mag'
-const magUploadMode = ref('folder')  // 'folder' | 'files'
+const inputType = ref('sequence')
+const magUploadMode = ref('folder')
 const magFileList = ref([])
-const magFolderName = ref('')  // 文件夹名称
+const magFolderName = ref('')
 const isDragOver = ref(false)
 
 const uploadForm = reactive({
@@ -305,7 +307,7 @@ const uploadProgress = reactive({
   percentage: 0,
   status: '',
   text: '',
-  stage: 0  // MAG 分析阶段：0=未开始，1=预处理，2=分析
+  stage: 0
 })
 
 const canUpload = computed(() => {
@@ -336,7 +338,7 @@ const handleFileChange = (file) => {
 
 // 超出文件数量限制
 const handleExceed = () => {
-  ElMessage.warning('每次只能上传一个文件')
+  ElMessage.warning(t('upload.messages.onlyOneFile'))
 }
 
 // 触发文件夹选择
@@ -354,7 +356,6 @@ const handleFolderSelect = (event) => {
   if (!files || files.length === 0) return
   
   processSelectedFiles(files, true)
-  // 清空 input 以便再次选择同一文件夹
   event.target.value = ''
 }
 
@@ -374,13 +375,11 @@ const processSelectedFiles = (files, isFolder) => {
   let folderName = ''
   
   for (const file of files) {
-    // 获取文件扩展名
     const ext = file.name.split('.').pop()?.toLowerCase()
     
     if (validExtensions.includes(ext)) {
       validFiles.push(file)
       
-      // 从 webkitRelativePath 获取文件夹名称
       if (isFolder && file.webkitRelativePath && !folderName) {
         const pathParts = file.webkitRelativePath.split('/')
         if (pathParts.length > 1) {
@@ -391,19 +390,18 @@ const processSelectedFiles = (files, isFolder) => {
   }
   
   if (validFiles.length === 0) {
-    ElMessage.warning('未找到有效的 FASTA 文件（.fa/.fasta/.fna）')
+    ElMessage.warning(t('upload.messages.noValidFiles'))
     return
   }
   
   magFileList.value = validFiles
   magFolderName.value = folderName || ''
   
-  // 如果没有设置 MAG 名称，使用文件夹名称
   if (folderName && !uploadForm.magName) {
     uploadForm.magName = folderName
   }
   
-  ElMessage.success(`已选择 ${validFiles.length} 个有效文件`)
+  ElMessage.success(t('upload.messages.selectedFiles', { count: validFiles.length }))
 }
 
 // 拖拽相关
@@ -425,14 +423,12 @@ const onDropFolder = async (event) => {
   const validFiles = []
   let folderName = ''
   
-  // 处理拖入的项目
   for (const item of items) {
     if (item.kind === 'file') {
       const entry = item.webkitGetAsEntry?.()
       
       if (entry) {
         if (entry.isDirectory) {
-          // 是文件夹，递归读取
           folderName = entry.name
           const files = await readDirectoryFiles(entry)
           for (const file of files) {
@@ -442,7 +438,6 @@ const onDropFolder = async (event) => {
             }
           }
         } else if (entry.isFile) {
-          // 是单个文件
           const file = item.getAsFile()
           if (file) {
             const ext = file.name.split('.').pop()?.toLowerCase()
@@ -452,7 +447,6 @@ const onDropFolder = async (event) => {
           }
         }
       } else {
-        // 兼容不支持 webkitGetAsEntry 的浏览器
         const file = item.getAsFile()
         if (file) {
           const ext = file.name.split('.').pop()?.toLowerCase()
@@ -465,7 +459,7 @@ const onDropFolder = async (event) => {
   }
   
   if (validFiles.length === 0) {
-    ElMessage.warning('未找到有效的 FASTA 文件（.fa/.fasta/.fna）')
+    ElMessage.warning(t('upload.messages.noValidFiles'))
     return
   }
   
@@ -476,7 +470,7 @@ const onDropFolder = async (event) => {
     uploadForm.magName = folderName
   }
   
-  ElMessage.success(`已选择 ${validFiles.length} 个有效文件`)
+  ElMessage.success(t('upload.messages.selectedFiles', { count: validFiles.length }))
 }
 
 // 递归读取文件夹中的文件
@@ -497,13 +491,11 @@ const readDirectoryFiles = (directoryEntry) => {
             const file = await getFileFromEntry(entry)
             if (file) files.push(file)
           } else if (entry.isDirectory) {
-            // 递归读取子目录
             const subFiles = await readDirectoryFiles(entry)
             files.push(...subFiles)
           }
         }
         
-        // 继续读取（有些浏览器分批返回）
         readEntries()
       })
     }
@@ -520,30 +512,6 @@ const getFileFromEntry = (fileEntry) => {
       () => resolve(null)
     )
   })
-}
-
-// MAG 文件改变（兼容旧逻辑）
-const handleMagFileChange = (file, fileList) => {
-  // 过滤有效的 FASTA 文件
-  const validExtensions = ['fa', 'fasta', 'fna']
-  const ext = file.name.split('.').pop()?.toLowerCase()
-  
-  if (!validExtensions.includes(ext)) {
-    ElMessage.warning(`不支持的文件格式: ${file.name}`)
-    // 从列表中移除
-    const index = fileList.findIndex(f => f.uid === file.uid)
-    if (index > -1) {
-      fileList.splice(index, 1)
-    }
-    return
-  }
-  
-  magFileList.value = fileList.map(f => f.raw || f)
-}
-
-// MAG 文件移除
-const handleMagFileRemove = (file, fileList) => {
-  magFileList.value = fileList.map(f => f.raw || f)
 }
 
 // 移除单个 MAG 文件
@@ -572,26 +540,24 @@ const handleUpload = async () => {
 const handleNormalUpload = async () => {
   if (inputType.value === 'sequence') {
     if (!uploadForm.textContent || !uploadForm.textContent.trim()) {
-      ElMessage.warning('请输入要上传的文本内容')
+      ElMessage.warning(t('upload.messages.enterText'))
       return
     }
-    // 将文本内容打包成临时文件
     const text = uploadForm.textContent.trim()
     const blob = new Blob([text], { type: 'text/plain;charset=utf-8' })
     const virtualFileName = `pasted_sequence_${Date.now()}.fasta`
     uploadForm.file = new File([blob], virtualFileName, { type: 'text/plain;charset=utf-8' })
   } else if (inputType.value === 'file') {
     if (!uploadForm.file) {
-      ElMessage.warning('请选择要上传的文件')
+      ElMessage.warning(t('upload.messages.selectFile'))
       return
     }
   }
   
-  // 检查文件大小
-  const maxFileSize = 524288000 // 500MB
+  const maxFileSize = 524288000
   if (uploadForm.file.size > maxFileSize) {
     const fileSizeMB = (uploadForm.file.size / (1024 * 1024)).toFixed(2)
-    ElMessage.error(`文件大小 ${fileSizeMB} MB 超过限制（最大 500 MB）`)
+    ElMessage.error(t('upload.messages.fileTooLarge', { size: fileSizeMB }))
     return
   }
   
@@ -600,7 +566,7 @@ const handleNormalUpload = async () => {
     uploadProgress.show = true
     uploadProgress.percentage = 0
     uploadProgress.status = ''
-    uploadProgress.text = '正在上传文件...'
+    uploadProgress.text = t('upload.progress.uploading')
     uploadProgress.stage = 0
     
     const formData = new FormData()
@@ -614,17 +580,16 @@ const handleNormalUpload = async () => {
     
     uploadProgress.percentage = 100
     uploadProgress.status = 'success'
-    uploadProgress.text = '上传成功！'
+    uploadProgress.text = t('upload.progress.success')
     
-    ElMessage.success('文件上传成功')
+    ElMessage.success(t('upload.messages.uploadSuccess'))
     handleReset()
     await refreshFiles()
     
-    // 询问是否立即分析
     try {
-      await ElMessageBox.confirm('文件上传成功，是否立即开始抗性基因分析？', '提示', {
-        confirmButtonText: '立即分析',
-        cancelButtonText: '稍后分析',
+      await ElMessageBox.confirm(t('upload.confirmAnalyze'), t('upload.confirmAnalyzeTitle'), {
+        confirmButtonText: t('upload.analyzeNow'),
+        cancelButtonText: t('upload.analyzeLater'),
         type: 'success'
       })
       await startAnalysis(res.data.fileId)
@@ -632,16 +597,16 @@ const handleNormalUpload = async () => {
       // 用户选择稍后分析
     }
   } catch (error) {
-    console.error('上传失败：', error)
+    console.error('Upload failed:', error)
     uploadProgress.status = 'exception'
     
-    let errorMessage = '上传失败，请重试'
+    let errorMessage = t('upload.messages.uploadFailed')
     if (error.response?.data?.message) {
       errorMessage = error.response.data.message
     } else if (error.response?.status === 413) {
-      errorMessage = '文件大小超过限制'
+      errorMessage = t('upload.messages.fileSizeExceeded')
     } else if (error.response?.status >= 500) {
-      errorMessage = '服务器错误，请稍后重试'
+      errorMessage = t('upload.messages.serverError')
     }
     
     uploadProgress.text = errorMessage
@@ -657,7 +622,7 @@ const handleNormalUpload = async () => {
 // MAG 上传
 const handleMagUpload = async () => {
   if (magFileList.value.length === 0) {
-    ElMessage.warning('请选择要上传的 MAG 文件')
+    ElMessage.warning(t('upload.messages.selectMagFiles'))
     return
   }
   
@@ -666,17 +631,15 @@ const handleMagUpload = async () => {
     uploadProgress.show = true
     uploadProgress.percentage = 0
     uploadProgress.status = ''
-    uploadProgress.text = '正在上传 MAG 文件...'
+    uploadProgress.text = t('upload.progress.magUploading')
     uploadProgress.stage = 1
     
     const formData = new FormData()
     
-    // 添加所有文件
     for (const file of magFileList.value) {
       formData.append('files', file)
     }
     
-    // 添加其他参数
     if (uploadForm.magName) {
       formData.append('magName', uploadForm.magName)
     }
@@ -686,32 +649,30 @@ const handleMagUpload = async () => {
     formData.append('autoAnalyze', 'true')
     
     uploadProgress.percentage = 20
-    uploadProgress.text = '文件上传中...'
+    uploadProgress.text = t('upload.progress.processing')
     
     const res = await uploadMag(formData)
     
     uploadProgress.percentage = 50
-    uploadProgress.text = 'MAG 分析任务已创建，正在处理...'
+    uploadProgress.text = t('upload.progress.magProcessing')
     uploadProgress.stage = 1
     
-    ElMessage.success(`MAG 上传成功，共 ${res.data.fileCount} 个文件`)
+    ElMessage.success(t('upload.messages.magUploadSuccess', { count: res.data.fileCount }))
     
-    // 如果创建了任务，显示任务信息
     if (res.data.task) {
       uploadProgress.percentage = 100
       uploadProgress.status = 'success'
-      uploadProgress.text = `分析任务已创建 (ID: ${res.data.task.taskId})`
+      uploadProgress.text = t('upload.progress.taskCreated', { id: res.data.task.taskId })
       
       handleReset()
       
-      // 询问是否跳转到历史记录
       try {
         await ElMessageBox.confirm(
-          'MAG 分析任务已创建，是否前往历史记录查看进度？',
-          '任务已创建',
+          t('upload.magTaskCreated'),
+          t('upload.magTaskCreatedTitle'),
           {
-            confirmButtonText: '查看进度',
-            cancelButtonText: '留在此页',
+            confirmButtonText: t('upload.viewProgress'),
+            cancelButtonText: t('upload.stayHere'),
             type: 'success'
           }
         )
@@ -722,10 +683,10 @@ const handleMagUpload = async () => {
     }
     
   } catch (error) {
-    console.error('MAG 上传失败：', error)
+    console.error('MAG upload failed:', error)
     uploadProgress.status = 'exception'
     
-    let errorMessage = 'MAG 上传失败，请重试'
+    let errorMessage = t('upload.messages.magUploadFailed')
     if (error.response?.data?.message) {
       errorMessage = error.response.data.message
     }
@@ -742,15 +703,15 @@ const handleMagUpload = async () => {
   }
 }
 
-// 开始分析（直接使用 ARG 类型）
+// 开始分析
 const startAnalysis = async (fileId) => {
   try {
     await createTask({ fileId, analysisType: 'arg' })
-    ElMessage.success('抗性基因分析任务已创建')
+    ElMessage.success(t('upload.messages.taskCreated'))
     router.push('/history')
   } catch (error) {
-    console.error('创建任务失败:', error)
-    ElMessage.error('创建任务失败')
+    console.error('Failed to create task:', error)
+    ElMessage.error(t('upload.messages.createTaskFailed'))
   }
 }
 
@@ -776,7 +737,7 @@ const refreshFiles = async () => {
     const res = await getUserFiles()
     files.value = res.data
   } catch (error) {
-    console.error('获取文件列表失败：', error)
+    console.error('Failed to get files:', error)
     files.value = []
   } finally {
     loadingFiles.value = false
@@ -786,9 +747,9 @@ const refreshFiles = async () => {
 // 分析文件
 const handleAnalyze = async (row) => {
   try {
-    await ElMessageBox.confirm('确定要对该文件进行抗性基因分析吗？', '确认', {
-      confirmButtonText: '开始分析',
-      cancelButtonText: '取消',
+    await ElMessageBox.confirm(t('upload.confirmAnalyzeFile'), t('upload.confirmAnalyzeFileTitle'), {
+      confirmButtonText: t('upload.startAnalyze'),
+      cancelButtonText: t('common.cancel'),
       type: 'info'
     })
     await startAnalysis(row.fileId)
@@ -800,13 +761,13 @@ const handleAnalyze = async (row) => {
 // 删除文件
 const handleDelete = async (row) => {
   try {
-    await ElMessageBox.confirm('确定要删除该文件吗？删除后无法恢复。', '警告', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
+    await ElMessageBox.confirm(t('upload.confirmDelete'), t('upload.confirmDeleteTitle'), {
+      confirmButtonText: t('common.confirm'),
+      cancelButtonText: t('common.cancel'),
       type: 'warning'
     })
     await deleteFile(row.fileId)
-    ElMessage.success('文件已删除')
+    ElMessage.success(t('upload.messages.fileDeleted'))
     await refreshFiles()
   } catch {
     // 用户取消或删除失败
@@ -825,7 +786,7 @@ const formatFileSize = (bytes) => {
 // 格式化日期
 const formatDate = (dateString) => {
   if (!dateString) return '-'
-  return new Date(dateString).toLocaleString('zh-CN')
+  return new Date(dateString).toLocaleString()
 }
 
 // 获取状态类型
@@ -842,10 +803,10 @@ const getStatusType = (status) => {
 // 获取状态文本
 const getStatusText = (status) => {
   const texts = {
-    'UPLOADED': '已上传',
-    'PROCESSING': '处理中',
-    'FAILED': '失败',
-    'DELETED': '已删除'
+    'UPLOADED': t('upload.status.uploaded'),
+    'PROCESSING': t('upload.status.processing'),
+    'FAILED': t('upload.status.failed'),
+    'DELETED': t('upload.status.deleted')
   }
   return texts[status] || status
 }
@@ -990,16 +951,6 @@ onMounted(() => {
 
 :deep(.el-upload__tip) {
   color: rgba(255, 255, 255, 0.6);
-}
-
-/* MAG 上传样式 */
-.mag-upload :deep(.el-upload-dragger) {
-  border-color: rgba(103, 194, 58, 0.4);
-}
-
-.mag-upload :deep(.el-upload-dragger:hover) {
-  border-color: rgba(103, 194, 58, 0.7);
-  background: rgba(103, 194, 58, 0.08);
 }
 
 /* MAG 上传模式切换 */

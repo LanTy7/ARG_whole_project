@@ -16,6 +16,7 @@ ARG-BiLSTM 命令行工具
 import argparse
 import os
 import sys
+import json
 import pandas as pd
 from Bio import SeqIO
 from reasoning import ARGPredictor
@@ -75,19 +76,24 @@ def run_end_to_end(input_file, output_dir, model_dir, threshold=0.5):
     # 7. 保存结果
     print(f"[4/4] 保存结果: {output_dir}")
     
-    # 7.1 全部预测结果 (TSV)
+    # 7.1 将 top_classes 转为 JSON 字符串以便保存到 TSV
+    for r in results:
+        if r.get('top_classes'):
+            r['top_classes'] = json.dumps(r['top_classes'], ensure_ascii=False)
+    
+    # 7.2 全部预测结果 (TSV)
     df_all = pd.DataFrame(results)
     df_all.to_csv(os.path.join(output_dir, "all_predictions.tsv"), sep='\t', index=False)
     
-    # 7.2 仅ARG结果 (TSV)
+    # 7.3 仅ARG结果 (TSV)
     df_arg = df_all[df_all['is_arg'] == True]
     df_arg.to_csv(os.path.join(output_dir, "arg_predictions.tsv"), sep='\t', index=False)
     
-    # 7.3 ARG序列 (FASTA)
+    # 7.4 ARG序列 (FASTA)
     arg_ids = set(df_arg['id'].tolist())
     arg_records = [r for r in records if r.id in arg_ids]
     if arg_records:
-        # 添加预测信息到description
+        # 添加预测信息到description (注意: results 中的 top_classes 已经是 JSON 字符串)
         id_to_result = {r['id']: r for r in results if r['is_arg']}
         for record in arg_records:
             res = id_to_result[record.id]
@@ -95,7 +101,7 @@ def run_end_to_end(input_file, output_dir, model_dir, threshold=0.5):
         
         SeqIO.write(arg_records, os.path.join(output_dir, "arg_sequences.fasta"), "fasta")
     
-    # 7.4 类别统计
+    # 7.5 类别统计
     if not df_arg.empty:
         class_counts = df_arg['arg_class'].value_counts()
         class_counts.to_csv(os.path.join(output_dir, "class_summary.tsv"), sep='\t', header=['count'])

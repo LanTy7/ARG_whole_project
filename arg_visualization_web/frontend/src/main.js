@@ -5,6 +5,7 @@ import pinia from './stores';
 import ElementPlus from 'element-plus';
 import 'element-plus/dist/index.css';
 import * as ElementPlusIconsVue from '@element-plus/icons-vue';
+import i18n from './locales';
 
 const app = createApp(App);
 
@@ -15,6 +16,10 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 
 app.use(router);
 app.use(pinia);
+app.use(i18n);
+
+// Element Plus 使用 ConfigProvider 组件来动态切换语言
+// 在 App.vue 中包裹 el-config-provider 实现
 app.use(ElementPlus);
 
 app.mount('#app');

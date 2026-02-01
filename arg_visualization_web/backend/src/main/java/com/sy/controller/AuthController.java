@@ -3,6 +3,7 @@ package com.sy.controller;
 import com.sy.vo.Result;
 import com.sy.pojo.User;
 import com.sy.service.LoginService;
+import com.sy.util.I18nUtil;
 import com.sy.util.JwtUtil;
 import com.sy.vo.LoginRequest;
 import com.sy.vo.LoginResponse;
@@ -38,19 +39,16 @@ public class AuthController {
     public Result<String> sendVerificationCode(@RequestBody @Valid VerificationCodeRequest request) {
         try {
             loginService.sendVerificationCode(request.getEmail());
-            return Result.success("验证码已发送，请查收邮件");
+            return Result.successWithCode("auth.code.sent", null);
         } catch (RuntimeException e) {
-            String errorMsg;
-            if (e.getMessage().contains("邮箱格式无效")) {
-                errorMsg = "邮箱格式不正确";
-            } else if (e.getMessage().contains("已被注册")) {
-                errorMsg = "该邮箱已被注册";
-            } else {
-                errorMsg = "发送验证码失败：" + e.getMessage();
+            if (e.getMessage().contains("邮箱格式无效") || e.getMessage().contains("invalid")) {
+                return Result.errorWithCode("auth.email.invalid");
+            } else if (e.getMessage().contains("已被注册") || e.getMessage().contains("exists")) {
+                return Result.errorWithCode("auth.email.exists");
             }
-            return Result.error(errorMsg);
+            return Result.errorWithCode("error.server");
         } catch (Exception e) {
-            return Result.error("系统错误，请稍后重试");
+            return Result.errorWithCode("error.server");
         }
     }
     
@@ -61,25 +59,20 @@ public class AuthController {
     public Result<String> register(@RequestBody @Valid RegisterRequest registerRequest) {
         try {
             loginService.register(registerRequest);
-            return Result.success("注册成功");
+            return Result.successWithCode("auth.register.success", null);
         } catch (RuntimeException e) {
-            String errorMsg;
-            if (e.getMessage().contains("验证码无效")) {
-                errorMsg = "验证码无效或已过期";
-            } else if (e.getMessage().contains("邮箱")) {
-                errorMsg = "该邮箱已被注册";
-            } else if (e.getMessage().contains("用户名")) {
-                errorMsg = "该用户名已被使用";
-            } else if (e.getMessage().contains("密码")) {
-                errorMsg = "密码格式不正确，密码长度应为6-20个字符";
-            } else if (e.getMessage().contains("validation")) {
-                errorMsg = "注册信息不完整或格式不正确：" + e.getMessage();
-            } else {
-                errorMsg = "注册失败：" + e.getMessage();
+            if (e.getMessage().contains("验证码") || e.getMessage().contains("code")) {
+                return Result.errorWithCode("auth.code.invalid");
+            } else if (e.getMessage().contains("邮箱") || e.getMessage().contains("email")) {
+                return Result.errorWithCode("auth.email.exists");
+            } else if (e.getMessage().contains("用户名") || e.getMessage().contains("username")) {
+                return Result.errorWithCode("auth.username.exists");
+            } else if (e.getMessage().contains("密码") || e.getMessage().contains("password")) {
+                return Result.errorWithCode("auth.password.length");
             }
-            return Result.error(errorMsg);
+            return Result.errorWithCode("error.server");
         } catch (Exception e) {
-            return Result.error("系统错误，请稍后重试");
+            return Result.errorWithCode("error.server");
         }
     }
     
@@ -99,19 +92,16 @@ public class AuthController {
             loginService.recordLogin(user.getUserId());
             
             // 返回登录响应
-            return Result.success(new LoginResponse(token, user));
+            return Result.successWithCode("auth.login.success", new LoginResponse(token, user));
         } catch (RuntimeException e) {
-            String errorMsg;
-            if (e.getMessage().contains("not found")) {
-                errorMsg = "该邮箱未注册";
-            } else if (e.getMessage().contains("password")) {
-                errorMsg = "密码错误";
-            } else {
-                errorMsg = "登录失败：" + e.getMessage();
+            if (e.getMessage().contains("not found") || e.getMessage().contains("未注册")) {
+                return Result.errorWithCode("auth.email.invalid");
+            } else if (e.getMessage().contains("password") || e.getMessage().contains("密码")) {
+                return Result.errorWithCode("auth.login.failed");
             }
-            return Result.error(errorMsg);
+            return Result.errorWithCode("auth.login.failed");
         } catch (Exception e) {
-            return Result.error("系统错误，请稍后重试");
+            return Result.errorWithCode("error.server");
         }
     }
     
@@ -138,9 +128,9 @@ public class AuthController {
                 }
             }
             
-            return Result.success();
+            return Result.successWithCode("auth.logout.success", null);
         } catch (Exception e) {
-            return Result.error("退出登录失败");
+            return Result.errorWithCode("error.server");
         }
     }
     
@@ -153,17 +143,14 @@ public class AuthController {
             String code = loginService.sendLoginCode(request.getEmail());
             return Result.success(code); // 直接返回验证码
         } catch (RuntimeException e) {
-            String errorMsg;
-            if (e.getMessage().contains("邮箱格式无效")) {
-                errorMsg = "邮箱格式不正确";
-            } else if (e.getMessage().contains("未注册")) {
-                errorMsg = "该邮箱未注册";
-            } else {
-                errorMsg = "发送验证码失败：" + e.getMessage();
+            if (e.getMessage().contains("邮箱格式无效") || e.getMessage().contains("invalid")) {
+                return Result.errorWithCode("auth.email.invalid");
+            } else if (e.getMessage().contains("未注册") || e.getMessage().contains("not found")) {
+                return Result.errorWithCode("auth.email.invalid");
             }
-            return Result.error(errorMsg);
+            return Result.errorWithCode("error.server");
         } catch (Exception e) {
-            return Result.error("系统错误，请稍后重试");
+            return Result.errorWithCode("error.server");
         }
     }
 
@@ -174,19 +161,16 @@ public class AuthController {
     public Result<String> sendResetCode(@RequestBody @Valid VerificationCodeRequest request) {
         try {
             loginService.sendResetCode(request.getEmail());
-            return Result.success("验证码已发送，请查收邮件");
+            return Result.successWithCode("auth.code.sent", null);
         } catch (RuntimeException e) {
-            String errorMsg;
-            if (e.getMessage().contains("邮箱格式无效")) {
-                errorMsg = "邮箱格式不正确";
-            } else if (e.getMessage().contains("未注册")) {
-                errorMsg = "该邮箱未注册";
-            } else {
-                errorMsg = "发送验证码失败：" + e.getMessage();
+            if (e.getMessage().contains("邮箱格式无效") || e.getMessage().contains("invalid")) {
+                return Result.errorWithCode("auth.email.invalid");
+            } else if (e.getMessage().contains("未注册") || e.getMessage().contains("not found")) {
+                return Result.errorWithCode("auth.email.invalid");
             }
-            return Result.error(errorMsg);
+            return Result.errorWithCode("error.server");
         } catch (Exception e) {
-            return Result.error("系统错误，请稍后重试");
+            return Result.errorWithCode("error.server");
         }
     }
 
@@ -197,21 +181,18 @@ public class AuthController {
     public Result<String> resetPassword(@RequestBody @Valid com.sy.vo.ResetPasswordRequest request) {
         try {
             loginService.resetPassword(request);
-            return Result.success("密码重置成功");
+            return Result.successWithCode("auth.register.success", null);
         } catch (RuntimeException e) {
-            String errorMsg;
-            if (e.getMessage().contains("验证码无效")) {
-                errorMsg = "验证码无效或已过期";
-            } else if (e.getMessage().contains("邮箱")) {
-                errorMsg = "该邮箱未注册";
-            } else if (e.getMessage().contains("密码")) {
-                errorMsg = "两次输入的新密码不一致";
-            } else {
-                errorMsg = "重置密码失败：" + e.getMessage();
+            if (e.getMessage().contains("验证码") || e.getMessage().contains("code")) {
+                return Result.errorWithCode("auth.code.invalid");
+            } else if (e.getMessage().contains("邮箱") || e.getMessage().contains("email")) {
+                return Result.errorWithCode("auth.email.invalid");
+            } else if (e.getMessage().contains("密码") || e.getMessage().contains("password")) {
+                return Result.errorWithCode("auth.password.mismatch");
             }
-            return Result.error(errorMsg);
+            return Result.errorWithCode("error.server");
         } catch (Exception e) {
-            return Result.error("系统错误，请稍后重试");
+            return Result.errorWithCode("error.server");
         }
     }
 
@@ -231,9 +212,9 @@ public class AuthController {
                     return Result.success();
                 }
             }
-            return Result.error("token无效");
+            return Result.errorWithCode("auth.token.invalid");
         } catch (Exception e) {
-            return Result.error("token验证失败");
+            return Result.errorWithCode("auth.token.invalid");
         }
     }
 
@@ -258,9 +239,9 @@ public class AuthController {
                     }
                 }
             }
-            return Result.error("未登录或登录已过期");
+            return Result.errorWithCode("auth.token.invalid");
         } catch (Exception e) {
-            return Result.error("获取用户信息失败");
+            return Result.errorWithCode("error.server");
         }
     }
 } 

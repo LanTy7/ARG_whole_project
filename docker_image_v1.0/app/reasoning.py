@@ -119,7 +119,7 @@ class ARGPredictor:
         
         return torch.tensor([encoding], dtype=torch.float32).to(self.device)
 
-    def predict_sequence(self, sequence_id, sequence_str, threshold=0.5):
+    def predict_sequence(self, sequence_id, sequence_str, threshold=0.5, top_k=5):
         """
         预测单条序列
         
@@ -127,6 +127,7 @@ class ARGPredictor:
             sequence_id: 序列ID
             sequence_str: 氨基酸序列字符串
             threshold: 二分类阈值 (默认0.5)
+            top_k: 返回概率最高的前k个分类 (默认5)
         
         Returns:
             dict: 预测结果
@@ -146,25 +147,38 @@ class ARGPredictor:
                 "is_arg": False,
                 "binary_prob": round(prob, 4),
                 "arg_class": None,
-                "class_prob": None
+                "class_prob": None,
+                "top_classes": None
             }
         
-        # Step 2: 多分类 - 确定ARG类型
+        # Step 2: 多分类 - 确定ARG类型，返回 Top-K
         input_multi = self._preprocess_multi(sequence_str)
         with torch.no_grad():
             logits = self.multi_model(input_multi)
-            probs = torch.softmax(logits, dim=1)
-            max_prob, pred_idx = torch.max(probs, dim=1)
+            probs = torch.softmax(logits, dim=1).squeeze(0)  # shape: (num_classes,)
+            
+            # 获取 Top-K 概率和索引
+            k = min(top_k, len(self.class_names))
+            top_probs, top_indices = torch.topk(probs, k)
+            
+            # 构建 Top-K 列表
+            top_classes = []
+            for i in range(k):
+                top_classes.append({
+                    "class": self.class_names[top_indices[i].item()],
+                    "prob": round(top_probs[i].item(), 4)
+                })
         
         return {
             "id": sequence_id,
             "is_arg": True,
             "binary_prob": round(prob, 4),
-            "arg_class": self.class_names[pred_idx.item()],
-            "class_prob": round(max_prob.item(), 4)
+            "arg_class": self.class_names[top_indices[0].item()],
+            "class_prob": round(top_probs[0].item(), 4),
+            "top_classes": top_classes
         }
 
-    def predict_batch(self, sequences, seq_ids, threshold=0.5):
+    def predict_batch(self, sequences, seq_ids, threshold=0.5, top_k=5):
         """
         批量预测序列
         
@@ -172,6 +186,7 @@ class ARGPredictor:
             sequences: 序列列表
             seq_ids: 序列ID列表
             threshold: 二分类阈值
+            top_k: 返回概率最高的前k个分类 (默认5)
         
         Returns:
             list[dict]: 预测结果列表
@@ -194,7 +209,9 @@ class ARGPredictor:
         # 找出预测为ARG的序列
         arg_indices = [i for i, p in enumerate(binary_probs) if p >= threshold]
         
-        # Step 2: 对ARG序列进行多分类
+        # Step 2: 对ARG序列进行多分类，获取 Top-K
+        top_probs_batch = None
+        top_indices_batch = None
         if arg_indices:
             multi_inputs = []
             for i in arg_indices:
@@ -204,12 +221,16 @@ class ARGPredictor:
             with torch.no_grad():
                 multi_logits = self.multi_model(multi_batch)
                 multi_probs = torch.softmax(multi_logits, dim=1)
-                max_probs, pred_indices = torch.max(multi_probs, dim=1)
-                max_probs = max_probs.cpu().numpy()
-                pred_indices = pred_indices.cpu().numpy()
+                
+                # 获取 Top-K
+                k = min(top_k, len(self.class_names))
+                top_probs_batch, top_indices_batch = torch.topk(multi_probs, k, dim=1)
+                top_probs_batch = top_probs_batch.cpu().numpy()
+                top_indices_batch = top_indices_batch.cpu().numpy()
         
         # 组装结果
         arg_result_idx = 0
+        k = min(top_k, len(self.class_names))
         for i in range(len(sequences)):
             if binary_probs[i] < threshold:
                 results.append({
@@ -217,27 +238,38 @@ class ARGPredictor:
                     "is_arg": False,
                     "binary_prob": round(float(binary_probs[i]), 4),
                     "arg_class": None,
-                    "class_prob": None
+                    "class_prob": None,
+                    "top_classes": None
                 })
             else:
+                # 构建 Top-K 列表
+                top_classes = []
+                for j in range(k):
+                    top_classes.append({
+                        "class": self.class_names[top_indices_batch[arg_result_idx][j]],
+                        "prob": round(float(top_probs_batch[arg_result_idx][j]), 4)
+                    })
+                
                 results.append({
                     "id": seq_ids[i],
                     "is_arg": True,
                     "binary_prob": round(float(binary_probs[i]), 4),
-                    "arg_class": self.class_names[pred_indices[arg_result_idx]],
-                    "class_prob": round(float(max_probs[arg_result_idx]), 4)
+                    "arg_class": self.class_names[top_indices_batch[arg_result_idx][0]],
+                    "class_prob": round(float(top_probs_batch[arg_result_idx][0]), 4),
+                    "top_classes": top_classes
                 })
                 arg_result_idx += 1
         
         return results
 
-    def process_fasta(self, fasta_content, threshold=0.5):
+    def process_fasta(self, fasta_content, threshold=0.5, top_k=5):
         """
         处理FASTA格式内容
         
         Args:
             fasta_content: FASTA格式字符串
             threshold: 二分类阈值
+            top_k: 返回概率最高的前k个分类 (默认5)
         
         Returns:
             list[dict]: 预测结果列表
@@ -249,13 +281,14 @@ class ARGPredictor:
             res = self.predict_sequence(
                 record.id, 
                 str(record.seq), 
-                threshold
+                threshold,
+                top_k
             )
             results.append(res)
         
         return results
 
-    def process_fasta_file(self, file_path, threshold=0.5, batch_size=256):
+    def process_fasta_file(self, file_path, threshold=0.5, batch_size=256, top_k=5):
         """
         处理FASTA文件 (支持批量处理)
         
@@ -263,6 +296,7 @@ class ARGPredictor:
             file_path: FASTA文件路径
             threshold: 二分类阈值
             batch_size: 批次大小
+            top_k: 返回概率最高的前k个分类 (默认5)
         
         Returns:
             list[dict]: 预测结果列表
@@ -276,7 +310,7 @@ class ARGPredictor:
             sequences = [str(r.seq) for r in batch_records]
             seq_ids = [r.id for r in batch_records]
             
-            batch_results = self.predict_batch(sequences, seq_ids, threshold)
+            batch_results = self.predict_batch(sequences, seq_ids, threshold, top_k)
             all_results.extend(batch_results)
         
         return all_results

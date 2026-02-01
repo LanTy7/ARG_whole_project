@@ -5,7 +5,7 @@
       <template #header>
         <div class="card-header">
           <el-icon><DataAnalysis /></el-icon>
-          <span>系统统计</span>
+          <span>{{ $t('admin.systemStats') }}</span>
         </div>
       </template>
       
@@ -17,7 +17,7 @@
             </div>
             <div class="stat-content">
               <div class="stat-value">{{ statistics.totalUsers || 0 }}</div>
-              <div class="stat-label">总用户数</div>
+              <div class="stat-label">{{ $t('admin.stats.totalUsers') }}</div>
             </div>
           </div>
         </el-col>
@@ -29,7 +29,7 @@
             </div>
             <div class="stat-content">
               <div class="stat-value">{{ statistics.totalFiles || 0 }}</div>
-              <div class="stat-label">总文件数</div>
+              <div class="stat-label">{{ $t('admin.stats.totalFiles') }}</div>
             </div>
           </div>
         </el-col>
@@ -41,7 +41,7 @@
             </div>
             <div class="stat-content">
               <div class="stat-value">{{ statistics.totalTasks || 0 }}</div>
-              <div class="stat-label">总任务数</div>
+              <div class="stat-label">{{ $t('admin.stats.totalTasks') }}</div>
             </div>
           </div>
         </el-col>
@@ -53,7 +53,7 @@
             </div>
             <div class="stat-content">
               <div class="stat-value">{{ statistics.totalLogins || 0 }}</div>
-              <div class="stat-label">总登录次数</div>
+              <div class="stat-label">{{ $t('admin.stats.totalLogins') }}</div>
             </div>
           </div>
         </el-col>
@@ -64,11 +64,11 @@
     <el-card class="main-card">
       <el-tabs v-model="activeTab" @tab-change="handleTabChange">
         <!-- 用户管理 -->
-        <el-tab-pane label="用户管理" name="users">
+        <el-tab-pane :label="$t('admin.tabs.users')" name="users">
           <div class="tab-header">
             <el-input
               v-model="searchKeyword.users"
-              placeholder="搜索用户名或用户ID"
+              :placeholder="$t('admin.users.searchPlaceholder')"
               style="width: 300px; margin-right: 10px;"
               clearable
               @keyup.enter="handleSearchUsers"
@@ -79,11 +79,11 @@
             </el-input>
             <el-button type="primary" @click="handleSearchUsers" :loading="loading.users">
               <el-icon><Search /></el-icon>
-              搜索
+              {{ $t('common.search') }}
             </el-button>
             <el-button type="primary" @click="fetchUsers" :loading="loading.users">
               <el-icon><Refresh /></el-icon>
-              刷新
+              {{ $t('common.reset') }}
             </el-button>
           </div>
           
@@ -95,27 +95,27 @@
             style="width: 100%"
             class="data-table"
           >
-            <el-table-column prop="userId" label="用户ID" width="80" />
-            <el-table-column prop="username" label="用户名" width="150" />
-            <el-table-column prop="email" label="邮箱" width="200" />
-            <el-table-column prop="role" label="角色" width="100">
+            <el-table-column prop="userId" :label="$t('admin.users.table.userId')" width="80" />
+            <el-table-column prop="username" :label="$t('admin.users.table.username')" width="150" />
+            <el-table-column prop="email" :label="$t('admin.users.table.email')" width="200" />
+            <el-table-column prop="role" :label="$t('admin.users.table.role')" width="100">
               <template #default="{ row }">
                 <el-tag :type="row.role === 'ADMIN' ? 'danger' : 'primary'">
-                  {{ row.role === 'ADMIN' ? '管理员' : '普通用户' }}
+                  {{ row.role === 'ADMIN' ? $t('admin.users.roles.admin') : $t('admin.users.roles.user') }}
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="status" label="状态" width="100">
+            <el-table-column prop="status" :label="$t('admin.users.table.status')" width="100">
               <template #default="{ row }">
                 <el-tag :type="row.status === 'ACTIVE' ? 'success' : 'danger'">
-                  {{ row.status === 'ACTIVE' ? '正常' : '已封禁' }}
+                  {{ row.status === 'ACTIVE' ? $t('admin.users.status.active') : $t('admin.users.status.banned') }}
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="fileCount" label="文件数" width="100" />
-            <el-table-column prop="taskCount" label="任务数" width="100" />
-            <el-table-column prop="createdAt" label="创建时间" width="180" />
-            <el-table-column label="最后登录" width="240">
+            <el-table-column prop="fileCount" :label="$t('admin.users.table.fileCount')" width="100" />
+            <el-table-column prop="taskCount" :label="$t('admin.users.table.taskCount')" width="100" />
+            <el-table-column prop="createdAt" :label="$t('admin.users.table.createdAt')" width="180" />
+            <el-table-column :label="$t('admin.users.table.lastLogin')" width="240">
               <template #default="{ row }">
                 <div v-if="row.lastLoginAt">
                   <div>{{ row.lastLoginAt }}</div>
@@ -123,10 +123,10 @@
                     {{ row.lastLoginLocation }}
                   </div>
                 </div>
-                <span v-else style="color: #909399;">未登录</span>
+                <span v-else style="color: #909399;">{{ $t('admin.users.notLoggedIn') }}</span>
               </template>
             </el-table-column>
-            <el-table-column label="操作" width="120">
+            <el-table-column :label="$t('admin.users.table.actions')" width="120">
               <template #default="{ row }">
                 <el-button
                   v-if="row.role !== 'ADMIN'"
@@ -134,20 +134,20 @@
                   size="small"
                   @click="handleDeleteUser(row)"
                 >
-                  删除
+                  {{ $t('admin.users.actions.delete') }}
                 </el-button>
-                <el-tag v-else type="info" size="small">管理员</el-tag>
+                <el-tag v-else type="info" size="small">{{ $t('admin.users.roles.admin') }}</el-tag>
               </template>
             </el-table-column>
           </el-table>
         </el-tab-pane>
 
         <!-- 文件管理 -->
-        <el-tab-pane label="文件管理" name="files">
+        <el-tab-pane :label="$t('admin.tabs.files')" name="files">
           <div class="tab-header">
             <el-input
               v-model="searchKeyword.files.user"
-              placeholder="用户ID或用户名"
+              :placeholder="$t('admin.files.searchUser')"
               style="width: 200px; margin-right: 10px;"
               clearable
               @keyup.enter="handleSearchFiles"
@@ -158,7 +158,7 @@
             </el-input>
             <el-input
               v-model="searchKeyword.files.file"
-              placeholder="文件ID或文件名"
+              :placeholder="$t('admin.files.searchFile')"
               style="width: 250px; margin-right: 10px;"
               clearable
               @keyup.enter="handleSearchFiles"
@@ -169,11 +169,11 @@
             </el-input>
             <el-button type="primary" @click="handleSearchFiles" :loading="loading.files">
               <el-icon><Search /></el-icon>
-              搜索
+              {{ $t('common.search') }}
             </el-button>
             <el-button type="primary" @click="fetchFiles" :loading="loading.files">
               <el-icon><Refresh /></el-icon>
-              刷新
+              {{ $t('common.reset') }}
             </el-button>
           </div>
           
@@ -185,32 +185,32 @@
             style="width: 100%"
             class="data-table"
           >
-            <el-table-column prop="fileId" label="文件ID" width="80" />
-            <el-table-column prop="userId" label="用户ID" width="80" />
-            <el-table-column prop="username" label="用户名" width="150" />
-            <el-table-column prop="originalFilename" label="文件名" min-width="200" show-overflow-tooltip />
-            <el-table-column prop="fileSize" label="文件大小" width="120">
+            <el-table-column prop="fileId" :label="$t('admin.files.table.fileId')" width="80" />
+            <el-table-column prop="userId" :label="$t('admin.files.table.userId')" width="80" />
+            <el-table-column prop="username" :label="$t('admin.files.table.username')" width="150" />
+            <el-table-column prop="originalFilename" :label="$t('admin.files.table.filename')" min-width="200" show-overflow-tooltip />
+            <el-table-column prop="fileSize" :label="$t('admin.files.table.fileSize')" width="120">
               <template #default="{ row }">
                 {{ formatFileSize(row.fileSize) }}
               </template>
             </el-table-column>
-            <el-table-column prop="fileType" label="文件类型" width="100" />
-            <el-table-column prop="status" label="状态" width="100">
+            <el-table-column prop="fileType" :label="$t('admin.files.table.fileType')" width="100" />
+            <el-table-column prop="status" :label="$t('admin.files.table.status')" width="100">
               <template #default="{ row }">
                 <el-tag :type="getStatusType(row.status)">
                   {{ getStatusText(row.status) }}
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="uploadTime" label="上传时间" width="180" />
-            <el-table-column label="操作" width="120" fixed="right">
+            <el-table-column prop="uploadTime" :label="$t('admin.files.table.uploadTime')" width="180" />
+            <el-table-column :label="$t('admin.files.table.actions')" width="120" fixed="right">
               <template #default="{ row }">
                 <el-button
                   type="danger"
                   size="small"
                   @click="handleDeleteFile(row)"
                 >
-                  删除
+                  {{ $t('admin.users.actions.delete') }}
                 </el-button>
               </template>
             </el-table-column>
@@ -224,6 +224,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
+import { useI18n } from 'vue-i18n';
 import {
   DataAnalysis,
   User,
@@ -242,6 +243,8 @@ import {
   searchUsers,
   searchFiles,
 } from '@/api/admin';
+
+const { t } = useI18n();
 
 const activeTab = ref('users');
 const loading = ref({
@@ -285,7 +288,7 @@ const fetchUsers = async () => {
     userList.value = res.data;
     searchKeyword.value.users = ''; // 清空搜索关键字
   } catch (error) {
-    ElMessage.error('获取用户列表失败: ' + (error.message || '未知错误'));
+    ElMessage.error(t('admin.messages.getUsersFailed') + ': ' + (error.message || ''));
   } finally {
     loading.value.users = false;
   }
@@ -303,10 +306,10 @@ const handleSearchUsers = async () => {
     const res = await searchUsers(searchKeyword.value.users.trim());
     userList.value = res.data;
     if (res.data.length === 0) {
-      ElMessage.info('未找到匹配的用户');
+      ElMessage.info(t('admin.users.noMatch'));
     }
   } catch (error) {
-    ElMessage.error('搜索用户失败: ' + (error.message || '未知错误'));
+    ElMessage.error(t('admin.messages.searchUsersFailed') + ': ' + (error.message || ''));
   } finally {
     loading.value.users = false;
   }
@@ -321,7 +324,7 @@ const fetchFiles = async () => {
     searchKeyword.value.files.user = ''; // 清空搜索关键字
     searchKeyword.value.files.file = ''; // 清空搜索关键字
   } catch (error) {
-    ElMessage.error('获取文件列表失败: ' + (error.message || '未知错误'));
+    ElMessage.error(t('admin.messages.getFilesFailed') + ': ' + (error.message || ''));
   } finally {
     loading.value.files = false;
   }
@@ -346,10 +349,10 @@ const handleSearchFiles = async () => {
     );
     fileList.value = res.data;
     if (res.data.length === 0) {
-      ElMessage.info('未找到匹配的文件');
+      ElMessage.info(t('admin.files.noMatch'));
     }
   } catch (error) {
-    ElMessage.error('搜索文件失败: ' + (error.message || '未知错误'));
+    ElMessage.error(t('admin.messages.searchFilesFailed') + ': ' + (error.message || ''));
   } finally {
     loading.value.files = false;
   }
@@ -359,24 +362,24 @@ const handleSearchFiles = async () => {
 const handleDeleteUser = async (row) => {
   try {
     await ElMessageBox.confirm(
-      `确定要删除用户 "${row.username}" 吗？此操作将删除该用户的所有文件、任务和相关数据，且无法恢复！`,
-      '危险操作',
+      t('admin.users.confirmDelete', { name: row.username }),
+      t('admin.dangerAction'),
       {
-        confirmButtonText: '确定删除',
-        cancelButtonText: '取消',
+        confirmButtonText: t('admin.confirmDelete'),
+        cancelButtonText: t('common.cancel'),
         type: 'error',
         distinguishCancelAndClose: true,
       }
     );
 
     await deleteUser(row.userId);
-    ElMessage.success('用户删除成功');
+    ElMessage.success(t('admin.users.deleteSuccess'));
     fetchUsers();
     fetchFiles();
     fetchStatistics();
   } catch (error) {
     if (error !== 'cancel' && error !== 'close') {
-      ElMessage.error('删除用户失败: ' + (error.message || '未知错误'));
+      ElMessage.error(t('admin.messages.deleteUserFailed') + ': ' + (error.message || ''));
     }
   }
 };
@@ -385,23 +388,23 @@ const handleDeleteUser = async (row) => {
 const handleDeleteFile = async (row) => {
   try {
     await ElMessageBox.confirm(
-      `确定要删除文件 "${row.originalFilename}" 吗？此操作将删除该文件及其所有相关任务和分析结果，且无法恢复！`,
-      '危险操作',
+      t('admin.files.confirmDelete', { name: row.originalFilename }),
+      t('admin.dangerAction'),
       {
-        confirmButtonText: '确定删除',
-        cancelButtonText: '取消',
+        confirmButtonText: t('admin.confirmDelete'),
+        cancelButtonText: t('common.cancel'),
         type: 'error',
         distinguishCancelAndClose: true,
       }
     );
 
     await deleteFile(row.fileId);
-    ElMessage.success('文件删除成功');
+    ElMessage.success(t('admin.files.deleteSuccess'));
     fetchFiles();
     fetchStatistics();
   } catch (error) {
     if (error !== 'cancel' && error !== 'close') {
-      ElMessage.error('删除文件失败: ' + (error.message || '未知错误'));
+      ElMessage.error(t('admin.messages.deleteFileFailed') + ': ' + (error.message || ''));
     }
   }
 };
@@ -438,14 +441,14 @@ const getStatusType = (status) => {
 
 // 获取状态文本
 const getStatusText = (status) => {
-  const texts = {
-    UPLOADED: '已上传',
-    ANALYZING: '分析中',
-    COMPLETED: '已完成',
-    DELETED: '已删除',
-    FAILED: '失败',
+  const statusMap = {
+    UPLOADED: 'admin.files.status.uploaded',
+    ANALYZING: 'admin.files.status.analyzing',
+    COMPLETED: 'admin.files.status.completed',
+    DELETED: 'admin.files.status.deleted',
+    FAILED: 'admin.files.status.failed',
   };
-  return texts[status] || status;
+  return statusMap[status] ? t(statusMap[status]) : status;
 };
 
 onMounted(() => {

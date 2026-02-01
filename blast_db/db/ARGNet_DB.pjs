@@ -1,0 +1,22 @@
+{
+  "version": "1.2",
+  "dbname": "ARGNet_DB",
+  "dbtype": "Protein",
+  "db-version": 5,
+  "description": "ARGNet Reference Database",
+  "number-of-letters": 5915310,
+  "number-of-sequences": 18619,
+  "last-updated": "2026-01-09T08:15:00",
+  "number-of-volumes": 1,
+  "bytes-total": 8578651,
+  "bytes-to-cache": 6082994,
+  "files": [
+    "ARGNet_DB.pdb",
+    "ARGNet_DB.phr",
+    "ARGNet_DB.pin",
+    "ARGNet_DB.pot",
+    "ARGNet_DB.psq",
+    "ARGNet_DB.ptf",
+    "ARGNet_DB.pto"
+  ]
+}

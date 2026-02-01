@@ -3,11 +3,11 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>分析任务历史</span>
+          <span>{{ $t('history.title') }}</span>
           <div class="header-actions">
             <el-input
               v-model="searchKeyword"
-              placeholder="搜索任务ID或文件名"
+              :placeholder="$t('history.searchPlaceholder')"
               style="width: 280px;"
               clearable
               @keyup.enter="handleSearch"
@@ -18,11 +18,11 @@
               </template>
             </el-input>
             <el-button type="primary" @click="handleSearch" :loading="loading">
-              搜索
+              {{ $t('common.search') }}
             </el-button>
             <el-button type="primary" link @click="refreshTasks" :loading="loading">
               <el-icon><Refresh /></el-icon>
-              刷新
+              {{ $t('upload.refresh') }}
             </el-button>
           </div>
         </div>
@@ -33,12 +33,12 @@
           <template #default="{ row }">
             <div class="expand-content">
               <el-descriptions :column="2" border>
-                <el-descriptions-item label="文件ID">{{ row.fileId }}</el-descriptions-item>
-                <el-descriptions-item label="创建时间">{{ formatDate(row.createdAt) }}</el-descriptions-item>
-                <el-descriptions-item label="开始时间">{{ formatDate(row.startedAt) }}</el-descriptions-item>
-                <el-descriptions-item label="完成时间">{{ formatDate(row.completedAt) }}</el-descriptions-item>
-                <el-descriptions-item label="运行时长">{{ formatDuration(row.startedAt, row.completedAt) }}</el-descriptions-item>
-                <el-descriptions-item label="错误信息" v-if="row.errorMessage">
+                <el-descriptions-item :label="$t('history.table.taskId')">{{ row.fileId }}</el-descriptions-item>
+                <el-descriptions-item :label="$t('history.table.createdAt')">{{ formatDate(row.createdAt) }}</el-descriptions-item>
+                <el-descriptions-item label="Started At">{{ formatDate(row.startedAt) }}</el-descriptions-item>
+                <el-descriptions-item :label="$t('history.table.completedAt')">{{ formatDate(row.completedAt) }}</el-descriptions-item>
+                <el-descriptions-item label="Duration">{{ formatDuration(row.startedAt, row.completedAt) }}</el-descriptions-item>
+                <el-descriptions-item label="Error" v-if="row.errorMessage">
                   <el-text type="danger">{{ row.errorMessage }}</el-text>
                 </el-descriptions-item>
               </el-descriptions>
@@ -46,9 +46,9 @@
           </template>
         </el-table-column>
         
-        <el-table-column label="任务ID" width="100" prop="taskId" />
-        <el-table-column prop="fileName" label="文件名" min-width="200" show-overflow-tooltip />
-        <el-table-column label="状态" width="150">
+        <el-table-column :label="$t('history.table.taskId')" width="100" prop="taskId" />
+        <el-table-column prop="fileName" :label="$t('upload.table.filename')" min-width="200" show-overflow-tooltip />
+        <el-table-column :label="$t('history.table.status')" width="150">
           <template #default="{ row }">
             <div class="status-cell">
               <el-tag :type="getStatusType(row.status)">
@@ -61,7 +61,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="进度" width="180">
+        <el-table-column :label="$t('history.table.progress')" width="180">
           <template #default="{ row }">
             <div v-if="isProcessing(row.status)" class="progress-cell">
               <el-progress
@@ -71,20 +71,20 @@
               <!-- MAG 两阶段进度 -->
               <div v-if="isMagTask(row)" class="stage-progress">
                 <el-steps :active="getStageNumber(row.status) - 1" simple size="small">
-                  <el-step title="预处理" />
-                  <el-step title="分析" />
+                  <el-step :title="$t('upload.steps.prodigal')" />
+                  <el-step :title="$t('upload.steps.arg')" />
                 </el-steps>
               </div>
             </div>
             <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column label="创建时间" width="180">
+        <el-table-column :label="$t('history.table.createdAt')" width="180">
           <template #default="{ row }">
             {{ formatDate(row.createdAt) }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="240">
+        <el-table-column :label="$t('history.table.actions')" width="240">
           <template #default="{ row }">
             <el-button
               v-if="row.status === 'COMPLETED'"
@@ -93,7 +93,7 @@
               size="small"
               @click="handleViewResult(row)"
             >
-              查看结果
+              {{ $t('history.actions.view') }}
             </el-button>
             <el-button
               v-if="row.status === 'RUNNING'"
@@ -102,7 +102,7 @@
               size="small"
               @click="handleCancelTask(row)"
             >
-              取消
+              {{ $t('history.actions.cancel') }}
             </el-button>
             <el-button
               v-if="row.status === 'FAILED'"
@@ -111,7 +111,7 @@
               size="small"
               @click="handleRetryTask(row)"
             >
-              重试
+              Retry
             </el-button>
             <el-button
               type="danger"
@@ -119,7 +119,7 @@
               size="small"
               @click="handleDeleteTask(row)"
             >
-              删除
+              {{ $t('history.actions.delete') }}
             </el-button>
           </template>
         </el-table-column>
@@ -146,8 +146,10 @@ import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Refresh, Search } from '@element-plus/icons-vue'
+import { useI18n } from 'vue-i18n'
 import { getUserTasks, cancelTask, deleteTask, createTask } from '@/api/task'
 
+const { t } = useI18n()
 const router = useRouter()
 
 const loading = ref(false)
@@ -177,8 +179,8 @@ const refreshTasks = async () => {
     pagination.total = tasks.value.length
     searchKeyword.value = ''
   } catch (error) {
-    console.error('获取任务列表失败：', error)
-    ElMessage.error('获取任务列表失败')
+    console.error('Failed to fetch tasks:', error)
+    ElMessage.error(t('history.messages.loadFailed') || 'Failed to load tasks')
     tasks.value = []
     pagination.total = 0
   } finally {
@@ -200,11 +202,11 @@ const handleSearch = async () => {
     pagination.total = tasks.value.length
     pagination.current = 1
     if (tasks.value.length === 0) {
-      ElMessage.info('未找到匹配的任务')
+      ElMessage.info(t('history.noTasks'))
     }
   } catch (error) {
-    console.error('搜索任务失败：', error)
-    ElMessage.error('搜索任务失败')
+    console.error('Failed to search tasks:', error)
+    ElMessage.error(t('common.error'))
   } finally {
     loading.value = false
   }
@@ -221,14 +223,14 @@ const handleViewResult = (row) => {
 // 取消任务
 const handleCancelTask = async (row) => {
   try {
-    await ElMessageBox.confirm('确定要取消该任务吗？', '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
+    await ElMessageBox.confirm(t('history.confirmCancel'), t('history.confirmCancelTitle'), {
+      confirmButtonText: t('common.confirm'),
+      cancelButtonText: t('common.cancel'),
       type: 'warning'
     })
     
     await cancelTask(row.taskId)
-    ElMessage.success('任务已取消')
+    ElMessage.success(t('history.messages.cancelSuccess'))
     await refreshTasks()
   } catch {
     // 用户取消或操作失败
@@ -238,14 +240,14 @@ const handleCancelTask = async (row) => {
 // 重试任务
 const handleRetryTask = async (row) => {
   try {
-    await ElMessageBox.confirm('确定要重新运行该任务吗？', '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
+    await ElMessageBox.confirm('Are you sure to retry this task?', t('common.confirm'), {
+      confirmButtonText: t('common.confirm'),
+      cancelButtonText: t('common.cancel'),
       type: 'info'
     })
     
     await createTask({ fileId: row.fileId, analysisType: 'arg' })
-    ElMessage.success('抗性基因分析任务已重新创建')
+    ElMessage.success(t('upload.messages.taskCreated'))
     await refreshTasks()
   } catch {
     // 用户取消或操作失败
@@ -255,14 +257,14 @@ const handleRetryTask = async (row) => {
 // 删除任务
 const handleDeleteTask = async (row) => {
   try {
-    await ElMessageBox.confirm('确定要删除该任务吗？删除后无法恢复。', '警告', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
+    await ElMessageBox.confirm(t('history.confirmDelete'), t('history.confirmDeleteTitle'), {
+      confirmButtonText: t('common.confirm'),
+      cancelButtonText: t('common.cancel'),
       type: 'warning'
     })
     
     await deleteTask(row.taskId)
-    ElMessage.success('任务已删除')
+    ElMessage.success(t('history.messages.deleteSuccess'))
     await refreshTasks()
   } catch {
     // 用户取消或操作失败
@@ -272,7 +274,7 @@ const handleDeleteTask = async (row) => {
 // 格式化日期
 const formatDate = (dateString) => {
   if (!dateString) return '-'
-  return new Date(dateString).toLocaleString('zh-CN')
+  return new Date(dateString).toLocaleString()
 }
 
 // 计算运行时长
@@ -291,15 +293,15 @@ const formatDuration = (start, end) => {
   const seconds = totalSeconds % 60
 
   const parts = []
-  if (hours) parts.push(`${hours}小时`)
-  if (minutes) parts.push(`${minutes}分`)
+  if (hours) parts.push(`${hours}h`)
+  if (minutes) parts.push(`${minutes}m`)
   if (!hours && !minutes) {
-    parts.push(`${seconds}秒`)
+    parts.push(`${seconds}s`)
   } else if (seconds) {
-    parts.push(`${seconds}秒`)
+    parts.push(`${seconds}s`)
   }
 
-  return parts.join('')
+  return parts.join(' ')
 }
 
 // 获取状态类型
@@ -318,16 +320,16 @@ const getStatusType = (status) => {
 
 // 获取状态文本
 const getStatusText = (status) => {
-  const texts = {
-    'PENDING': '等待中',
-    'RUNNING': '运行中',
-    'PREPROCESSING': '预处理中',
-    'ANALYZING': '分析中',
-    'COMPLETED': '已完成',
-    'FAILED': '失败',
-    'CANCELLED': '已取消'
+  const statusMap = {
+    'PENDING': t('history.status.pending'),
+    'RUNNING': t('history.status.running'),
+    'PREPROCESSING': t('history.status.running'),
+    'ANALYZING': t('history.status.running'),
+    'COMPLETED': t('history.status.completed'),
+    'FAILED': t('history.status.failed'),
+    'CANCELLED': t('history.status.cancelled')
   }
-  return texts[status] || status
+  return statusMap[status] || status
 }
 
 // 判断是否为 MAG 任务

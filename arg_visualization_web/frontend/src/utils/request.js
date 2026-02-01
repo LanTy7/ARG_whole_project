@@ -35,6 +35,10 @@ request.interceptors.request.use(
       delete config.headers['content-type'];
     }
     
+    // 设置语言偏好头
+    const locale = localStorage.getItem('locale') || 'zh';
+    config.headers['Accept-Language'] = locale === 'zh' ? 'zh-CN' : 'en-US';
+    
     // 从 localStorage 获取 token
     const token = localStorage.getItem('token');
     

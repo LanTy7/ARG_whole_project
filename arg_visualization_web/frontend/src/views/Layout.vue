@@ -3,13 +3,16 @@
     <!-- 左侧侧边栏 -->
     <aside class="sidebar">
       <div class="sidebar-header">
-        <div class="logo">🧬</div>
+        <div class="header-top">
+          <div class="logo">🧬</div>
+          <LangSwitch class="lang-switch" />
+        </div>
         <div class="title">
-          <h2>抗性基因识别</h2>
-          <p>ARG Identification</p>
+          <h2>{{ $t('sidebar.title') }}</h2>
+          <p>{{ $t('sidebar.subtitle') }}</p>
         </div>
       </div>
-      
+
       <el-menu
         :default-active="currentRoute"
         class="sidebar-menu"
@@ -17,36 +20,36 @@
       >
         <el-menu-item index="/">
           <el-icon><HomeFilled /></el-icon>
-          <span>首页</span>
+          <span>{{ $t('nav.home') }}</span>
         </el-menu-item>
-        
+
         <el-menu-item index="/upload">
           <el-icon><Upload /></el-icon>
-          <span>文件上传</span>
+          <span>{{ $t('nav.upload') }}</span>
         </el-menu-item>
-        
+
         <el-menu-item index="/visualization">
           <el-icon><DataLine /></el-icon>
-          <span>结果可视化</span>
+          <span>{{ $t('nav.visualization') }}</span>
         </el-menu-item>
-        
+
         <el-menu-item index="/history">
           <el-icon><Clock /></el-icon>
-          <span>历史记录</span>
+          <span>{{ $t('nav.history') }}</span>
         </el-menu-item>
-        
+
         <el-menu-item index="/introduction">
           <el-icon><InfoFilled /></el-icon>
-          <span>项目介绍</span>
+          <span>{{ $t('nav.introduction') }}</span>
         </el-menu-item>
 
 
         <el-menu-item index="/admin" v-if="isAdmin">
           <el-icon><Setting /></el-icon>
-          <span>管理功能</span>
+          <span>{{ $t('nav.admin') }}</span>
         </el-menu-item>
       </el-menu>
-      
+
       <div class="sidebar-footer">
         <el-button
           v-if="!userStore.token"
@@ -56,7 +59,7 @@
           @click="handleLogin"
         >
           <el-icon><User /></el-icon>
-          登录
+          {{ $t('nav.login') }}
         </el-button>
         <el-button
           v-else
@@ -66,11 +69,11 @@
           @click="handleLogout"
         >
           <el-icon><SwitchButton /></el-icon>
-          退出
+          {{ $t('nav.logout') }}
         </el-button>
       </div>
     </aside>
-    
+
     <!-- 右侧内容区 -->
     <main class="main-content">
       <router-view />
@@ -82,6 +85,9 @@
 import { computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 import {
   HomeFilled,
   Upload,
@@ -94,6 +100,7 @@ import {
 } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { logout } from '@/api/auth'
+import LangSwitch from '@/components/LangSwitch.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -115,12 +122,12 @@ const handleLogin = () => {
 // 处理登出
 const handleLogout = async () => {
   try {
-    await ElMessageBox.confirm('确定要退出登录吗？', '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
+    await ElMessageBox.confirm(t('confirmDialog.logout'), t('common.tip'), {
+      confirmButtonText: t('common.confirm'),
+      cancelButtonText: t('common.cancel'),
       type: 'warning'
     })
-    
+
     await logout()
     userStore.logout()
     router.push('/login')
@@ -158,13 +165,27 @@ onMounted(async () => {
 }
 
 .sidebar-header {
-  padding: 24px 20px;
+  padding: 16px 20px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   border-bottom: 1px solid rgba(0, 255, 255, 0.2);
   background: linear-gradient(135deg, #0a192f 0%, #112240 100%);
   position: relative;
   overflow: hidden;
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 12px;
+}
+
+.lang-switch {
+  position: relative;
+  z-index: 1;
 }
 
 .sidebar-header::before {
@@ -190,8 +211,7 @@ onMounted(async () => {
 }
 
 .logo {
-  font-size: 48px;
-  margin-right: 12px;
+  font-size: 36px;
   filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.5));
   position: relative;
   z-index: 1;
@@ -200,19 +220,21 @@ onMounted(async () => {
 .title {
   position: relative;
   z-index: 1;
+  text-align: center;
 }
 
 .title h2 {
   margin: 0;
-  font-size: 18px;
+  font-size: 17px;
   color: #00ffff;
   font-weight: 600;
   text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+  white-space: nowrap;
 }
 
 .title p {
   margin: 4px 0 0 0;
-  font-size: 12px;
+  font-size: 11px;
   color: rgba(0, 255, 255, 0.7);
   text-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
 }

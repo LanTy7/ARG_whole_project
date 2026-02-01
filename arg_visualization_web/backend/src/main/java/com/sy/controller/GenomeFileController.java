@@ -62,10 +62,10 @@ public class GenomeFileController {
             Map<String, Object> result = genomeFileService.uploadGenomeFile(file, userId, options);
             
             log.info("基因组文件上传成功，文件ID: {}", result.get("fileId"));
-            return Result.success("文件上传成功", result);
+            return Result.successWithCode("file.upload.success", result);
         } catch (Exception e) {
             log.error("基因组文件上传失败", e);
-            return Result.error("文件上传失败: " + e.getMessage());
+            return Result.errorWithCode("file.upload.failed");
         }
     }
     
@@ -116,7 +116,7 @@ public class GenomeFileController {
             return Result.success(files);
         } catch (Exception e) {
             log.error("获取文件列表失败", e);
-            return Result.error("获取文件列表失败: " + e.getMessage());
+            return Result.errorWithCode("error.server");
         }
     }
 
@@ -136,7 +136,7 @@ public class GenomeFileController {
             return Result.success(fileInfo);
         } catch (Exception e) {
             log.error("获取文件信息失败", e);
-            return Result.error("获取文件信息失败: " + e.getMessage());
+            return Result.errorWithCode("file.not.found");
         }
     }
 
@@ -153,10 +153,10 @@ public class GenomeFileController {
         try {
             Long userId = jwtUtil.getUserIdFromToken(token.replace("Bearer ", ""));
             genomeFileService.deleteFile(fileId, userId);
-            return Result.success();
+            return Result.successWithCode("file.delete.success", null);
         } catch (Exception e) {
             log.error("删除文件失败", e);
-            return Result.error("删除文件失败: " + e.getMessage());
+            return Result.errorWithCode("file.delete.failed");
         }
     }
 }

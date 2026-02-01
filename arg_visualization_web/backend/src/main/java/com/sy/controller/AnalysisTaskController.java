@@ -37,10 +37,10 @@ public class AnalysisTaskController {
             log.info("用户 {} 创建 ARG 分析任务，文件ID: {}", userId, fileId);
             
             Map<String, Object> task = analysisTaskService.createTask(fileId, userId, request);
-            return Result.success("分析任务创建成功", task);
+            return Result.successWithCode("task.create.success", task);
         } catch (Exception e) {
             log.error("创建分析任务失败", e);
-            return Result.error("创建任务失败: " + e.getMessage());
+            return Result.errorWithCode("task.create.failed");
         }
     }
 
@@ -63,7 +63,7 @@ public class AnalysisTaskController {
             return Result.success(tasks);
         } catch (Exception e) {
             log.error("获取任务列表失败", e);
-            return Result.error("获取任务列表失败: " + e.getMessage());
+            return Result.errorWithCode("error.server");
         }
     }
 
@@ -80,7 +80,7 @@ public class AnalysisTaskController {
             return Result.success(task);
         } catch (Exception e) {
             log.error("获取任务详情失败", e);
-            return Result.error("获取任务详情失败: " + e.getMessage());
+            return Result.errorWithCode("task.not.found");
         }
     }
 
@@ -97,7 +97,7 @@ public class AnalysisTaskController {
             return Result.success(status);
         } catch (Exception e) {
             log.error("获取任务状态失败", e);
-            return Result.error("获取任务状态失败: " + e.getMessage());
+            return Result.errorWithCode("task.not.found");
         }
     }
 
@@ -111,10 +111,10 @@ public class AnalysisTaskController {
         try {
             Long userId = jwtUtil.getUserIdFromToken(token.replace("Bearer ", ""));
             analysisTaskService.cancelTask(taskId, userId);
-            return Result.success("任务已取消", null);
+            return Result.successWithCode("task.cancel.success", null);
         } catch (Exception e) {
             log.error("取消任务失败", e);
-            return Result.error("取消任务失败: " + e.getMessage());
+            return Result.errorWithCode("task.cancel.failed");
         }
     }
 
@@ -128,10 +128,10 @@ public class AnalysisTaskController {
         try {
             Long userId = jwtUtil.getUserIdFromToken(token.replace("Bearer ", ""));
             analysisTaskService.deleteTask(taskId, userId);
-            return Result.success();
+            return Result.successWithCode("task.delete.success", null);
         } catch (Exception e) {
             log.error("删除任务失败", e);
-            return Result.error("删除任务失败: " + e.getMessage());
+            return Result.errorWithCode("task.delete.failed");
         }
     }
 
@@ -148,7 +148,7 @@ public class AnalysisTaskController {
             return Result.success(result);
         } catch (Exception e) {
             log.error("获取任务结果失败", e);
-            return Result.error("获取任务结果失败: " + e.getMessage());
+            return Result.errorWithCode("task.not.found");
         }
     }
 }

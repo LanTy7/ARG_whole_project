@@ -1,9 +1,12 @@
 <template>
-  <router-view />
+  <el-config-provider :locale="elementPlusLocale">
+    <router-view />
+  </el-config-provider>
 </template>
 
 <script setup>
-// 主应用组件
+import { ElConfigProvider } from 'element-plus'
+import { elementPlusLocale } from '@/locales'
 </script>
 
 <style>
