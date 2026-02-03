@@ -234,7 +234,73 @@ export default {
     title: '结果可视化',
     selectTask: '选择任务',
     selectTaskPlaceholder: '请选择一个任务查看结果',
+    emptyDescription: '请先选择一个已完成的 ARG 分析任务',
     noTasks: '暂无已完成的任务',
+    info: {
+      taskId: '任务ID',
+      taskName: '任务名称',
+      analysisType: '分析类型',
+      argDetection: '抗性基因检测 (ARG)',
+      resultSummary: '识别结果',
+      resultCount: '共 {total} 条序列，其中 {arg} 条预测为抗性基因'
+    },
+    tab: {
+      detail: '预测结果详情',
+      charts: '可视化图表'
+    },
+    detail: {
+      title: '抗性基因预测结果',
+      summaryDesc: '共分析 {total} 条序列，其中 {arg} 条预测为抗性基因，{nonArg} 条预测为非抗性基因',
+      downloadArg: '下载 ARG 预测结果',
+      legendTitle: '表格颜色说明：',
+      legendArg: '绿色 = 预测为抗性基因',
+      legendNonArg: '灰色 = 预测为非抗性基因',
+      noResults: '没有 ARG 预测结果',
+      searchPlaceholder: '搜索序列 ID...',
+      filterType: '筛选类型',
+      showCount: '显示 {filtered} / {total} 条'
+    },
+    filterAll: '全部',
+    filterArgOnly: '仅 ARG',
+    filterNonArgOnly: '仅非 ARG',
+    chartsPage: {
+      title: 'ARG 预测结果可视化',
+      downloadCharts: '下载图表图片',
+      noData: '没有 ARG 预测结果可供可视化',
+      pieTitle: 'ARG 与非 ARG 序列分布',
+      pieDesc: '抗性基因与非抗性基因的数量占比',
+      barTitle: 'ARG 分类统计',
+      barDesc: '抗性基因的序列中，各个 ARG 类别的数量分布',
+      noCategory: '暂无分类信息'
+    },
+    downloadCard: {
+      title: '下载分析结果',
+      magTip: '这是一个 MAG 分析任务，可下载 Prodigal 预处理结果',
+      argFileName: 'ARG 预测结果',
+      argFileDesc: '包含所有序列的抗性基因预测结果 (TSV 格式)',
+      downloadBtn: '下载',
+      mergedFileName: '合并后的蛋白质序列',
+      mergedFileDesc: 'Prodigal 预测后合并的所有蛋白质序列 (FAA 格式)',
+      prodigalFileName: 'Prodigal 预测结果',
+      prodigalFileDescSuffix: '(ZIP 打包)',
+      prodigalFileDescEn: 'Prodigal 预测结果打包 (ZIP 打包)',
+      allFileName: '下载全部结果',
+      allFileDesc: '打包下载所有分析结果文件 (ZIP 格式)',
+      downloadAllBtn: '一键下载全部'
+    },
+    chartPie: {
+      tooltipCount: '数量',
+      tooltipPercent: '占比',
+      seriesName: 'ARG 分布',
+      argName: '抗性基因 (ARG)',
+      nonArgName: '非抗性基因',
+      labelUnit: '条'
+    },
+    chartBar: {
+      tooltipCount: '数量',
+      yAxisName: '数量',
+      seriesName: 'ARG 类别数量'
+    },
     summary: {
       title: '分析摘要',
       totalSequences: '总序列数',
@@ -263,17 +329,34 @@ export default {
     blast: 'BLAST',
     blastDrawer: {
       title: 'BLAST 比对结果',
-      queryInfo: '查询序列信息',
-      queryId: '序列ID',
+      loadingText: '正在进行 BLAST 比对...',
+      querySection: '查询序列',
+      queryId: '序列 ID',
       queryLength: '序列长度',
-      hits: '比对结果',
-      noHits: '未找到匹配序列',
-      hitId: '匹配ID',
-      identity: '相似度',
+      predClass: '预测分类',
+      hitsSection: '比对结果',
+      hitsCount: '找到 {count} 个匹配',
+      noSignificantMatch: '未找到显著匹配',
+      subjectId: '匹配序列',
+      identity: '一致性',
       alignLength: '比对长度',
-      evalue: 'E-value',
-      bitScore: '比特分数',
-      description: '描述'
+      evalue: 'E 值',
+      bitScore: '比分',
+      hitDetail: '匹配详情',
+      hitIdLabel: '匹配序列 ID',
+      description: '描述',
+      identityLabel: '序列一致性',
+      bitScoreLabel: '比分 (Bit Score)',
+      alignLengthLabel: '比对长度',
+      queryRange: '查询序列区域',
+      subjectRange: '目标序列区域',
+      queryLengthLabel: '查询序列长度',
+      subjectLengthLabel: '目标序列长度',
+      close: '关闭',
+      reRunBlast: '重新比对',
+      queryInfo: '查询序列信息',
+      noHits: '未找到匹配序列',
+      hitId: '匹配ID'
     },
     download: {
       all: '下载全部结果',
@@ -283,8 +366,15 @@ export default {
     loading: '加载中...',
     messages: {
       loadFailed: '加载任务结果失败',
+      loadSuccess: '数据加载成功',
       blastFailed: 'BLAST 比对失败',
-      downloadFailed: '下载失败'
+      downloadFailed: '下载失败',
+      downloadSuccess: '下载成功',
+      preparingDownload: '正在准备下载...',
+      chartsGenerating: '正在生成图片...',
+      chartsDownloadSuccess: '图表图片下载成功',
+      pieDownloadSuccess: '饼图下载成功',
+      noChartsToDownload: '没有可下载的图表'
     }
   },
   // 平台介绍页面

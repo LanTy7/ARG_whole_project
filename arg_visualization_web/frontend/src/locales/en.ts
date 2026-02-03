@@ -234,7 +234,73 @@ export default {
     title: 'Result Visualization',
     selectTask: 'Select Task',
     selectTaskPlaceholder: 'Select a task to view results',
+    emptyDescription: 'Please select a completed ARG analysis task first',
     noTasks: 'No completed tasks',
+    info: {
+      taskId: 'Task ID',
+      taskName: 'Task Name',
+      analysisType: 'Analysis Type',
+      argDetection: 'ARG Detection',
+      resultSummary: 'Result Summary',
+      resultCount: '{total} sequences, {arg} predicted as ARG'
+    },
+    tab: {
+      detail: 'Result Details',
+      charts: 'Charts'
+    },
+    detail: {
+      title: 'ARG Prediction Results',
+      summaryDesc: '{total} sequences analyzed, {arg} predicted as ARG, {nonArg} as non-ARG',
+      downloadArg: 'Download ARG Results',
+      legendTitle: 'Table legend:',
+      legendArg: 'Green = ARG',
+      legendNonArg: 'Gray = Non-ARG',
+      noResults: 'No ARG prediction results',
+      searchPlaceholder: 'Search sequence ID...',
+      filterType: 'Filter',
+      showCount: '{filtered} / {total}'
+    },
+    filterAll: 'All',
+    filterArgOnly: 'ARG only',
+    filterNonArgOnly: 'Non-ARG only',
+    chartsPage: {
+      title: 'ARG Result Visualization',
+      downloadCharts: 'Download Charts',
+      noData: 'No ARG results to visualize',
+      pieTitle: 'ARG vs Non-ARG Distribution',
+      pieDesc: 'Proportion of ARG vs non-ARG sequences',
+      barTitle: 'ARG Category Statistics',
+      barDesc: 'Count per ARG category',
+      noCategory: 'No category data'
+    },
+    downloadCard: {
+      title: 'Download Results',
+      magTip: 'This is a MAG task; you can download Prodigal preprocessing results',
+      argFileName: 'ARG Prediction Results',
+      argFileDesc: 'All sequences with ARG prediction (TSV)',
+      downloadBtn: 'Download',
+      mergedFileName: 'Merged Protein Sequences',
+      mergedFileDesc: 'All Prodigal-predicted protein sequences (FAA)',
+      prodigalFileName: 'Prodigal Results',
+      prodigalFileDescSuffix: '(ZIP)',
+      prodigalFileDescEn: 'Prodigal prediction results package (ZIP)',
+      allFileName: 'Download All',
+      allFileDesc: 'All result files (ZIP)',
+      downloadAllBtn: 'Download All'
+    },
+    chartPie: {
+      tooltipCount: 'Count',
+      tooltipPercent: 'Ratio',
+      seriesName: 'ARG Distribution',
+      argName: 'ARG',
+      nonArgName: 'Non-ARG',
+      labelUnit: ''
+    },
+    chartBar: {
+      tooltipCount: 'Count',
+      yAxisName: 'Count',
+      seriesName: 'ARG Categories'
+    },
     summary: {
       title: 'Analysis Summary',
       totalSequences: 'Total Sequences',
@@ -263,17 +329,34 @@ export default {
     blast: 'BLAST',
     blastDrawer: {
       title: 'BLAST Results',
-      queryInfo: 'Query Sequence Info',
+      loadingText: 'Running BLAST...',
+      querySection: 'Query Sequence',
       queryId: 'Sequence ID',
       queryLength: 'Sequence Length',
-      hits: 'Hits',
-      noHits: 'No matching sequences found',
-      hitId: 'Hit ID',
+      predClass: 'Predicted Class',
+      hitsSection: 'Hits',
+      hitsCount: '{count} hit(s) found',
+      noSignificantMatch: 'No significant matches',
+      subjectId: 'Subject ID',
       identity: 'Identity',
-      alignLength: 'Alignment Length',
+      alignLength: 'Align Length',
       evalue: 'E-value',
       bitScore: 'Bit Score',
-      description: 'Description'
+      hitDetail: 'Hit Detail',
+      hitIdLabel: 'Subject ID',
+      description: 'Description',
+      identityLabel: 'Identity',
+      bitScoreLabel: 'Bit Score',
+      alignLengthLabel: 'Alignment Length',
+      queryRange: 'Query Range',
+      subjectRange: 'Subject Range',
+      queryLengthLabel: 'Query Length',
+      subjectLengthLabel: 'Subject Length',
+      close: 'Close',
+      reRunBlast: 'Re-run BLAST',
+      queryInfo: 'Query Sequence Info',
+      noHits: 'No matching sequences found',
+      hitId: 'Hit ID'
     },
     download: {
       all: 'Download All Results',
@@ -283,8 +366,15 @@ export default {
     loading: 'Loading...',
     messages: {
       loadFailed: 'Failed to load task results',
+      loadSuccess: 'Data loaded successfully',
       blastFailed: 'BLAST alignment failed',
-      downloadFailed: 'Download failed'
+      downloadFailed: 'Download failed',
+      downloadSuccess: 'Download successful',
+      preparingDownload: 'Preparing download...',
+      chartsGenerating: 'Generating images...',
+      chartsDownloadSuccess: 'Charts downloaded',
+      pieDownloadSuccess: 'Pie chart downloaded',
+      noChartsToDownload: 'No charts to download'
     }
   },
   // Introduction page
@@ -524,6 +614,7 @@ export default {
   },
   // Common
   common: {
+    index: 'Index',
     confirm: 'Confirm',
     cancel: 'Cancel',
     delete: 'Delete',

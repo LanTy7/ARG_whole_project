@@ -7,6 +7,8 @@ import com.sy.mapper.UserMapper;
 import com.sy.pojo.AnalysisTask;
 import com.sy.pojo.GenomeFile;
 import com.sy.pojo.User;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sy.service.AdminService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +35,7 @@ public class AdminServiceImpl implements AdminService {
     private final GenomeFileMapper genomeFileMapper;
     private final AnalysisTaskMapper analysisTaskMapper;
     private final LoginLogMapper loginLogMapper;
+    private final ObjectMapper objectMapper;
 
     @Override
     @Transactional
@@ -251,9 +254,19 @@ public class AdminServiceImpl implements AdminService {
         map.put("createdAt", user.getCreatedAt() != null ? user.getCreatedAt().toString() : null);
         map.put("lastLoginAt", user.getLastLoginAt() != null ? user.getLastLoginAt().toString() : null);
         
-        // 获取最后登录的地理位置
+        // 获取最后登录的地理位置（DB 存 JSON：{"zh":"浙江省嘉兴市","en":"Jiaxing, Zhejiang"}，兼容旧数据为纯中文串）
         com.sy.pojo.LoginLog lastLogin = loginLogMapper.findLastLoginByUserId(user.getUserId());
-        map.put("lastLoginLocation", lastLogin != null ? lastLogin.getLocation() : null);
+        if (lastLogin == null || lastLogin.getLocation() == null) {
+            map.put("lastLoginLocation", null);
+        } else {
+            String loc = lastLogin.getLocation();
+            try {
+                Map<String, String> parsed = objectMapper.readValue(loc, new TypeReference<Map<String, String>>() {});
+                map.put("lastLoginLocation", parsed);
+            } catch (Exception e) {
+                map.put("lastLoginLocation", Map.of("zh", loc, "en", loc));
+            }
+        }
         
         // 统计用户数据
         Integer fileCount = genomeFileMapper.countByUserId(user.getUserId());

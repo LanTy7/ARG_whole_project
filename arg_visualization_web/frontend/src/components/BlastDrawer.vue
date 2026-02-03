@@ -1,7 +1,7 @@
 <template>
   <el-drawer
     v-model="visible"
-    title="BLAST 比对结果"
+    :title="$t('visualization.blastDrawer.title')"
     direction="rtl"
     size="45%"
     :before-close="handleClose"
@@ -10,52 +10,48 @@
     <template #header>
       <div class="drawer-header">
         <el-icon class="header-icon"><Search /></el-icon>
-        <span>BLAST 比对结果</span>
+        <span>{{ $t('visualization.blastDrawer.title') }}</span>
       </div>
     </template>
 
-    <div class="blast-content" v-loading="loading" element-loading-text="正在进行 BLAST 比对...">
-      <!-- 查询序列信息 -->
+    <div class="blast-content" v-loading="loading" :element-loading-text="$t('visualization.blastDrawer.loadingText')">
       <div class="query-info" v-if="blastResult">
         <div class="section-title">
           <el-icon><Document /></el-icon>
-          <span>查询序列</span>
+          <span>{{ $t('visualization.blastDrawer.querySection') }}</span>
         </div>
         <el-descriptions :column="1" border size="small">
-          <el-descriptions-item label="序列 ID">
+          <el-descriptions-item :label="$t('visualization.blastDrawer.queryId')">
             <span class="sequence-id">{{ blastResult.queryInfo?.id || sequenceId }}</span>
           </el-descriptions-item>
-          <el-descriptions-item label="序列长度">
+          <el-descriptions-item :label="$t('visualization.blastDrawer.queryLength')">
             <el-tag type="info" size="small">{{ blastResult.queryInfo?.length || '-' }} aa</el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="预测分类" v-if="argClass">
+          <el-descriptions-item :label="$t('visualization.blastDrawer.predClass')" v-if="argClass">
             <el-tag type="warning" size="small">{{ argClass }}</el-tag>
           </el-descriptions-item>
         </el-descriptions>
       </div>
 
-      <!-- 比对结果统计 -->
       <div class="result-summary" v-if="blastResult && !loading">
         <div class="section-title">
           <el-icon><DataAnalysis /></el-icon>
-          <span>比对结果</span>
+          <span>{{ $t('visualization.blastDrawer.hitsSection') }}</span>
           <el-tag type="success" size="small" style="margin-left: 10px;">
-            找到 {{ blastResult.totalHits || 0 }} 个匹配
+            {{ $t('visualization.blastDrawer.hitsCount', { count: blastResult.totalHits || 0 }) }}
           </el-tag>
         </div>
       </div>
 
-      <!-- 无结果提示 -->
       <el-empty 
         v-if="blastResult && blastResult.totalHits === 0 && !loading" 
-        description="未找到显著匹配"
+        :description="$t('visualization.blastDrawer.noSignificantMatch')"
       >
         <template #image>
           <el-icon style="font-size: 60px; color: #909399;"><Warning /></el-icon>
         </template>
       </el-empty>
 
-      <!-- 比对结果表格 -->
       <div class="hits-table" v-if="blastResult && blastResult.totalHits > 0">
         <el-table 
           :data="blastResult.hits" 
@@ -67,12 +63,12 @@
           @row-click="handleRowClick"
         >
           <el-table-column type="index" label="#" width="50" align="center" />
-          <el-table-column prop="subjectId" label="匹配序列" min-width="180" show-overflow-tooltip>
+          <el-table-column prop="subjectId" :label="$t('visualization.blastDrawer.subjectId')" min-width="180" show-overflow-tooltip>
             <template #default="{ row }">
               <span class="subject-id">{{ row.subjectId }}</span>
             </template>
           </el-table-column>
-          <el-table-column prop="identity" label="一致性" width="90" align="center">
+          <el-table-column prop="identity" :label="$t('visualization.blastDrawer.identity')" width="90" align="center">
             <template #default="{ row }">
               <el-tag 
                 :type="getIdentityTagType(row.identity)" 
@@ -82,17 +78,17 @@
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="evalue" label="E 值" width="100" align="center">
+          <el-table-column prop="evalue" :label="$t('visualization.blastDrawer.evalue')" width="100" align="center">
             <template #default="{ row }">
               <span class="evalue">{{ formatEvalue(row.evalue) }}</span>
             </template>
           </el-table-column>
-          <el-table-column prop="bitScore" label="比分" width="80" align="center">
+          <el-table-column prop="bitScore" :label="$t('visualization.blastDrawer.bitScore')" width="80" align="center">
             <template #default="{ row }">
               {{ row.bitScore?.toFixed(1) }}
             </template>
           </el-table-column>
-          <el-table-column prop="alignLength" label="比对长度" width="90" align="center">
+          <el-table-column prop="alignLength" :label="$t('visualization.blastDrawer.alignLength')" width="90" align="center">
             <template #default="{ row }">
               {{ row.alignLength }} / {{ row.queryLength }}
             </template>
@@ -100,20 +96,19 @@
         </el-table>
       </div>
 
-      <!-- 选中的匹配详情 -->
       <div class="hit-detail" v-if="selectedHit">
         <div class="section-title">
           <el-icon><InfoFilled /></el-icon>
-          <span>匹配详情</span>
+          <span>{{ $t('visualization.blastDrawer.hitDetail') }}</span>
         </div>
         <el-descriptions :column="2" border size="small">
-          <el-descriptions-item label="匹配序列 ID" :span="2">
+          <el-descriptions-item :label="$t('visualization.blastDrawer.hitIdLabel')" :span="2">
             <span class="subject-id">{{ selectedHit.subjectId }}</span>
           </el-descriptions-item>
-          <el-descriptions-item label="描述" :span="2" v-if="selectedHit.description">
+          <el-descriptions-item :label="$t('visualization.blastDrawer.description')" :span="2" v-if="selectedHit.description">
             {{ selectedHit.description }}
           </el-descriptions-item>
-          <el-descriptions-item label="序列一致性">
+          <el-descriptions-item :label="$t('visualization.blastDrawer.identityLabel')">
             <el-progress 
               :percentage="selectedHit.identity" 
               :color="getProgressColor(selectedHit.identity)"
@@ -121,31 +116,30 @@
               style="width: 120px;"
             />
           </el-descriptions-item>
-          <el-descriptions-item label="E 值">
+          <el-descriptions-item :label="$t('visualization.blastDrawer.evalue')">
             <span class="evalue">{{ selectedHit.evalue }}</span>
           </el-descriptions-item>
-          <el-descriptions-item label="比分 (Bit Score)">
+          <el-descriptions-item :label="$t('visualization.blastDrawer.bitScoreLabel')">
             {{ selectedHit.bitScore?.toFixed(1) }}
           </el-descriptions-item>
-          <el-descriptions-item label="比对长度">
+          <el-descriptions-item :label="$t('visualization.blastDrawer.alignLengthLabel')">
             {{ selectedHit.alignLength }} aa
           </el-descriptions-item>
-          <el-descriptions-item label="查询序列区域">
+          <el-descriptions-item :label="$t('visualization.blastDrawer.queryRange')">
             {{ selectedHit.queryStart }} - {{ selectedHit.queryEnd }}
           </el-descriptions-item>
-          <el-descriptions-item label="目标序列区域">
+          <el-descriptions-item :label="$t('visualization.blastDrawer.subjectRange')">
             {{ selectedHit.subjectStart }} - {{ selectedHit.subjectEnd }}
           </el-descriptions-item>
-          <el-descriptions-item label="查询序列长度">
+          <el-descriptions-item :label="$t('visualization.blastDrawer.queryLengthLabel')">
             {{ selectedHit.queryLength }} aa
           </el-descriptions-item>
-          <el-descriptions-item label="目标序列长度">
+          <el-descriptions-item :label="$t('visualization.blastDrawer.subjectLengthLabel')">
             {{ selectedHit.subjectLength }} aa
           </el-descriptions-item>
         </el-descriptions>
       </div>
 
-      <!-- 错误信息 -->
       <el-alert
         v-if="error"
         :title="error"
@@ -158,10 +152,10 @@
 
     <template #footer>
       <div class="drawer-footer">
-        <el-button @click="handleClose">关闭</el-button>
+        <el-button @click="handleClose">{{ $t('visualization.blastDrawer.close') }}</el-button>
         <el-button type="primary" @click="handleRefresh" :loading="loading">
           <el-icon><Refresh /></el-icon>
-          重新比对
+          {{ $t('visualization.blastDrawer.reRunBlast') }}
         </el-button>
       </div>
     </template>
@@ -170,9 +164,12 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Search, Document, DataAnalysis, Warning, InfoFilled, Refresh } from '@element-plus/icons-vue'
 import { blastSingleSequence } from '@/api/blast'
+
+const { t } = useI18n()
 
 const props = defineProps({
   modelValue: {
@@ -231,14 +228,14 @@ async function runBlast() {
     }
     
     if (blastResult.value?.totalHits === 0) {
-      ElMessage.info('未找到显著匹配')
+      ElMessage.info(t('visualization.blastDrawer.noSignificantMatch'))
     } else {
-      ElMessage.success(`找到 ${blastResult.value.totalHits} 个匹配`)
+      ElMessage.success(t('visualization.blastDrawer.hitsCount', { count: blastResult.value.totalHits }))
     }
   } catch (e) {
     console.error('BLAST 比对失败:', e)
-    error.value = e.message || 'BLAST 比对失败'
-    ElMessage.error('BLAST 比对失败: ' + error.value)
+    error.value = e.message || t('visualization.messages.blastFailed')
+    ElMessage.error(t('visualization.messages.blastFailed') + ': ' + error.value)
   } finally {
     loading.value = false
   }

@@ -167,10 +167,10 @@ public class LoginServiceImpl implements LoginService {
             }
             log.setIpAddress(ip);
             
-            // 获取IP地理位置
+            // 获取IP地理位置（中英双语言 JSON：{"zh":"浙江省嘉兴市","en":"Jiaxing, Zhejiang"}）
             try {
-                String location = ipLocationUtil.getLocationByIp(ip);
-                log.setLocation(location);
+                String locationJson = ipLocationUtil.getLocationByIpBothJson(ip);
+                log.setLocation(locationJson);
             } catch (Exception e) {
                 // 如果获取地理位置失败，记录错误但不影响登录流程
                 System.err.println("获取IP地理位置失败: IP=" + ip + ", 错误=" + e.getMessage());

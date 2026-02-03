@@ -10,7 +10,7 @@ export const useUserStore = defineStore('user', {
         userInfo = JSON.parse(stored);
       }
     } catch (e) {
-      console.error('解析用户信息失败:', e);
+      console.error('Failed to parse user info:', e);
       localStorage.removeItem('userInfo');
     }
     
@@ -29,31 +29,27 @@ export const useUserStore = defineStore('user', {
   },
   
   actions: {
-    // 设置 token
     setToken(token) {
       this.token = token;
       localStorage.setItem('token', token);
     },
-    
-    // 设置用户信息
+
     setUserInfo(userInfo) {
       this.userInfo = userInfo;
       localStorage.setItem('userInfo', JSON.stringify(userInfo));
     },
-    
-    // 获取用户信息
+
     async fetchUserInfo() {
       try {
         const res = await getUserInfo();
         this.setUserInfo(res.data);
         return res.data;
       } catch (error) {
-        console.error('获取用户信息失败：', error);
+        console.error('Failed to fetch user info:', error);
         throw error;
       }
     },
-    
-    // 登出
+
     logout() {
       this.token = '';
       this.userInfo = null;

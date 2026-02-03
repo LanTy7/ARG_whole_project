@@ -54,11 +54,11 @@ public class AnalysisTaskServiceImpl implements AnalysisTaskService {
             throw new RuntimeException("无权访问该文件");
         }
         
-        // 创建任务
+        // 创建任务（任务名用英文格式，避免中文文件名写入 DB）
         AnalysisTask task = new AnalysisTask();
         task.setUserId(userId);
         task.setFileId(fileId);
-        task.setTaskName("抗性基因检测 - " + genomeFile.getOriginalFilename());
+        task.setTaskName("ARG - Task");
         task.setStatus("PENDING");
         task.setProgress(0);
         task.setCreatedAt(LocalDateTime.now());
@@ -71,7 +71,8 @@ public class AnalysisTaskServiceImpl implements AnalysisTaskService {
         // 保存到数据库
         analysisTaskMapper.insert(task);
         
-        // 设置输出目录
+        // 设置任务名与输出目录（英文：ARG - task_{id}）
+        task.setTaskName("ARG - task_" + task.getTaskId());
         String outputDir = outputBaseDir + File.separator + "task_" + task.getTaskId();
         task.setOutputDir(outputDir);
         analysisTaskMapper.updateById(task);
@@ -409,14 +410,14 @@ public class AnalysisTaskServiceImpl implements AnalysisTaskService {
             log.warn("统计 MAG 文件数量失败", e);
         }
         
-        // 创建任务
+        // 创建任务（任务名用英文格式，避免中文 mag 名写入 DB）
         AnalysisTask task = new AnalysisTask();
         task.setUserId(userId);
         task.setFileId(null);  // MAG 任务没有对应的单个文件
         task.setTaskType("MAG");  // 设置任务类型
         task.setMagDirPath(magDirPath);  // 设置 MAG 目录路径
         task.setMagFileCount(fileCount);  // 设置文件数量
-        task.setTaskName("MAG 抗性基因检测 - " + magName);
+        task.setTaskName("ARG - MAG");
         task.setStatus("PENDING");
         task.setProgress(0);
         task.setCreatedAt(LocalDateTime.now());
@@ -434,7 +435,8 @@ public class AnalysisTaskServiceImpl implements AnalysisTaskService {
         // 保存到数据库
         analysisTaskMapper.insert(task);
         
-        // 设置输出目录
+        // 设置任务名与输出目录（英文：ARG - mag_{id}）
+        task.setTaskName("ARG - mag_" + task.getTaskId());
         String outputDir = outputBaseDir + File.separator + "task_" + task.getTaskId();
         task.setOutputDir(outputDir);
         analysisTaskMapper.updateById(task);

@@ -120,7 +120,7 @@
                 <div v-if="row.lastLoginAt">
                   <div>{{ row.lastLoginAt }}</div>
                   <div v-if="row.lastLoginLocation" style="color: #909399; font-size: 12px; margin-top: 4px;">
-                    {{ row.lastLoginLocation }}
+                    {{ row.lastLoginLocation?.[currentLocale] ?? row.lastLoginLocation?.zh ?? row.lastLoginLocation?.en ?? '' }}
                   </div>
                 </div>
                 <span v-else style="color: #909399;">{{ $t('admin.users.notLoggedIn') }}</span>
@@ -243,6 +243,7 @@ import {
   searchUsers,
   searchFiles,
 } from '@/api/admin';
+import { currentLocale } from '@/locales';
 
 const { t } = useI18n();
 

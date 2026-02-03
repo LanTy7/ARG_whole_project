@@ -1,9 +1,9 @@
 <template>
   <div class="visualization-container">
     <el-card v-if="!taskId || !argData">
-      <el-empty description="请先选择一个已完成的 ARG 分析任务">
+      <el-empty :description="$t('visualization.emptyDescription')">
         <el-button type="primary" @click="router.push('/history')">
-          查看历史记录
+          {{ $t('home.viewHistory') }}
         </el-button>
       </el-empty>
     </el-card>
@@ -12,15 +12,15 @@
       <!-- 顶部信息栏 -->
       <el-card class="info-header">
         <el-descriptions :column="3" border>
-          <el-descriptions-item label="任务ID">{{ taskId }}</el-descriptions-item>
-          <el-descriptions-item label="任务名称">{{ argData.genomeInfo?.taskName || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="分析类型">
-            <el-tag type="warning">抗性基因检测 (ARG)</el-tag>
+          <el-descriptions-item :label="$t('visualization.info.taskId')">{{ taskId }}</el-descriptions-item>
+          <el-descriptions-item :label="$t('visualization.info.taskName')">{{ argData.genomeInfo?.taskName || '-' }}</el-descriptions-item>
+          <el-descriptions-item :label="$t('visualization.info.analysisType')">
+            <el-tag type="warning">{{ $t('visualization.info.argDetection') }}</el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="识别结果" :span="3">
+          <el-descriptions-item :label="$t('visualization.info.resultSummary')" :span="3">
             <el-tag type="success" size="large">
               <el-icon><Document /></el-icon>
-              共 {{ argResults.length }} 条序列，其中 {{ argPositiveCount }} 条预测为抗性基因
+              {{ $t('visualization.info.resultCount', { total: argResults.length, arg: argPositiveCount }) }}
             </el-tag>
           </el-descriptions-item>
         </el-descriptions>
@@ -30,19 +30,17 @@
       <el-card class="tabs-card">
         <el-tabs v-model="activeTab" @tab-click="handleTabClick">
           <!-- ARG 预测结果详情 -->
-          <el-tab-pane label="预测结果详情" name="detail">
+          <el-tab-pane :label="$t('visualization.tab.detail')" name="detail">
             <div class="detail-content" v-loading="loading">
               <div class="detail-header">
                 <div>
-                  <h3> 抗性基因预测结果</h3>
+                  <h3>{{ $t('visualization.detail.title') }}</h3>
                   <p class="summary-desc">
-                    共分析 <strong>{{ argResults.length }}</strong> 条序列，
-                    其中 <strong style="color: #67C23A;">{{ argPositiveCount }}</strong> 条预测为抗性基因，
-                    <strong style="color: #909399;">{{ argNegativeCount }}</strong> 条预测为非抗性基因
+                    {{ $t('visualization.detail.summaryDesc', { total: argResults.length, arg: argPositiveCount, nonArg: argNegativeCount }) }}
                   </p>
                 </div>
                 <el-button type="primary" :icon="Download" @click="downloadArgResults">
-                  下载 ARG 预测结果
+                  {{ $t('visualization.detail.downloadArg') }}
                 </el-button>
               </div>
               
@@ -55,27 +53,27 @@
               >
                 <template #title>
                   <div class="legend-container">
-                    <span style="font-weight: bold; margin-right: 20px;">表格颜色说明：</span>
+                    <span style="font-weight: bold; margin-right: 20px;">{{ $t('visualization.detail.legendTitle') }}</span>
                     <span class="legend-item">
                       <span class="legend-box arg-positive-box"></span>
-                      绿色 = 预测为抗性基因
+                      {{ $t('visualization.detail.legendArg') }}
                     </span>
                     <span class="legend-item">
                       <span class="legend-box arg-negative-box"></span>
-                      灰色 = 预测为非抗性基因
+                      {{ $t('visualization.detail.legendNonArg') }}
                     </span>
                   </div>
                 </template>
               </el-alert>
               
-              <el-empty v-if="argResults.length === 0" description="没有 ARG 预测结果" />
+              <el-empty v-if="argResults.length === 0" :description="$t('visualization.detail.noResults')" />
               
               <template v-else>
                 <!-- 筛选和搜索 -->
                 <div class="table-toolbar">
                   <el-input
                     v-model="searchKeyword"
-                    placeholder="搜索序列 ID..."
+                    :placeholder="$t('visualization.detail.searchPlaceholder')"
                     clearable
                     style="width: 300px;"
                     @input="handleSearch"
@@ -84,13 +82,13 @@
                       <el-icon><Search /></el-icon>
                     </template>
                   </el-input>
-                  <el-select v-model="filterArgType" placeholder="筛选类型" style="width: 150px;" @change="handleFilter">
-                    <el-option label="全部" value="all" />
-                    <el-option label="仅 ARG" value="arg" />
-                    <el-option label="仅非 ARG" value="non-arg" />
+                  <el-select v-model="filterArgType" :placeholder="$t('visualization.detail.filterType')" style="width: 150px;" @change="handleFilter">
+                    <el-option :label="$t('visualization.filterAll')" value="all" />
+                    <el-option :label="$t('visualization.filterArgOnly')" value="arg" />
+                    <el-option :label="$t('visualization.filterNonArgOnly')" value="non-arg" />
                   </el-select>
                   <span class="filter-info">
-                    显示 {{ filteredResults.length }} / {{ argResults.length }} 条
+                    {{ $t('visualization.detail.showCount', { filtered: filteredResults.length, total: argResults.length }) }}
                   </span>
                 </div>
                 
@@ -210,31 +208,29 @@
           </el-tab-pane>
           
           <!-- 可视化图表标签页 -->
-          <el-tab-pane label="可视化图表" name="charts">
+          <el-tab-pane :label="$t('visualization.tab.charts')" name="charts">
             <div class="charts-content" v-loading="loading">
               <div class="charts-header">
-                <h3> ARG 预测结果可视化</h3>
+                <h3>{{ $t('visualization.chartsPage.title') }}</h3>
                 <el-button type="primary" :icon="Download" @click="downloadChartImages">
-                  下载图表图片
+                  {{ $t('visualization.chartsPage.downloadCharts') }}
                 </el-button>
               </div>
               
-              <el-empty v-if="argResults.length === 0" description="没有 ARG 预测结果可供可视化" />
+              <el-empty v-if="argResults.length === 0" :description="$t('visualization.chartsPage.noData')" />
               
               <div v-else class="charts-grid">
-                <!-- 饼图：ARG 与非 ARG 数量分布 -->
                 <div class="chart-container">
-                  <h4> ARG 与非 ARG 序列分布</h4>
-                  <p class="chart-desc">抗性基因与非抗性基因的数量占比</p>
+                  <h4>{{ $t('visualization.chartsPage.pieTitle') }}</h4>
+                  <p class="chart-desc">{{ $t('visualization.chartsPage.pieDesc') }}</p>
                   <div ref="pieChartRef" class="chart" style="height: 400px;"></div>
                 </div>
                 
-                <!-- 柱状图：各 ARG 类别分布 -->
                 <div class="chart-container">
-                  <h4> ARG 分类统计</h4>
-                  <p class="chart-desc">抗性基因的序列中，各个 ARG 类别的数量分布</p>
+                  <h4>{{ $t('visualization.chartsPage.barTitle') }}</h4>
+                  <p class="chart-desc">{{ $t('visualization.chartsPage.barDesc') }}</p>
                   <div ref="barChartRef" class="chart" style="height: 400px;"></div>
-                  <el-empty v-if="argClassStats.length === 0 && argPositiveCount > 0" description="暂无分类信息" />
+                  <el-empty v-if="argClassStats.length === 0 && argPositiveCount > 0" :description="$t('visualization.chartsPage.noCategory')" />
                 </div>
               </div>
             </div>
@@ -246,7 +242,7 @@
       <el-card class="download-card">
         <template #header>
           <div class="card-header">
-            <span><el-icon><Download /></el-icon> 下载分析结果</span>
+            <span><el-icon><Download /></el-icon> {{ $t('visualization.downloadCard.title') }}</span>
           </div>
         </template>
         
@@ -258,70 +254,65 @@
             style="margin-bottom: 16px;"
           >
             <template #title>
-              <span>这是一个 MAG 分析任务，可下载 Prodigal 预处理结果</span>
+              <span>{{ $t('visualization.downloadCard.magTip') }}</span>
             </template>
           </el-alert>
           
           <div class="download-items">
-            <!-- ARG 预测结果 - 所有任务都有 -->
             <div class="download-item">
               <div class="download-info">
                 <el-icon class="file-icon"><Document /></el-icon>
                 <div class="file-details">
-                  <span class="file-name">ARG 预测结果</span>
-                  <span class="file-desc">包含所有序列的抗性基因预测结果 (TSV 格式)</span>
+                  <span class="file-name">{{ $t('visualization.downloadCard.argFileName') }}</span>
+                  <span class="file-desc">{{ $t('visualization.downloadCard.argFileDesc') }}</span>
                   <span class="file-size" v-if="downloadFiles.arg">{{ downloadFiles.arg.sizeFormatted }}</span>
                 </div>
               </div>
               <el-button type="primary" size="small" @click="handleDownload('arg')" :loading="downloading.arg">
-                <el-icon><Download /></el-icon> 下载
+                <el-icon><Download /></el-icon> {{ $t('visualization.downloadCard.downloadBtn') }}
               </el-button>
             </div>
             
-            <!-- MAG 任务特有的下载选项 -->
             <template v-if="isMagTask">
-              <!-- 合并后的蛋白质序列 -->
               <div class="download-item" v-if="downloadFiles.merged">
                 <div class="download-info">
                   <el-icon class="file-icon" style="color: #67C23A;"><Document /></el-icon>
                   <div class="file-details">
-                    <span class="file-name">合并后的蛋白质序列</span>
-                    <span class="file-desc">Prodigal 预测后合并的所有蛋白质序列 (FAA 格式)</span>
+                    <span class="file-name">{{ $t('visualization.downloadCard.mergedFileName') }}</span>
+                    <span class="file-desc">{{ $t('visualization.downloadCard.mergedFileDesc') }}</span>
                     <span class="file-size">{{ downloadFiles.merged.sizeFormatted }}</span>
                   </div>
                 </div>
                 <el-button type="success" size="small" @click="handleDownload('merged')" :loading="downloading.merged">
-                  <el-icon><Download /></el-icon> 下载
+                  <el-icon><Download /></el-icon> {{ $t('visualization.downloadCard.downloadBtn') }}
                 </el-button>
               </div>
               
-              <!-- Prodigal 结果打包 -->
               <div class="download-item" v-if="downloadFiles.prodigal">
                 <div class="download-info">
                   <el-icon class="file-icon" style="color: #E6A23C;"><FolderOpened /></el-icon>
                   <div class="file-details">
-                    <span class="file-name">Prodigal 预测结果</span>
-                    <span class="file-desc">{{ downloadFiles.prodigal.name }} (ZIP 打包)</span>
+                    <span class="file-name">{{ $t('visualization.downloadCard.prodigalFileName') }}</span>
+                    <span class="file-desc">{{ $i18n.locale === 'en' ? $t('visualization.downloadCard.prodigalFileDescEn') : (downloadFiles.prodigal.name + ' ' + $t('visualization.downloadCard.prodigalFileDescSuffix')) }}</span>
                     <span class="file-size">{{ downloadFiles.prodigal.sizeFormatted }}</span>
                   </div>
                 </div>
                 <el-button type="warning" size="small" @click="handleDownload('prodigal')" :loading="downloading.prodigal">
-                  <el-icon><Download /></el-icon> 下载
+                  <el-icon><Download /></el-icon> {{ $t('visualization.downloadCard.downloadBtn') }}
                 </el-button>
               </div>
             </template>
             
-            <!-- 一键下载全部 -->
             <div class="download-item download-all">
               <div class="download-info">
                 <el-icon class="file-icon" style="color: #409EFF;"><Files /></el-icon>
                 <div class="file-details">
-                  <span class="file-name">下载全部结果</span>
-                  <span class="file-desc">打包下载所有分析结果文件 (ZIP 格式)</span>
+                  <span class="file-name">{{ $t('visualization.downloadCard.allFileName') }}</span>
+                  <span class="file-desc">{{ $t('visualization.downloadCard.allFileDesc') }}</span>
                 </div>
               </div>
               <el-button type="primary" @click="handleDownload('all')" :loading="downloading.all">
-                <el-icon><Download /></el-icon> 一键下载全部
+                <el-icon><Download /></el-icon> {{ $t('visualization.downloadCard.downloadAllBtn') }}
               </el-button>
             </div>
           </div>
@@ -342,6 +333,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted, watch, nextTick, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Download, Document, Search, FolderOpened, Files, InfoFilled } from '@element-plus/icons-vue'
 import { getGenomeVisualization } from '@/api/visualization'
@@ -353,6 +345,7 @@ import BlastDrawer from '@/components/BlastDrawer.vue'
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
+const { t, locale } = useI18n()
 
 // 状态管理
 const taskId = ref(null)
@@ -466,6 +459,13 @@ watch(activeTab, async (newTab) => {
   }
 })
 
+// 监听语言切换，重新渲染图表文案
+watch(locale, () => {
+  if (activeTab.value === 'charts') {
+    nextTick(() => initCharts())
+  }
+})
+
 // 处理窗口大小变化
 function handleResize() {
   pieChartInstance?.resize()
@@ -530,10 +530,10 @@ async function loadData() {
     // 加载可下载文件列表
     await loadDownloadableFiles()
     
-    ElMessage.success('数据加载成功')
+    ElMessage.success(t('visualization.messages.loadSuccess'))
   } catch (error) {
-    console.error('加载数据失败:', error)
-    ElMessage.error('加载数据失败: ' + (error.response?.data?.message || error.message))
+    console.error('Failed to load data:', error)
+    ElMessage.error(t('visualization.messages.loadFailed') + ': ' + (error.response?.data?.message || error.message))
   } finally {
     loading.value = false
   }
@@ -561,7 +561,7 @@ async function loadDownloadableFiles() {
       }
     })
   } catch (error) {
-    console.error('加载下载文件列表失败:', error)
+    console.error('Failed to load downloadable files:', error)
   } finally {
     downloadLoading.value = false
   }
@@ -573,10 +573,10 @@ async function handleDownload(type) {
   try {
     const token = userStore.token ? `Bearer ${userStore.token}` : ''
     await downloadFile(type, taskId.value, token)
-    ElMessage.success('下载成功')
+    ElMessage.success(t('visualization.messages.downloadSuccess'))
   } catch (error) {
-    console.error('下载失败:', error)
-    ElMessage.error('下载失败: ' + error.message)
+    console.error('Download failed:', error)
+    ElMessage.error(t('visualization.messages.downloadFailed') + ': ' + error.message)
   } finally {
     downloading[type] = false
   }
@@ -586,13 +586,13 @@ async function handleDownload(type) {
 function downloadArgResults() {
   try {
     if (argResults.value.length === 0) {
-      ElMessage.warning('没有可下载的数据')
+      ElMessage.warning(t('visualization.detail.noResults'))
       return
     }
     
     const fileName = `task_${taskId.value}_arg_predictions.tsv`
     
-    ElMessage.info('正在准备下载...')
+    ElMessage.info(t('visualization.messages.preparingDownload'))
     
     // 构建 TSV 内容
     let tsvContent = 'id\tis_arg\tpred_prob\targ_class\tclass_prob\tprob\n'
@@ -610,10 +610,10 @@ function downloadArgResults() {
     a.click()
     window.URL.revokeObjectURL(url)
     
-    ElMessage.success('下载成功')
+    ElMessage.success(t('visualization.messages.downloadSuccess'))
   } catch (error) {
-    console.error('下载失败:', error)
-    ElMessage.error('下载失败: ' + error.message)
+    console.error('download error:', error)
+    ElMessage.error(t('visualization.messages.downloadFailed') + ': ' + error.message)
   }
 }
 
@@ -647,7 +647,8 @@ function initPieChart() {
         color: '#2c3e50'
       },
       formatter: (params) => {
-        return `<strong style="color: #0088cc;">${params.name}</strong><br/>数量: ${params.value} 条<br/>占比: ${params.percent}%`
+        const unit = t('visualization.chartPie.labelUnit')
+        return `<strong style="color: #0088cc;">${params.name}</strong><br/>${t('visualization.chartPie.tooltipCount')}: ${params.value}${unit ? ' ' + unit : ''}<br/>${t('visualization.chartPie.tooltipPercent')}: ${params.percent}%`
       }
     },
     legend: {
@@ -663,7 +664,7 @@ function initPieChart() {
     },
     series: [
       {
-        name: 'ARG 分布',
+        name: t('visualization.chartPie.seriesName'),
         type: 'pie',
         radius: ['35%', '65%'],
         center: ['50%', '45%'],
@@ -678,7 +679,10 @@ function initPieChart() {
         label: {
           show: true,
           position: 'outside',
-          formatter: '{b}\n{c} 条 ({d}%)',
+          formatter: (params) => {
+            const unit = t('visualization.chartPie.labelUnit')
+            return params.name + '\n' + params.value + (unit ? ' ' + unit : '') + ' (' + params.percent + '%)'
+          },
           fontSize: 13,
           fontWeight: 600,
           color: '#2c3e50',
@@ -707,7 +711,7 @@ function initPieChart() {
         data: [
           { 
             value: argPositiveCount.value, 
-            name: '抗性基因 (ARG)',
+            name: t('visualization.chartPie.argName'),
             itemStyle: { 
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
                 { offset: 0, color: '#67C23A' },
@@ -717,7 +721,7 @@ function initPieChart() {
           },
           { 
             value: argNegativeCount.value, 
-            name: '非抗性基因',
+            name: t('visualization.chartPie.nonArgName'),
             itemStyle: { 
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
                 { offset: 0, color: '#909399' },
@@ -780,7 +784,8 @@ function initBarChart() {
       },
       formatter: (params) => {
         const data = params[0]
-        return `<strong style="color: #0088cc;">${data.name}</strong><br/>数量: ${data.value} 条`
+        const unit = t('visualization.chartPie.labelUnit')
+        return `<strong style="color: #0088cc;">${data.name}</strong><br/>${t('visualization.chartBar.tooltipCount')}: ${data.value}${unit ? ' ' + unit : ''}`
       }
     },
     grid: {
@@ -814,7 +819,7 @@ function initBarChart() {
     },
     yAxis: {
       type: 'value',
-      name: '数量',
+      name: t('visualization.chartBar.yAxisName'),
       nameTextStyle: {
         color: '#0088cc',
         fontSize: 13,
@@ -839,7 +844,7 @@ function initBarChart() {
     },
     series: [
       {
-        name: 'ARG 类别数量',
+        name: t('visualization.chartBar.seriesName'),
         type: 'bar',
         barWidth: stats.length > 8 ? '50%' : '40%',
         data: stats.map((s, index) => ({
@@ -886,7 +891,7 @@ function initBarChart() {
 // 下载图表图片
 function downloadChartImages() {
   try {
-    ElMessage.info('正在生成图片...')
+    ElMessage.info(t('visualization.messages.chartsGenerating'))
     
     let downloadCount = 0
     
@@ -917,18 +922,18 @@ function downloadChartImages() {
         a2.download = `task_${taskId.value}_arg_class_distribution_bar.png`
         a2.click()
         
-        ElMessage.success('图表图片下载成功')
+        ElMessage.success(t('visualization.messages.chartsDownloadSuccess'))
       }, 500)
     } else {
       if (downloadCount > 0) {
-        ElMessage.success('饼图下载成功')
+        ElMessage.success(t('visualization.messages.pieDownloadSuccess'))
       } else {
-        ElMessage.warning('没有可下载的图表')
+        ElMessage.warning(t('visualization.messages.noChartsToDownload'))
       }
     }
   } catch (error) {
     console.error('下载失败:', error)
-    ElMessage.error('下载失败: ' + error.message)
+    ElMessage.error(t('visualization.messages.downloadFailed') + ': ' + error.message)
   }
 }
 </script>

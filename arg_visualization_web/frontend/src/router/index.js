@@ -18,37 +18,37 @@ const routes = [
         path: '',
         name: 'Home',
         component: () => import('@/views/Home.vue'),
-        meta: { title: '首页' }
+        meta: { title: 'Home' }
       },
       {
         path: '/upload',
         name: 'Upload',
         component: () => import('@/views/Upload.vue'),
-        meta: { title: '文件上传' }
+        meta: { title: 'File Upload' }
       },
       {
         path: '/visualization',
         name: 'Visualization',
         component: () => import('@/views/Visualization.vue'),
-        meta: { title: '结果可视化' }
+        meta: { title: 'Result Visualization' }
       },
       {
         path: '/history',
         name: 'History',
         component: () => import('@/views/History.vue'),
-        meta: { title: '历史记录' }
+        meta: { title: 'History' }
       },
       {
         path: '/introduction',
         name: 'Introduction',
         component: () => import('@/views/Introduction.vue'),
-        meta: { title: '项目介绍' }
+        meta: { title: 'Introduction' }
       },
       {
         path: '/admin',
         name: 'Admin',
         component: () => import('@/views/Admin.vue'),
-        meta: { title: '管理功能', requiresAdmin: true }
+        meta: { title: 'Admin', requiresAdmin: true }
       }
     ]
   },
@@ -63,29 +63,26 @@ const router = createRouter({
   routes
 })
 
-// 路由守卫
 router.beforeEach((to, from, next) => {
   const userStore = useUserStore()
-  
-  // 设置页面标题
-  document.title = to.meta.title 
-    ? `${to.meta.title} - 抗性基因识别系统` 
-    : '抗性基因识别系统'
-  
-  // 检查管理员权限
+
+  document.title = to.meta.title
+    ? `${to.meta.title} - ARG Identification System`
+    : 'ARG Identification System'
+
   if (to.meta.requiresAdmin) {
     if (!userStore.isLoggedIn) {
-      ElMessage.warning('请先登录')
+      ElMessage.warning('Please log in first')
       next('/login')
       return
     }
     if (!userStore.isAdmin) {
-      ElMessage.error('需要管理员权限')
+      ElMessage.error('Admin permission required')
       next('/')
       return
     }
   }
-  
+
   next()
 })
 
