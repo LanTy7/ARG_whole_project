@@ -59,15 +59,15 @@ const handleCommand = (lang) => {
   gap: 6px;
   padding: 8px 12px;
   border-radius: 8px;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--theme-text-soft);
   transition: all 0.3s ease;
   border: 1px solid transparent;
 }
 
 .lang-trigger:hover {
-  background: rgba(0, 255, 255, 0.1);
-  border-color: rgba(0, 255, 255, 0.3);
-  color: #00ffff;
+  background: var(--theme-bg-overlay-4);
+  border-color: var(--theme-border-4);
+  color: var(--theme-accent);
 }
 
 .globe-icon {
@@ -78,7 +78,7 @@ const handleCommand = (lang) => {
 }
 
 .lang-trigger:hover .globe-icon {
-  filter: drop-shadow(0 0 4px rgba(0, 255, 255, 0.5));
+  filter: drop-shadow(0 1px 3px var(--theme-shadow-3));
   transform: rotate(15deg);
 }
 
@@ -90,40 +90,40 @@ const handleCommand = (lang) => {
 
 .arrow {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--theme-text-faint);
   transition: transform 0.3s;
 }
 
 .lang-trigger:hover .arrow {
-  color: #00ffff;
+  color: var(--theme-accent);
 }
 
 /* Dropdown 样式 */
 :deep(.lang-dropdown) {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  border: 1px solid rgba(0, 255, 255, 0.2);
+  background: var(--theme-gradient-bg);
+  border: 1px solid var(--theme-border-3);
   border-radius: 10px;
   padding: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 255, 255, 0.1);
+  box-shadow: 0 8px 24px var(--theme-shadow-3), 0 0 20px var(--theme-bg-overlay-3);
   min-width: 160px;
 }
 
 :deep(.el-dropdown-menu__item) {
   border-radius: 8px;
   padding: 12px 16px;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--theme-text-soft);
   margin: 2px 0;
   transition: all 0.3s ease;
 }
 
 :deep(.el-dropdown-menu__item:hover) {
-  background: rgba(0, 255, 255, 0.1);
-  color: #00ffff;
+  background: var(--theme-bg-overlay-4);
+  color: var(--theme-accent);
 }
 
 :deep(.el-dropdown-menu__item.active) {
-  background: rgba(0, 255, 255, 0.15);
-  color: #00ffff;
+  background: var(--theme-bg-overlay-5);
+  color: var(--theme-accent);
 }
 
 .lang-option {
@@ -143,7 +143,7 @@ const handleCommand = (lang) => {
 }
 
 .check-icon {
-  color: #00ffff;
+  color: var(--theme-accent);
   font-size: 16px;
 }
 </style>

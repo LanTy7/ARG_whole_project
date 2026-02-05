@@ -1,0 +1,75 @@
+:root {
+  /* ========== 主色 ========== */
+  --theme-primary: 247, 247, 255;
+  --theme-primary-rgb: rgb(var(--theme-primary));
+  --theme-bg: rgb(247, 247, 255);
+  --theme-bg-2: rgb(240, 242, 255);
+  --theme-bg-3: rgb(242, 242, 245);
+  --theme-bg-4: rgb(247, 247, 240);
+  --theme-bg-5: rgb(242, 232, 235);
+  --theme-bg-6: rgb(247, 247, 230);
+  --theme-bg-7: rgb(242, 242, 235);
+  --theme-bg-8: rgb(247, 247, 255);
+
+  /* ========== 强调色（与 247,247,255 相配的深紫灰） ========== */
+  --theme-accent: #4a4563;
+  --theme-accent-2: #5a5475;
+  --theme-accent-rgb: 74, 69, 99;
+
+  /* ========== 边框用 RGB，便于 rgba(var(), alpha) ========== */
+  --theme-border-rgb: 110, 105, 140;
+  --theme-border: rgba(var(--theme-border-rgb), 0.1);
+  --theme-border-2: rgba(var(--theme-border-rgb), 0.2);
+  --theme-border-3: rgba(var(--theme-border-rgb), 0.25);
+  --theme-border-4: rgba(var(--theme-border-rgb), 0.3);
+  --theme-border-5: rgba(var(--theme-border-rgb), 0.35);
+  --theme-border-6: rgba(var(--theme-border-rgb), 0.4);
+  --theme-border-7: rgba(var(--theme-border-rgb), 0.5);
+
+  /* ========== 阴影 / 背景半透明 ========== */
+  --theme-shadow-rgb: 74, 69, 99;
+  --theme-shadow: rgba(var(--theme-shadow-rgb), 0.1);
+  --theme-shadow-2: rgba(var(--theme-shadow-rgb), 0.15);
+  --theme-shadow-3: rgba(var(--theme-shadow-rgb), 0.2);
+  --theme-shadow-4: rgba(var(--theme-shadow-rgb), 0.25);
+  --theme-bg-overlay: rgba(var(--theme-border-rgb), 0.04);
+  --theme-bg-overlay-2: rgba(var(--theme-border-rgb), 0.06);
+  --theme-bg-overlay-3: rgba(var(--theme-border-rgb), 0.08);
+  --theme-bg-overlay-4: rgba(var(--theme-border-rgb), 0.12);
+  --theme-bg-overlay-5: rgba(var(--theme-border-rgb), 0.15);
+
+  /* ========== 文字（亮色主题用深色字，保证可读） ========== */
+  --theme-text: #0d0d0d;
+  --theme-text-soft: rgba(10, 10, 10, 0.95);
+  --theme-text-muted: rgba(10, 10, 10, 0.88);
+  --theme-text-light: rgba(10, 10, 10, 0.78);
+  --theme-text-lighter: rgba(10, 10, 10, 0.65);
+  --theme-text-faint: rgba(10, 10, 10, 0.55);
+  /* 深色背景上的浅色文字（如步骤圆圈内） */
+  --theme-text-on-dark: #ffffff;
+
+  /* ========== 常用背景/按钮色） ========== */
+  --theme-gradient-bg: var(--theme-bg);
+  --theme-gradient-sidebar: var(--theme-bg-3);
+  --theme-gradient-card: var(--theme-bg);
+  --theme-gradient-button: var(--theme-bg-5);
+  --theme-gradient-welcome: var(--theme-bg-8);
+  --theme-gradient-accent: var(--theme-accent);
+
+  /* ========== 主按钮色（与主色 247,247,255 相配的深紫纯色） ========== */
+  --theme-btn-primary: rgb(88, 72, 148);
+  --theme-btn-primary-hover: rgb(72, 58, 128);
+  --theme-btn-primary-text: #ffffff;
+
+  /* ========== 危险操作（深红，如删除） ========== */
+  --theme-btn-danger: rgb(180, 38, 42);
+  --theme-btn-danger-hover: rgb(155, 28, 32);
+  --theme-btn-danger-text: #ffffff;
+
+  /* ========== 状态标签：成功态不用绿色，用与主题相配的蓝紫 ========== */
+  --theme-status-success: rgb(72, 100, 160);
+  --theme-status-success-text: #ffffff;
+
+  /* ========== 统计图标：运行中/任务数（橙黄，Home 与 Admin 一致） ========== */
+  --theme-stat-tasks: #e6a23c;
+}

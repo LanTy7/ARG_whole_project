@@ -1,8 +1,8 @@
 <template>
-  <div class="login-container">
+  <div class="login-container" :style="{ backgroundImage: `url(${bgUrl})` }">
     <div class="login-box">
       <div class="login-header">
-        <div class="logo">🧬</div>
+        <img :src="logoUrl" alt="Logo" class="logo" />
         <h1>{{ $t('login.title') }}</h1>
         <p>{{ $t('login.subtitle') }}</p>
       </div>
@@ -178,6 +178,8 @@ import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user';
 import { login, sendLoginCode, register, sendVerificationCode } from '@/api/auth';
 import LangSwitch from '@/components/LangSwitch.vue';
+import logoUrl from '@/assets/arg.svg';
+import bgUrl from '@/assets/background.png';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -433,20 +435,26 @@ const handleRegister = (event) => {
 </script>
 
 <style scoped>
+/* 背景与侧边栏一致 */
 .login-container {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--theme-gradient-sidebar);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
+/* 登录表单用主题主色，与背景区分 */
 .login-box {
   width: 450px;
   padding: 40px;
-  background: white;
+  background: var(--theme-bg);
+  border: 1px solid var(--theme-border-2);
   border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 12px 40px var(--theme-shadow-3), 0 0 0 1px var(--theme-border);
   position: relative;
 }
 
@@ -456,14 +464,16 @@ const handleRegister = (event) => {
 }
 
 .logo {
-  font-size: 60px;
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
   margin-bottom: 10px;
 }
 
 .login-header h1 {
   margin: 0 0 8px 0;
   font-size: 28px;
-  color: #333;
+  color: var(--theme-text);
 }
 
 .login-header p {

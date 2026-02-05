@@ -393,15 +393,15 @@ onUnmounted(() => {
 }
 
 :deep(.el-card) {
-  background: linear-gradient(135deg, rgba(10, 25, 47, 0.8) 0%, rgba(17, 34, 64, 0.8) 100%);
-  border: 1px solid rgba(0, 255, 255, 0.2);
-  box-shadow: 0 4px 16px rgba(0, 255, 255, 0.1);
+  background: var(--theme-gradient-card);
+  border: 1px solid var(--theme-border-2);
+  box-shadow: 0 4px 16px var(--theme-shadow);
 }
 
 :deep(.el-card__header) {
-  background: rgba(0, 255, 255, 0.05);
-  border-bottom: 1px solid rgba(0, 255, 255, 0.2);
-  color: #00ffff;
+  background: var(--theme-bg-overlay-2);
+  border-bottom: 1px solid var(--theme-border-3);
+  color: var(--theme-accent);
 }
 
 .card-header {
@@ -419,13 +419,13 @@ onUnmounted(() => {
 
 :deep(.el-table) {
   background: transparent;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--theme-text);
 }
 
 :deep(.el-table th.el-table__cell) {
-  background: rgba(0, 255, 255, 0.1);
-  color: #00ffff;
-  border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+  background: var(--theme-bg-overlay-4);
+  color: var(--theme-accent);
+  border-bottom: 1px solid var(--theme-border-4);
 }
 
 :deep(.el-table tr) {
@@ -433,15 +433,15 @@ onUnmounted(() => {
 }
 
 :deep(.el-table td.el-table__cell) {
-  border-bottom: 1px solid rgba(0, 255, 255, 0.1);
+  border-bottom: 1px solid var(--theme-border);
 }
 
 :deep(.el-table__body tr:hover > td) {
-  background: rgba(0, 255, 255, 0.05) !important;
+  background: var(--theme-bg-overlay-2) !important;
 }
 
 :deep(.el-table__expanded-cell) {
-  background: rgba(0, 255, 255, 0.03);
+  background: var(--theme-bg-overlay);
 }
 
 .expand-content {
@@ -453,13 +453,13 @@ onUnmounted(() => {
 }
 
 :deep(.el-descriptions__label) {
-  color: #00ffff;
-  background: rgba(0, 255, 255, 0.1);
+  color: var(--theme-accent);
+  background: var(--theme-bg-overlay-4);
 }
 
 :deep(.el-descriptions__content) {
-  color: rgba(255, 255, 255, 0.9);
-  background: rgba(0, 255, 255, 0.03);
+  color: var(--theme-accent);
+  background: var(--theme-bg-overlay);
 }
 
 .pagination {
@@ -470,26 +470,89 @@ onUnmounted(() => {
 
 :deep(.el-pagination) {
   --el-pagination-bg-color: transparent;
-  --el-pagination-text-color: rgba(255, 255, 255, 0.8);
-  --el-pagination-button-bg-color: rgba(0, 255, 255, 0.1);
-  --el-pagination-hover-color: #00ffff;
+  --el-pagination-text-color: var(--theme-accent);
+  --el-pagination-button-bg-color: rgba(var(--theme-primary), 0.8);
+  --el-pagination-hover-color: var(--theme-accent);
 }
 
 :deep(.el-pagination .el-pager li) {
-  background: rgba(0, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(0, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--theme-accent);
+  border: 1px solid var(--theme-border-3);
 }
 
 :deep(.el-pagination .el-pager li.is-active) {
-  background: rgba(0, 255, 255, 0.3);
-  color: #00ffff;
-  border-color: rgba(0, 255, 255, 0.5);
+  background: var(--theme-bg-5);
+  color: var(--theme-accent);
+  border-color: var(--theme-border-7);
 }
 
 :deep(.el-pagination .el-pager li:hover) {
-  color: #00ffff;
-  background: rgba(0, 255, 255, 0.15);
+  color: var(--theme-accent);
+  background: rgba(var(--theme-primary), 0.9);
+}
+
+/* 状态标签：成功/失败等统一用实心，成功用紫、失败用深红 */
+:deep(.el-tag--success) {
+  background: var(--theme-status-success) !important;
+  border-color: var(--theme-status-success) !important;
+  color: var(--theme-status-success-text) !important;
+}
+:deep(.el-tag--danger) {
+  background: var(--theme-btn-danger) !important;
+  border-color: var(--theme-btn-danger) !important;
+  color: var(--theme-btn-danger-text) !important;
+}
+:deep(.el-tag--warning) {
+  background: var(--theme-accent-2) !important;
+  border-color: var(--theme-accent-2) !important;
+  color: #fff !important;
+}
+:deep(.el-tag--info) {
+  background: var(--theme-accent) !important;
+  border-color: var(--theme-accent) !important;
+  color: #fff !important;
+}
+
+/* 操作按钮：主按钮与危险按钮用 theme 色 */
+:deep(.el-button--primary) {
+  background: var(--theme-btn-primary) !important;
+  border-color: var(--theme-btn-primary) !important;
+  color: var(--theme-btn-primary-text) !important;
+}
+:deep(.el-button--primary:hover),
+:deep(.el-button--primary:focus) {
+  background: var(--theme-btn-primary-hover) !important;
+  border-color: var(--theme-btn-primary-hover) !important;
+  color: var(--theme-btn-primary-text) !important;
+}
+:deep(.el-button--primary.is-link) {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: var(--theme-btn-primary) !important;
+}
+:deep(.el-button--primary.is-link:hover),
+:deep(.el-button--primary.is-link:focus) {
+  color: var(--theme-btn-primary-hover) !important;
+}
+:deep(.el-button--danger) {
+  color: var(--theme-btn-danger) !important;
+  border-color: var(--theme-btn-danger) !important;
+}
+:deep(.el-button--danger:hover),
+:deep(.el-button--danger:focus) {
+  color: var(--theme-btn-danger-hover) !important;
+  border-color: var(--theme-btn-danger-hover) !important;
+}
+:deep(.el-button--danger:not(.is-link)) {
+  background: var(--theme-btn-danger) !important;
+  color: var(--theme-btn-danger-text) !important;
+}
+:deep(.el-button--danger:not(.is-link):hover),
+:deep(.el-button--danger:not(.is-link):focus) {
+  background: var(--theme-btn-danger-hover) !important;
+  border-color: var(--theme-btn-danger-hover) !important;
+  color: var(--theme-btn-danger-text) !important;
 }
 
 /* 状态和进度样式 */
@@ -516,14 +579,14 @@ onUnmounted(() => {
 }
 
 .stage-progress :deep(.el-steps--simple) {
-  background: rgba(0, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.6);
   border-radius: 4px;
   padding: 4px 8px;
 }
 
 .stage-progress :deep(.el-step__title) {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--theme-text-light);
 }
 
 .stage-progress :deep(.el-step__title.is-process) {

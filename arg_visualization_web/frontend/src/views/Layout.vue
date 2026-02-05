@@ -4,7 +4,7 @@
     <aside class="sidebar">
       <div class="sidebar-header">
         <div class="header-top">
-          <div class="logo">🧬</div>
+          <img :src="logoUrl" alt="Logo" class="logo" />
           <LangSwitch class="lang-switch" />
         </div>
         <div class="title">
@@ -75,7 +75,7 @@
     </aside>
 
     <!-- 右侧内容区 -->
-    <main class="main-content">
+    <main class="main-content" :style="{ backgroundImage: mainBgUrl ? `url(${mainBgUrl})` : undefined }">
       <router-view />
     </main>
   </div>
@@ -84,6 +84,8 @@
 <script setup>
 import { computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import logoUrl from '@/assets/arg.svg'
+import mainBgUrl from '@/assets/main-background.png'
 import { ElMessageBox } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 
@@ -152,24 +154,42 @@ onMounted(async () => {
 .layout-container {
   display: flex;
   height: 100vh;
-  background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
+  background: var(--theme-gradient-bg);
 }
 
 .sidebar {
   width: 260px;
-  background: linear-gradient(180deg, #16213e 0%, #0f3460 100%);
-  border-right: 1px solid rgba(0, 255, 255, 0.1);
+  background: linear-gradient(180deg, var(--theme-bg-3) 0%, var(--theme-bg-2) 35%, var(--theme-bg-5) 100%);
+  border-right: 1px solid var(--theme-border-2);
   display: flex;
   flex-direction: column;
-  box-shadow: 2px 0 16px rgba(0, 255, 255, 0.1);
+  box-shadow: 2px 0 16px var(--theme-shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 方案2：同色系竖向渐变 + 轻微条纹纹理 */
+.sidebar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    105deg,
+    transparent,
+    transparent 12px,
+    var(--theme-bg-overlay-4) 12px,
+    var(--theme-bg-overlay-4) 13.5px
+  );
+  opacity: 0.7;
+  pointer-events: none;
 }
 
 .sidebar-header {
   padding: 16px 20px;
   display: flex;
   flex-direction: column;
-  border-bottom: 1px solid rgba(0, 255, 255, 0.2);
-  background: linear-gradient(135deg, #0a192f 0%, #112240 100%);
+  border-bottom: 1px solid var(--theme-border-3);
+  background: var(--theme-bg-1);
   position: relative;
   overflow: hidden;
 }
@@ -188,31 +208,11 @@ onMounted(async () => {
   z-index: 1;
 }
 
-.sidebar-header::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: repeating-linear-gradient(
-    45deg,
-    transparent,
-    transparent 10px,
-    rgba(0, 255, 255, 0.03) 10px,
-    rgba(0, 255, 255, 0.03) 20px
-  );
-  animation: slide 20s linear infinite;
-}
-
-@keyframes slide {
-  0% { transform: translate(0, 0); }
-  100% { transform: translate(50px, 50px); }
-}
-
 .logo {
-  font-size: 36px;
-  filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.5));
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px rgba(var(--theme-shadow-rgb), 0.35));
   position: relative;
   z-index: 1;
 }
@@ -226,17 +226,17 @@ onMounted(async () => {
 .title h2 {
   margin: 0;
   font-size: 17px;
-  color: #00ffff;
+  color: var(--theme-text);
   font-weight: 600;
-  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+  text-shadow: 0 1px 2px var(--theme-shadow-3);
   white-space: nowrap;
 }
 
 .title p {
   margin: 4px 0 0 0;
   font-size: 11px;
-  color: rgba(0, 255, 255, 0.7);
-  text-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
+  color: var(--theme-text-muted);
+  text-shadow: none;
 }
 
 .sidebar-menu {
@@ -256,34 +256,34 @@ onMounted(async () => {
   height: 48px;
   line-height: 48px;
   transition: all 0.3s;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--theme-text-soft);
   border: 1px solid transparent;
 }
 
 :deep(.el-menu-item:hover) {
-  background: rgba(0, 255, 255, 0.1);
-  color: #00ffff;
-  border-color: rgba(0, 255, 255, 0.3);
+  background: var(--theme-bg-overlay-4);
+  color: var(--theme-accent);
+  border-color: var(--theme-border-4);
   transform: translateX(4px);
-  box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+  box-shadow: 0 2px 8px var(--theme-shadow-2);
 }
 
 :deep(.el-menu-item.is-active) {
-  background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(0, 150, 255, 0.2) 100%);
-  color: #00ffff;
-  border-color: rgba(0, 255, 255, 0.5);
-  box-shadow: 0 0 15px rgba(0, 255, 255, 0.3), inset 0 0 10px rgba(0, 255, 255, 0.1);
+  background: linear-gradient(135deg, rgba(var(--theme-primary), 0.9) 0%, rgba(220, 200, 180, 0.95) 100%);
+  color: var(--theme-accent);
+  border-color: var(--theme-border-6);
+  box-shadow: 0 2px 12px var(--theme-shadow-3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 :deep(.el-menu-item.is-active .el-icon) {
-  color: #00ffff;
-  filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.5));
+  color: var(--theme-accent);
+  filter: drop-shadow(0 1px 2px var(--theme-shadow-3));
 }
 
 .sidebar-footer {
   padding: 16px;
-  border-top: 1px solid rgba(0, 255, 255, 0.2);
-  background: linear-gradient(180deg, transparent 0%, rgba(0, 255, 255, 0.05) 100%);
+  border-top: 1px solid var(--theme-border-3);
+  background: linear-gradient(180deg, transparent 0%, var(--theme-bg-overlay-2) 100%);
 }
 
 .auth-button {
@@ -293,30 +293,34 @@ onMounted(async () => {
   font-weight: 600;
   border-radius: 8px;
   transition: all 0.3s;
-  border: 1px solid rgba(0, 255, 255, 0.3);
+  border: 1px solid var(--theme-border-5);
 }
 
 .auth-button.el-button--primary {
-  background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(0, 150, 255, 0.2) 100%);
-  color: #00ffff;
-  border-color: rgba(0, 255, 255, 0.5);
+  background: var(--theme-gradient-card);
+  color: var(--theme-accent);
+  border-color: var(--theme-border-7);
 }
 
 .auth-button.el-button--primary:hover {
-  background: linear-gradient(135deg, rgba(0, 255, 255, 0.3) 0%, rgba(0, 150, 255, 0.3) 100%);
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+  background: var(--theme-gradient-button);
+  box-shadow: 0 4px 16px var(--theme-shadow-4);
   transform: translateY(-2px);
 }
 
 .auth-button.el-button--danger {
-  background: linear-gradient(135deg, rgba(255, 50, 100, 0.2) 0%, rgba(255, 0, 50, 0.2) 100%);
-  color: #ff4466;
-  border-color: rgba(255, 50, 100, 0.5);
+  /* 退出按钮默认：中性、与主色协调，不显红 */
+  background: var(--theme-gradient-card);
+  color: var(--theme-text);
+  border-color: var(--theme-border-5);
 }
 
 .auth-button.el-button--danger:hover {
-  background: linear-gradient(135deg, rgba(255, 50, 100, 0.3) 0%, rgba(255, 0, 50, 0.3) 100%);
-  box-shadow: 0 0 20px rgba(255, 50, 100, 0.4);
+  /* 悬停时才变成明显的红色警示 */
+  background: var(--theme-btn-danger);
+  color: var(--theme-btn-danger-text);
+  border-color: var(--theme-btn-danger-hover);
+  box-shadow: 0 0 18px rgba(180, 38, 42, 0.45);
   transform: translateY(-2px);
 }
 
@@ -324,6 +328,9 @@ onMounted(async () => {
   flex: 1;
   overflow-y: auto;
   padding: 24px;
-  background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
+  background: var(--theme-gradient-bg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 </style>

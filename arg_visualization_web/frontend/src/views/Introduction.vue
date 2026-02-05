@@ -548,12 +548,12 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
   align-items: center;
   justify-content: space-between;
   padding: 60px 40px;
-  background: linear-gradient(135deg, rgba(0, 40, 80, 0.9) 0%, rgba(0, 20, 40, 0.95) 100%);
+  background: linear-gradient(135deg, var(--theme-bg) 0%, var(--theme-bg-2) 40%, var(--theme-bg-3) 100%);
   border-radius: 20px;
   margin-bottom: 50px;
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(0, 255, 255, 0.2);
+  border: 1px solid var(--theme-border-2);
 }
 
 .hero-content {
@@ -565,7 +565,7 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
 .hero-title {
   font-size: 36px;
   font-weight: 700;
-  color: #fff;
+  color: var(--theme-text);
   margin: 0 0 16px 0;
   display: flex;
   align-items: center;
@@ -573,20 +573,20 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
 }
 
 .title-decoration {
-  color: #00ffff;
+  color: var(--theme-text);
   font-size: 24px;
 }
 
 .hero-subtitle {
   font-size: 20px;
-  color: #00ffff;
+  color: var(--theme-text);
   margin: 0 0 20px 0;
   font-weight: 500;
 }
 
 .hero-description {
   font-size: 16px;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--theme-text-muted);
   line-height: 1.8;
   max-width: 600px;
   margin: 0 0 32px 0;
@@ -605,12 +605,12 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
 .stat-number {
   font-size: 32px;
   font-weight: 700;
-  color: #00ffff;
+  color: var(--theme-text);
 }
 
 .stat-label {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--theme-text-muted);
 }
 
 .hero-decoration {
@@ -628,7 +628,7 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
 .dna-strand {
   width: 8px;
   height: 120px;
-  background: linear-gradient(to top, transparent, rgba(0, 255, 255, 0.3), transparent);
+  background: linear-gradient(to top, transparent, rgba(120, 90, 70, 0.4), transparent);
   animation: dnaWave 1.5s ease-in-out infinite;
 }
 
@@ -649,10 +649,10 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
 }
 
 .section-block {
-  background: linear-gradient(135deg, rgba(10, 25, 47, 0.95) 0%, rgba(17, 34, 64, 0.95) 100%);
+  background: linear-gradient(135deg, var(--theme-bg) 0%, var(--theme-bg-2) 60%, var(--theme-bg-3) 100%);
   border-radius: 16px;
   padding: 40px;
-  border: 1px solid rgba(0, 255, 255, 0.15);
+  border: 1px solid var(--theme-border-2);
 }
 
 .section-header {
@@ -661,26 +661,26 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
   gap: 20px;
   margin-bottom: 40px;
   padding-bottom: 20px;
-  border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(120, 90, 70, 0.25);
 }
 
 .section-number {
   font-size: 48px;
   font-weight: 800;
-  color: rgba(0, 255, 255, 0.2);
+  color: var(--theme-text-faint);
   line-height: 1;
 }
 
 .section-title {
   font-size: 28px;
   font-weight: 600;
-  color: #fff;
+  color: var(--theme-text);
   margin: 0 0 8px 0;
 }
 
 .section-subtitle {
   font-size: 14px;
-  color: rgba(0, 255, 255, 0.7);
+  color: var(--theme-text-muted);
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 2px;
@@ -691,9 +691,9 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
   display: flex;
   gap: 24px;
   padding: 30px;
-  background: linear-gradient(135deg, rgba(0, 255, 255, 0.08) 0%, rgba(0, 100, 200, 0.08) 100%);
+  background: rgba(255, 255, 255, 0.6);
   border-radius: 12px;
-  border: 1px solid rgba(0, 255, 255, 0.2);
+  border: 1px solid rgba(120, 90, 70, 0.2);
   margin-bottom: 30px;
 }
 
@@ -711,13 +711,13 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
 
 .definition-content h3 {
   font-size: 20px;
-  color: #fff;
+  color: var(--theme-text);
   margin: 0 0 12px 0;
 }
 
 .definition-content p {
   font-size: 15px;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--theme-text-muted);
   line-height: 1.8;
   margin: 0;
 }
@@ -729,17 +729,17 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
 
 .mechanism-card {
   padding: 24px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.5);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(120, 90, 70, 0.15);
   text-align: center;
   height: 100%;
   transition: all 0.3s;
 }
 
 .mechanism-card:hover {
-  background: rgba(0, 255, 255, 0.05);
-  border-color: rgba(0, 255, 255, 0.3);
+  background: rgba(240, 220, 202, 0.7);
+  border-color: rgba(120, 90, 70, 0.3);
   transform: translateY(-4px);
 }
 
@@ -764,13 +764,13 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
 
 .mechanism-card h4 {
   font-size: 18px;
-  color: #fff;
+  color: var(--theme-text);
   margin: 0 0 12px 0;
 }
 
 .mechanism-card p {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--theme-text-muted);
   margin: 0;
   line-height: 1.6;
 }
@@ -785,50 +785,50 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
   align-items: center;
   gap: 12px;
   font-size: 20px;
-  color: #fff;
+  color: var(--theme-text);
   margin: 0 0 24px 0;
 }
 
 .subsection-title .el-icon {
-  color: #00ffff;
+  color: var(--theme-status-success);
 }
 
 .importance-item {
   padding: 24px;
-  background: rgba(0, 255, 255, 0.03);
+  background: var(--theme-bg-overlay);
   border-radius: 12px;
-  border: 1px solid rgba(0, 255, 255, 0.1);
+  border: 1px solid var(--theme-border-2);
   text-align: center;
   height: 100%;
   transition: all 0.3s;
 }
 
 .importance-item:hover {
-  background: rgba(0, 255, 255, 0.08);
-  border-color: rgba(0, 255, 255, 0.3);
+  background: var(--theme-bg-overlay-3);
+  border-color: var(--theme-border-3);
 }
 
 .importance-icon {
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, #00ffff, #0099ff);
+  background: var(--theme-status-success);
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 16px;
-  color: #0a192f;
+  color: var(--theme-text-on-dark);
 }
 
 .importance-item h4 {
   font-size: 16px;
-  color: #fff;
+  color: var(--theme-text);
   margin: 0 0 8px 0;
 }
 
 .importance-item p {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--theme-text-muted);
   margin: 0;
   line-height: 1.6;
 }
@@ -850,20 +850,20 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
   padding: 12px 16px;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 8px;
-  border: 1px solid rgba(0, 255, 255, 0.15);
+  border: 1px solid rgba(120, 90, 70, 0.2);
   min-width: 140px;
 }
 
 .category-name {
   font-size: 14px;
   font-weight: 600;
-  color: #00ffff;
+  color: var(--theme-text);
   margin-bottom: 4px;
 }
 
 .category-desc {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--theme-text-muted);
 }
 
 /* 工作流程图 */
@@ -885,7 +885,7 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
   width: 60px;
   display: flex;
   align-items: center;
-  color: rgba(0, 255, 255, 0.4);
+  color: var(--theme-text-lighter);
 }
 
 .connector-svg {
@@ -898,13 +898,13 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
   padding: 24px;
   background: rgba(255, 255, 255, 0.03);
   border-radius: 12px;
-  border: 1px solid rgba(0, 255, 255, 0.15);
+  border: 1px solid rgba(120, 90, 70, 0.2);
   text-align: center;
   position: relative;
   min-width: 180px;
 }
 
-.step-1 { border-top: 3px solid #00ffff; }
+.step-1 { border-top: 3px solid var(--theme-status-success); }
 .step-2 { border-top: 3px solid #00ff88; }
 .step-3 { border-top: 3px solid #ffaa00; }
 .step-4 { border-top: 3px solid #ff6b6b; }
@@ -916,30 +916,30 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
   transform: translateX(-50%);
   width: 28px;
   height: 28px;
-  background: linear-gradient(135deg, #00ffff, #0099ff);
+  background: var(--theme-status-success);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 14px;
   font-weight: 700;
-  color: #0a192f;
+  color: var(--theme-text-on-dark);
 }
 
 .step-icon {
   margin: 16px 0;
-  color: #00ffff;
+  color: var(--theme-status-success);
 }
 
 .step-title {
   font-size: 18px;
-  color: #fff;
+  color: var(--theme-text);
   margin: 0 0 8px 0;
 }
 
 .step-desc {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--theme-text-muted);
   margin: 0 0 12px 0;
 }
 
@@ -959,15 +959,15 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
   padding: 30px;
   background: rgba(255, 255, 255, 0.03);
   border-radius: 12px;
-  border: 1px solid rgba(0, 255, 255, 0.15);
+  border: 1px solid rgba(120, 90, 70, 0.2);
   text-align: center;
   height: 100%;
   transition: all 0.3s;
 }
 
 .input-card:hover {
-  background: rgba(0, 255, 255, 0.08);
-  border-color: rgba(0, 255, 255, 0.3);
+  background: rgba(120, 90, 70, 0.12);
+  border-color: rgba(120, 90, 70, 0.35);
   transform: translateY(-4px);
 }
 
@@ -983,21 +983,21 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
 
 .input-icon.text { background: linear-gradient(135deg, #00ff88, #00cc6a); }
 .input-icon.file { background: linear-gradient(135deg, #ffaa00, #ff6b00); }
-.input-icon.mag { background: linear-gradient(135deg, #00ffff, #0099ff); }
+.input-icon.mag { background: var(--theme-status-success); }
 
 .input-icon {
-  color: #0a192f;
+  color: var(--theme-text-on-dark);
 }
 
 .input-card h4 {
   font-size: 18px;
-  color: #fff;
+  color: var(--theme-text);
   margin: 0 0 12px 0;
 }
 
 .input-card p {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--theme-text-muted);
   margin: 0 0 16px 0;
   line-height: 1.6;
 }
@@ -1010,20 +1010,20 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
 .model-intro {
   text-align: center;
   padding: 30px;
-  background: rgba(0, 255, 255, 0.05);
+  background: var(--theme-bg-overlay-2);
   border-radius: 12px;
   margin-bottom: 40px;
 }
 
 .model-intro h3 {
   font-size: 24px;
-  color: #00ffff;
+  color: var(--theme-text);
   margin: 0 0 16px 0;
 }
 
 .model-intro p {
   font-size: 16px;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--theme-text-muted);
   line-height: 1.8;
   margin: 0;
 }
@@ -1048,7 +1048,7 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
 
 .layer-label {
   font-size: 12px;
-  color: rgba(0, 255, 255, 0.7);
+  color: var(--theme-text-muted);
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -1061,7 +1061,7 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
 
 .seq-box, .encoding-box {
   padding: 8px 16px;
-  background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(0, 150, 255, 0.2));
+  background: linear-gradient(135deg, rgba(120, 90, 70, 0.25), rgba(120, 90, 70, 0.2));
   border-radius: 6px;
   font-size: 12px;
   color: #fff;
@@ -1089,7 +1089,7 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
 .lstm-box.backward { background: linear-gradient(135deg, #ff6b6b, #ff4757); }
 
 .lstm-merge {
-  color: #00ffff;
+  color: var(--theme-text);
 }
 
 .classifier-box {
@@ -1114,7 +1114,7 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
 }
 
 .arch-arrow {
-  color: rgba(0, 255, 255, 0.5);
+  color: var(--theme-text-muted);
   font-size: 24px;
   padding: 0 16px;
 }
@@ -1127,7 +1127,7 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
 .feature-card {
   background: rgba(255, 255, 255, 0.03);
   border-radius: 12px;
-  border: 1px solid rgba(0, 255, 255, 0.15);
+  border: 1px solid rgba(120, 90, 70, 0.2);
   overflow: hidden;
   height: 100%;
 }
@@ -1137,8 +1137,8 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
   align-items: center;
   gap: 16px;
   padding: 20px 24px;
-  background: rgba(0, 255, 255, 0.08);
-  border-bottom: 1px solid rgba(0, 255, 255, 0.15);
+  background: rgba(120, 90, 70, 0.12);
+  border-bottom: 1px solid rgba(120, 90, 70, 0.2);
 }
 
 .feature-icon {
@@ -1159,7 +1159,7 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
 
 .feature-header h3 {
   font-size: 20px;
-  color: #fff;
+  color: var(--theme-text);
   margin: 0;
 }
 
@@ -1169,7 +1169,7 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
 
 .feature-desc {
   font-size: 15px;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--theme-text-muted);
   margin: 0 0 20px 0;
 }
 
@@ -1188,12 +1188,12 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
 
 .spec-label {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--theme-text-muted);
 }
 
 .spec-value {
   font-size: 13px;
-  color: #00ffff;
+  color: var(--theme-text);
   font-weight: 500;
 }
 
@@ -1206,15 +1206,15 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
   padding: 30px;
   background: rgba(255, 255, 255, 0.03);
   border-radius: 12px;
-  border: 1px solid rgba(0, 255, 255, 0.15);
+  border: 1px solid rgba(120, 90, 70, 0.2);
   text-align: center;
   height: 100%;
   transition: all 0.3s;
 }
 
 .encoding-card:hover {
-  background: rgba(0, 255, 255, 0.08);
-  border-color: rgba(0, 255, 255, 0.3);
+  background: rgba(120, 90, 70, 0.12);
+  border-color: rgba(120, 90, 70, 0.35);
 }
 
 .encoding-icon {
@@ -1231,13 +1231,13 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
 
 .encoding-card h4 {
   font-size: 18px;
-  color: #fff;
+  color: var(--theme-text);
   margin: 0 0 12px 0;
 }
 
 .encoding-card p {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--theme-text-muted);
   margin: 0;
   line-height: 1.6;
 }
@@ -1256,13 +1256,13 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
   padding: 24px;
   background: rgba(255, 255, 255, 0.03);
   border-radius: 12px;
-  border: 1px solid rgba(0, 255, 255, 0.15);
+  border: 1px solid rgba(120, 90, 70, 0.2);
   text-align: center;
 }
 
 .tech-label {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--theme-text-muted);
   text-transform: uppercase;
   letter-spacing: 2px;
   margin-bottom: 16px;
@@ -1276,7 +1276,7 @@ const infraTech = ['Docker', 'Linux', 'BLAST', 'Prodigal']
 }
 
 .tech-arrow {
-  color: rgba(0, 255, 255, 0.4);
+  color: var(--theme-text-lighter);
   font-size: 24px;
   padding: 16px 0;
 }

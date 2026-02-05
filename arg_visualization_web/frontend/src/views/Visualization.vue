@@ -1,8 +1,8 @@
 <template>
   <div class="visualization-container">
-    <el-card v-if="!taskId || !argData">
+    <el-card v-if="!taskId || !argData" class="empty-state-card">
       <el-empty :description="$t('visualization.emptyDescription')">
-        <el-button type="primary" @click="router.push('/history')">
+        <el-button type="primary" class="empty-state-primary-btn" @click="router.push('/history')">
           {{ $t('home.viewHistory') }}
         </el-button>
       </el-empty>
@@ -1339,9 +1339,29 @@ h3 {
   background: rgba(0, 180, 255, 0.1);
 }
 
-/* 结果可视化初始页面的空状态样式 */
+/* 结果可视化初始页面的空状态样式：外层卡片和内部都用主题背景 */
+.visualization-container .empty-state-card {
+  background: var(--theme-gradient-bg);
+  border-color: var(--theme-border-2);
+  box-shadow: 0 4px 20px var(--theme-shadow);
+}
+.visualization-container .empty-state-card :deep(.el-card__body) {
+  background: var(--theme-gradient-bg);
+  padding: 40px;
+}
 .visualization-container :deep(.el-empty) {
-  background: transparent;
+  background: var(--theme-gradient-bg);
+}
+
+.visualization-container :deep(.empty-state-primary-btn) {
+  background: var(--theme-btn-primary) !important;
+  border-color: var(--theme-btn-primary) !important;
+  color: var(--theme-btn-primary-text) !important;
+}
+.visualization-container :deep(.empty-state-primary-btn:hover) {
+  background: var(--theme-btn-primary-hover) !important;
+  border-color: var(--theme-btn-primary-hover) !important;
+  color: var(--theme-btn-primary-text) !important;
 }
 
 .visualization-container :deep(.el-empty__image svg) {
@@ -1354,12 +1374,12 @@ h3 {
 }
 
 .visualization-container :deep(.el-empty__description) {
-  color: #00d4ff;
+  color: var(--theme-accent);
 }
 
 .visualization-container :deep(.el-empty__image path) {
-  fill: rgba(0, 180, 255, 0.4) !important;
-  stroke: rgba(0, 255, 255, 0.3) !important;
+  fill: rgba(var(--theme-border-rgb), 0.4) !important;
+  stroke: var(--theme-border-5) !important;
 }
 
 /* 可视化图表标签页样式 */

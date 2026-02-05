@@ -1,8 +1,8 @@
 <template>
   <div class="home-container">
     <el-card class="welcome-card">
-      <div class="welcome-content">
-        <div class="icon">🧬</div>
+      <div class="welcome-content" :style="{ backgroundImage: welcomeUrl ? `url(${welcomeUrl})` : undefined }">
+        <img :src="logoUrl" alt="" class="icon" />
         <h1>{{ $t('home.welcome') }}</h1>
         <p class="subtitle">{{ $t('home.subtitle') }}</p>
         
@@ -24,7 +24,7 @@
       <el-col :span="8">
         <el-card class="stat-card">
           <div class="stat-content">
-            <el-icon class="stat-icon" color="#409eff"><Document /></el-icon>
+            <el-icon class="stat-icon" style="color: var(--theme-status-success);"><Document /></el-icon>
             <div class="stat-info">
               <div class="stat-value">{{ stats.totalFiles }}</div>
               <div class="stat-label">{{ $t('home.stats.totalFiles') }}</div>
@@ -36,7 +36,7 @@
       <el-col :span="8">
         <el-card class="stat-card">
           <div class="stat-content">
-            <el-icon class="stat-icon" color="#67c23a"><Checked /></el-icon>
+            <el-icon class="stat-icon" style="color: var(--theme-status-success);"><Checked /></el-icon>
             <div class="stat-info">
               <div class="stat-value">{{ stats.completedTasks }}</div>
               <div class="stat-label">{{ $t('home.stats.completedTasks') }}</div>
@@ -48,7 +48,7 @@
       <el-col :span="8">
         <el-card class="stat-card">
           <div class="stat-content">
-            <el-icon class="stat-icon" color="#e6a23c"><Loading /></el-icon>
+            <el-icon class="stat-icon" style="color: var(--theme-stat-tasks);"><Loading /></el-icon>
             <div class="stat-info">
               <div class="stat-value">{{ stats.runningTasks }}</div>
               <div class="stat-label">{{ $t('home.stats.runningTasks') }}</div>
@@ -64,6 +64,8 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { Upload, Clock, Document, Checked, Loading } from '@element-plus/icons-vue';
+import logoUrl from '@/assets/arg.svg';
+import welcomeUrl from '@/assets/welcome.png';
 import { getUserFiles } from '@/api/file';
 import { getUserTasks } from '@/api/task';
 
@@ -110,9 +112,9 @@ onMounted(() => {
 
 .welcome-card {
   margin-bottom: 24px;
-  background: linear-gradient(135deg, #0a192f 0%, #112240 100%);
-  border: 1px solid rgba(0, 255, 255, 0.2);
-  box-shadow: 0 8px 32px rgba(0, 255, 255, 0.2);
+  background: var(--theme-gradient-welcome);
+  border: 1px solid var(--theme-border-2);
+  box-shadow: 0 8px 32px var(--theme-shadow-2);
 }
 
 :deep(.welcome-card .el-card__body) {
@@ -122,7 +124,10 @@ onMounted(() => {
 .welcome-content {
   text-align: center;
   padding: 80px 40px;
-  background: linear-gradient(135deg, rgba(10, 25, 47, 0.95) 0%, rgba(17, 34, 64, 0.95) 100%);
+  background: var(--theme-gradient-card);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   position: relative;
   overflow: hidden;
 }
@@ -134,8 +139,8 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
-              radial-gradient(circle at 80% 80%, rgba(0, 150, 255, 0.1) 0%, transparent 50%);
+  background: radial-gradient(circle at 20% 50%, var(--theme-bg-overlay-2) 0%, transparent 50%),
+              radial-gradient(circle at 80% 80%, var(--theme-bg-overlay-2) 0%, transparent 50%);
   pointer-events: none;
   z-index: 0;
 }
@@ -151,8 +156,8 @@ onMounted(() => {
     45deg,
     transparent,
     transparent 10px,
-    rgba(0, 255, 255, 0.03) 10px,
-    rgba(0, 255, 255, 0.03) 20px
+    var(--theme-bg-overlay) 10px,
+    var(--theme-bg-overlay) 20px
   );
   animation: slide 20s linear infinite;
 }
@@ -163,9 +168,11 @@ onMounted(() => {
 }
 
 .icon {
-  font-size: 120px;
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
   margin-bottom: 32px;
-  filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.8));
+  filter: drop-shadow(0 2px 12px var(--theme-shadow-4));
   animation: float 3s ease-in-out infinite, pulse 2s ease-in-out infinite;
   position: relative;
   z-index: 1;
@@ -178,34 +185,32 @@ onMounted(() => {
 }
 
 @keyframes pulse {
-  0%, 100% { filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.8)); }
-  50% { filter: drop-shadow(0 0 30px rgba(0, 255, 255, 1)); }
+  0%, 100% { filter: drop-shadow(0 2px 12px var(--theme-shadow-4)); }
+  50% { filter: drop-shadow(0 4px 20px rgba(var(--theme-shadow-rgb), 0.35)); }
 }
 
 .welcome-content h1 {
-  font-size: 48px;
+  font-size: 42px;
   margin: 0 0 20px 0;
-  color: #00ffff;
-  font-weight: 700;
-  text-shadow: 0 0 25px rgba(0, 255, 255, 0.6), 0 0 50px rgba(0, 255, 255, 0.3);
+  color: #1a2744;
+  font-weight: 600;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 8px rgba(255, 255, 255, 0.6), 0 1px 3px rgba(0, 0, 0, 0.15);
   position: relative;
   z-index: 1;
-  letter-spacing: 2px;
-  background: linear-gradient(135deg, #00ffff 0%, #00aaff 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
-.subtitle {
-  font-size: 20px;
-  color: rgba(0, 255, 255, 0.9);
+.welcome-content .subtitle {
+  font-size: 18px;
+  color: rgba(26, 39, 68, 0.85);
   margin: 0 0 50px 0;
-  text-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
   position: relative;
   z-index: 1;
-  font-weight: 300;
-  letter-spacing: 1px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-shadow: 0 1px 4px rgba(255, 255, 255, 0.5);
 }
 
 .actions {
@@ -246,32 +251,32 @@ onMounted(() => {
 }
 
 .actions :deep(.el-button--primary) {
-  background: linear-gradient(135deg, rgba(0, 255, 255, 0.3) 0%, rgba(0, 150, 255, 0.3) 100%);
-  border: 1px solid rgba(0, 255, 255, 0.5);
-  color: #00ffff;
-  box-shadow: 0 4px 16px rgba(0, 255, 255, 0.3);
+  background: var(--theme-gradient-button);
+  border: 1px solid var(--theme-border-7);
+  color: var(--theme-accent);
+  box-shadow: 0 4px 16px var(--theme-shadow-3);
 }
 
 .actions :deep(.el-button--primary:hover) {
-  background: linear-gradient(135deg, rgba(0, 255, 255, 0.4) 0%, rgba(0, 150, 255, 0.4) 100%);
+  background: var(--theme-gradient-sidebar);
   transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(0, 255, 255, 0.5), 0 0 30px rgba(0, 255, 255, 0.3);
+  box-shadow: 0 6px 24px var(--theme-shadow-4);
 }
 
 .actions :deep(.el-button--default) {
-  background: linear-gradient(135deg, rgba(0, 255, 255, 0.15) 0%, rgba(0, 180, 255, 0.15) 100%);
+  background: var(--theme-gradient-card);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(0, 255, 255, 0.4);
-  color: rgba(0, 255, 255, 0.9);
-  box-shadow: 0 2px 12px rgba(0, 255, 255, 0.15);
+  border: 1px solid var(--theme-border-6);
+  color: var(--theme-accent);
+  box-shadow: 0 2px 12px var(--theme-shadow-2);
 }
 
 .actions :deep(.el-button--default:hover) {
-  background: linear-gradient(135deg, rgba(0, 255, 255, 0.25) 0%, rgba(0, 180, 255, 0.25) 100%);
-  border-color: rgba(0, 255, 255, 0.6);
-  color: #00ffff;
+  background: var(--theme-gradient-sidebar);
+  border-color: var(--theme-border-7);
+  color: var(--theme-accent);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 255, 255, 0.3), 0 0 20px rgba(0, 255, 255, 0.2);
+  box-shadow: 0 6px 20px var(--theme-shadow-3);
 }
 
 .stats-row {
@@ -280,11 +285,11 @@ onMounted(() => {
 
 .stat-card {
   cursor: default;
-  border: 1px solid rgba(0, 255, 255, 0.25);
+  border: 1px solid var(--theme-border-2);
   border-radius: 16px;
-  box-shadow: 0 6px 20px rgba(0, 255, 255, 0.12), inset 0 0 20px rgba(0, 255, 255, 0.05);
+  box-shadow: 0 6px 20px var(--theme-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.4);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  background: linear-gradient(135deg, rgba(10, 25, 47, 0.85) 0%, rgba(17, 34, 64, 0.85) 100%);
+  background: var(--theme-gradient-card);
   backdrop-filter: blur(10px);
   position: relative;
   overflow: hidden;
@@ -297,7 +302,7 @@ onMounted(() => {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+  background: linear-gradient(90deg, transparent, var(--theme-bg-overlay-3), transparent);
   transition: left 0.6s;
 }
 
@@ -311,8 +316,8 @@ onMounted(() => {
 
 .stat-card:hover {
   transform: translateY(-8px) scale(1.02);
-  border-color: rgba(0, 255, 255, 0.5);
-  box-shadow: 0 12px 32px rgba(0, 255, 255, 0.25), 0 0 40px rgba(0, 255, 255, 0.15), inset 0 0 30px rgba(0, 255, 255, 0.08);
+  border-color: var(--theme-border-5);
+  box-shadow: 0 12px 32px var(--theme-shadow-3), inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 .stat-content {
@@ -342,12 +347,12 @@ onMounted(() => {
 .stat-value {
   font-size: 42px;
   font-weight: 700;
-  color: #00ffff;
-  text-shadow: 0 0 20px rgba(0, 255, 255, 0.6), 0 0 40px rgba(0, 255, 255, 0.3);
+  color: var(--theme-accent);
+  text-shadow: 0 1px 2px var(--theme-shadow-3);
   line-height: 1;
   margin-bottom: 10px;
   transition: all 0.4s;
-  background: linear-gradient(135deg, #00ffff 0%, #00aaff 100%);
+  background: var(--theme-gradient-accent);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -359,7 +364,7 @@ onMounted(() => {
 
 .stat-label {
   font-size: 15px;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--theme-text-muted);
   font-weight: 500;
   letter-spacing: 0.5px;
 }

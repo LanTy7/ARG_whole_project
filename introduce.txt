@@ -1,0 +1,17 @@
+ARG系统架构与功能综述
+
+系统架构设计
+本系统采用了清晰的全栈式模块化设计，确保了前后端分离与高性能计算的完美结合。在后端架构上，系统严格遵循标准的“三层架构”规范，即通过 Controller 层处理 RESTful API 请求与参数校验，Service 层负责复杂的业务逻辑编排与计算任务调度，以及 Mapper 层通过 MyBatis Plus 实现对 MySQL 数据库的高效访问。为了支撑繁重的生物信息计算，系统还引入了独立的计算引擎模块，通过 Docker 容器化技术隔离了基因预测模型与比对工具，使其能够与 Web 业务逻辑解耦运行。前端部分则作为独立的展现层，基于 Vue 3 框架和 Element Plus 实现了数据的动态渲染与交互。这种设计既保证了后端逻辑的清晰，又通过容器化技术解决了生物计算环境配置复杂的痛点。
+
+核心功能
+系统的核心运行逻辑遵循严格的数据处理流水线。当用户通过前端界面上传核酸序列或 MAG 文件时，后端首先将文件存储至服务器本地文件系统并记录任务状态。随后，系统根据任务类型调用 Prodigal 容器进行基因预测，将核酸序列翻译为蛋白质序列。这些蛋白质序列被送往预训练的 BiLSTM 深度学习模型容器中，先后进行二分类识别与多分类识别，精确判断序列是否具有抗性并归纳其所属的 14 种抗性类别。模型输出的原始数据由后端解析程序进行清洗与结构化，存储至数据库后，由前端通过 Axios 请求获取并动态渲染。这种从上传、处理到可视化的全流程闭环，极大降低了非生物信息专业用户使用深度学习模型进行 ARG 研究的门槛。
+
+---
+
+Overview of ARG System Architecture and Functions
+
+System Architecture Design
+The system adopts a clear full-stack modular design, ensuring the perfect integration of frontend-backend separation and high-performance computing. For the backend architecture, the system strictly follows the standard "three-layer architecture" specification: the Controller layer handles RESTful API requests and parameter validation, the Service layer manages complex business logic orchestration and computational task scheduling, and the Mapper layer achieves efficient access to the MySQL database via MyBatis Plus. To support heavy bioinformatics computations, an independent computing engine module is introduced, using Docker containerization technology to isolate gene prediction models and alignment tools, allowing them to run decoupled from web business logic. The frontend acts as an independent presentation layer, based on the Vue 3 framework and Element Plus to achieve dynamic data rendering and interaction. This design not only ensures clear backend logic but also solves the pain point of complex bioinformatics environment configuration through containerization.
+
+Core Functions
+The system's core operational logic follows a rigorous data processing pipeline. When users upload nucleotide sequences or MAG files through the frontend interface, the backend first stores the files in the server's local file system and records the task status. Subsequently, the system invokes the Prodigal container based on the task type for gene prediction, translating nucleotide sequences into protein sequences. These protein sequences are then sent to pre-trained BiLSTM deep learning model containers for binary identification and multi-class classification, precisely determining if a sequence is resistant and categorizing it into one of 14 resistance classes. The raw data output by the models is cleaned and structured by the backend parsing program, stored in the database, and then fetched and dynamically rendered by the frontend via Axios requests. This closed-loop process from upload and processing to visualization significantly lowers the barrier for non-bioinformatics professionals to use deep learning models for ARG research.

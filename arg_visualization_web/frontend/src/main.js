@@ -4,6 +4,7 @@ import router from './router';
 import pinia from './stores';
 import ElementPlus from 'element-plus';
 import 'element-plus/dist/index.css';
+import './assets/theme.css';
 import * as ElementPlusIconsVue from '@element-plus/icons-vue';
 import i18n from './locales';
 

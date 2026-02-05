@@ -823,15 +823,15 @@ onMounted(() => {
 }
 
 :deep(.el-card) {
-  background: linear-gradient(135deg, rgba(10, 25, 47, 0.8) 0%, rgba(17, 34, 64, 0.8) 100%);
-  border: 1px solid rgba(0, 255, 255, 0.2);
-  box-shadow: 0 4px 16px rgba(0, 255, 255, 0.1);
+  background: var(--theme-gradient-card);
+  border: 1px solid var(--theme-border-2);
+  box-shadow: 0 4px 16px var(--theme-shadow);
 }
 
 :deep(.el-card__header) {
-  background: rgba(0, 255, 255, 0.05);
-  border-bottom: 1px solid rgba(0, 255, 255, 0.2);
-  color: #00ffff;
+  background: var(--theme-bg-overlay-2);
+  border-bottom: 1px solid var(--theme-border-3);
+  color: var(--theme-accent);
 }
 
 .card-header {
@@ -850,80 +850,130 @@ onMounted(() => {
 }
 
 :deep(.el-form-item__label) {
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--theme-text-soft);
 }
 
 :deep(.el-input__wrapper) {
-  background: rgba(0, 255, 255, 0.05);
-  border: 1px solid rgba(0, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid var(--theme-border-3);
   box-shadow: none;
 }
 
 :deep(.el-input__wrapper:hover),
 :deep(.el-input__wrapper.is-focus) {
-  border-color: rgba(0, 255, 255, 0.5);
-  box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+  border-color: var(--theme-border-7);
+  box-shadow: 0 0 0 1px rgba(120, 90, 70, 0.15);
 }
 
 :deep(.el-input__inner) {
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--theme-accent);
 }
 
 :deep(.el-select__wrapper) {
-  background: rgba(0, 255, 255, 0.05);
-  border: 1px solid rgba(0, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid var(--theme-border-3);
   box-shadow: none;
 }
 
 :deep(.el-select__wrapper:hover),
 :deep(.el-select__wrapper.is-focused) {
-  border-color: rgba(0, 255, 255, 0.5);
-  box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+  border-color: var(--theme-border-7);
+  box-shadow: 0 0 0 1px rgba(120, 90, 70, 0.15);
 }
 
 :deep(.el-select__placeholder) {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(var(--theme-accent-rgb), 0.5);
 }
 
 :deep(.el-select__selected-item) {
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--theme-accent);
 }
 
 :deep(.el-button--default) {
-  background: rgba(0, 255, 255, 0.1);
-  border: 1px solid rgba(0, 255, 255, 0.3);
-  color: rgba(255, 255, 255, 0.8);
+  background: rgba(240, 220, 202, 0.9);
+  border: 1px solid var(--theme-border-5);
+  color: var(--theme-accent);
 }
 
 :deep(.el-button--default:hover) {
-  background: rgba(0, 255, 255, 0.2);
-  border-color: rgba(0, 255, 255, 0.5);
-  color: #00ffff;
+  background: rgb(230, 210, 190);
+  border-color: var(--theme-border-7);
+  color: var(--theme-accent);
+}
+
+/* 主按钮统一用 theme 按钮色 */
+:deep(.el-button--primary) {
+  background: var(--theme-btn-primary) !important;
+  border-color: var(--theme-btn-primary) !important;
+  color: var(--theme-btn-primary-text) !important;
+}
+:deep(.el-button--primary:hover),
+:deep(.el-button--primary:focus) {
+  background: var(--theme-btn-primary-hover) !important;
+  border-color: var(--theme-btn-primary-hover) !important;
+  color: var(--theme-btn-primary-text) !important;
+}
+:deep(.el-button--primary.is-link) {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: var(--theme-btn-primary) !important;
+}
+:deep(.el-button--primary.is-link:hover),
+:deep(.el-button--primary.is-link:focus) {
+  color: var(--theme-btn-primary-hover) !important;
+}
+
+/* 危险按钮（删除）：深红 */
+:deep(.el-button--danger) {
+  color: var(--theme-btn-danger) !important;
+  border-color: var(--theme-btn-danger) !important;
+}
+:deep(.el-button--danger:hover),
+:deep(.el-button--danger:focus) {
+  color: var(--theme-btn-danger-hover) !important;
+  border-color: var(--theme-btn-danger-hover) !important;
+}
+:deep(.el-button--danger:not(.is-link)) {
+  background: var(--theme-btn-danger) !important;
+  color: var(--theme-btn-danger-text) !important;
+}
+:deep(.el-button--danger:not(.is-link):hover),
+:deep(.el-button--danger:not(.is-link):focus) {
+  background: var(--theme-btn-danger-hover) !important;
+  border-color: var(--theme-btn-danger-hover) !important;
+  color: var(--theme-btn-danger-text) !important;
+}
+
+/* 状态标签：成功态用蓝紫，不用绿色 */
+:deep(.el-tag--success) {
+  background: var(--theme-status-success) !important;
+  border-color: var(--theme-status-success) !important;
+  color: var(--theme-status-success-text) !important;
 }
 
 :deep(.el-textarea__inner) {
-  background: rgba(0, 255, 255, 0.05);
-  border: 1px solid rgba(0, 255, 255, 0.2);
-  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid var(--theme-border-3);
+  color: var(--theme-accent);
 }
 
 :deep(.el-textarea__inner:hover),
 :deep(.el-textarea__inner:focus) {
-  border-color: rgba(0, 255, 255, 0.5);
+  border-color: var(--theme-border-7);
 }
 
-/* Radio Button 样式 */
+/* Radio Button 样式：选中态与主题主按钮同色 */
 :deep(.el-radio-button__inner) {
-  background: rgba(0, 255, 255, 0.05);
-  border-color: rgba(0, 255, 255, 0.3);
-  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.65);
+  border-color: var(--theme-border-4);
+  color: var(--theme-text-muted);
 }
 
 :deep(.el-radio-button__original-radio:checked + .el-radio-button__inner) {
-  background: rgba(0, 255, 255, 0.3);
-  border-color: #00ffff;
-  color: #00ffff;
-  box-shadow: -1px 0 0 0 #00ffff;
+  background: var(--theme-btn-primary) !important;
+  border-color: var(--theme-btn-primary) !important;
+  color: var(--theme-btn-primary-text) !important;
+  box-shadow: -1px 0 0 0 var(--theme-btn-primary);
 }
 
 .upload-demo {
@@ -932,25 +982,25 @@ onMounted(() => {
 
 :deep(.el-upload-dragger) {
   padding: 40px;
-  background: rgba(0, 255, 255, 0.05);
-  border: 2px dashed rgba(0, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.5);
+  border: 2px dashed var(--theme-border-5);
 }
 
 :deep(.el-upload-dragger:hover) {
-  border-color: rgba(0, 255, 255, 0.6);
-  background: rgba(0, 255, 255, 0.08);
+  border-color: var(--theme-border-6);
+  background: rgba(var(--theme-primary), 0.5);
 }
 
 :deep(.el-upload__text) {
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--theme-text-muted);
 }
 
 :deep(.el-upload__text em) {
-  color: #00ffff;
+  color: var(--theme-accent);
 }
 
 :deep(.el-upload__tip) {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--theme-text-lighter);
 }
 
 /* MAG 上传模式切换 */
@@ -987,22 +1037,22 @@ onMounted(() => {
 }
 
 .folder-upload-area .upload-text {
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--theme-text-muted);
   font-size: 14px;
   margin-bottom: 8px;
 }
 
 .folder-upload-area .upload-tip {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(92, 64, 51, 0.6);
   font-size: 12px;
 }
 
 .mag-file-preview {
   margin-top: 16px;
   padding: 12px;
-  background: rgba(0, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.5);
   border-radius: 8px;
-  border: 1px solid rgba(0, 255, 255, 0.2);
+  border: 1px solid var(--theme-border-2);
 }
 
 .mag-file-header {
@@ -1010,7 +1060,7 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(92, 64, 51, 0.9);
   font-size: 14px;
 }
 
@@ -1056,7 +1106,7 @@ onMounted(() => {
 .progress-text {
   margin-top: 16px;
   text-align: center;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(92, 64, 51, 0.9);
 }
 
 .stage-info {
@@ -1064,18 +1114,18 @@ onMounted(() => {
 }
 
 :deep(.el-steps--simple) {
-  background: rgba(0, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.5);
   border-radius: 8px;
   padding: 12px 20px;
 }
 
 :deep(.el-step__title) {
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(92, 64, 51, 0.8);
   font-size: 13px;
 }
 
 :deep(.el-step__title.is-process) {
-  color: #00ffff;
+  color: var(--theme-accent);
   font-weight: 600;
 }
 
@@ -1089,13 +1139,13 @@ onMounted(() => {
 
 :deep(.el-table) {
   background: transparent;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--theme-accent);
 }
 
 :deep(.el-table th.el-table__cell) {
-  background: rgba(0, 255, 255, 0.1);
-  color: #00ffff;
-  border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+  background: var(--theme-bg-overlay-4);
+  color: var(--theme-accent);
+  border-bottom: 1px solid var(--theme-border-4);
 }
 
 :deep(.el-table tr) {
@@ -1103,15 +1153,15 @@ onMounted(() => {
 }
 
 :deep(.el-table td.el-table__cell) {
-  border-bottom: 1px solid rgba(0, 255, 255, 0.1);
+  border-bottom: 1px solid var(--theme-border);
 }
 
 :deep(.el-table__body tr:hover > td) {
-  background: rgba(0, 255, 255, 0.05) !important;
+  background: var(--theme-bg-overlay-4) !important;
 }
 
 .text-upload-tip {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--theme-text-lighter);
   font-size: 12px;
   margin-top: 8px;
 }
