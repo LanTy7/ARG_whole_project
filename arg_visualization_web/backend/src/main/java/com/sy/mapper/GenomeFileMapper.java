@@ -1,6 +1,7 @@
 package com.sy.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.sy.pojo.GenomeFile;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -79,5 +80,11 @@ public interface GenomeFileMapper extends BaseMapper<GenomeFile> {
         "</script>"
     })
     List<GenomeFile> searchFilesWithConditions(@Param("userKeyword") String userKeyword, @Param("fileKeyword") String fileKeyword);
+
+    /**
+     * 分页搜索文件（根据用户信息和文件信息）
+     * 由 GenomeFileMapper.xml 实现，供 MyBatis-Plus 分页插件使用
+     */
+    IPage<GenomeFile> searchFilesWithConditionsPage(IPage<GenomeFile> page, @Param("userKeyword") String userKeyword, @Param("fileKeyword") String fileKeyword);
 }
 

@@ -1,10 +1,19 @@
 import request from '@/utils/request';
 
-// 获取所有用户列表
+// 获取所有用户列表（不分页）
 export function getAllUsers() {
   return request({
     url: '/admin/users',
     method: 'get'
+  });
+}
+
+// 分页获取用户列表（支持关键字）
+export function getUsersPage(params) {
+  return request({
+    url: '/admin/users/page',
+    method: 'get',
+    params
   });
 }
 
@@ -25,11 +34,20 @@ export function banUser(userId, ban) {
   });
 }
 
-// 获取所有文件列表
+// 获取所有文件列表（不分页）
 export function getAllFiles() {
   return request({
     url: '/admin/files',
     method: 'get'
+  });
+}
+
+// 分页获取文件列表（支持用户/文件关键字）
+export function getFilesPage(params) {
+  return request({
+    url: '/admin/files/page',
+    method: 'get',
+    params
   });
 }
 

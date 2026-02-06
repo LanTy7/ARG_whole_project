@@ -551,6 +551,7 @@ export default {
       },
       confirmDelete: '确定要删除用户 "{name}" 吗？此操作将删除该用户的所有文件、任务和相关数据，且无法恢复！',
       deleteSuccess: '用户删除成功',
+      deleting: '正在删除…',
       noMatch: '未找到匹配的用户'
     },
     files: {
@@ -577,6 +578,7 @@ export default {
       },
       confirmDelete: '确定要删除文件 "{name}" 吗？此操作将删除该文件及其所有相关任务和分析结果，且无法恢复！',
       deleteSuccess: '文件删除成功',
+      deleting: '正在删除…',
       noMatch: '未找到匹配的文件'
     },
     logs: {

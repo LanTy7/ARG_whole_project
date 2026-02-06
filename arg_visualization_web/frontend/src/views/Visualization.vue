@@ -20,7 +20,7 @@
           <el-descriptions-item :label="$t('visualization.info.resultSummary')" :span="3">
             <el-tag type="success" size="large">
               <el-icon><Document /></el-icon>
-              {{ $t('visualization.info.resultCount', { total: argResults.length, arg: argPositiveCount }) }}
+              {{ $t('visualization.info.resultCount', { total: totalCount, arg: argPositiveCount }) }}
             </el-tag>
           </el-descriptions-item>
         </el-descriptions>
@@ -36,7 +36,7 @@
                 <div>
                   <h3>{{ $t('visualization.detail.title') }}</h3>
                   <p class="summary-desc">
-                    {{ $t('visualization.detail.summaryDesc', { total: argResults.length, arg: argPositiveCount, nonArg: argNegativeCount }) }}
+                    {{ $t('visualization.detail.summaryDesc', { total: totalCount, arg: argPositiveCount, nonArg: argNegativeCount }) }}
                   </p>
                 </div>
                 <el-button type="primary" :icon="Download" @click="downloadArgResults">
@@ -46,7 +46,7 @@
               
               <!-- 颜色图例 -->
               <el-alert 
-                v-if="argResults.length > 0"
+                v-if="totalCount > 0"
                 type="info" 
                 :closable="false" 
                 style="margin-bottom: 16px;"
@@ -66,7 +66,7 @@
                 </template>
               </el-alert>
               
-              <el-empty v-if="argResults.length === 0" :description="$t('visualization.detail.noResults')" />
+              <el-empty v-if="totalCount === 0" :description="$t('visualization.detail.noResults')" />
               
               <template v-else>
                 <!-- 筛选和搜索 -->
@@ -88,7 +88,7 @@
                     <el-option :label="$t('visualization.filterNonArgOnly')" value="non-arg" />
                   </el-select>
                   <span class="filter-info">
-                    {{ $t('visualization.detail.showCount', { filtered: filteredResults.length, total: argResults.length }) }}
+                    {{ $t('visualization.detail.showCount', { filtered: tableTotal, total: totalCount }) }}
                   </span>
                 </div>
                 
@@ -197,7 +197,7 @@
                     v-model:current-page="pagination.currentPage"
                     v-model:page-size="pagination.pageSize"
                     :page-sizes="[50, 100, 200, 500]"
-                    :total="filteredResults.length"
+                    :total="tableTotal"
                     layout="total, sizes, prev, pager, next, jumper"
                     @size-change="handlePageSizeChange"
                     @current-change="handlePageChange"
@@ -217,7 +217,7 @@
                 </el-button>
               </div>
               
-              <el-empty v-if="argResults.length === 0" :description="$t('visualization.chartsPage.noData')" />
+              <el-empty v-if="totalCount === 0" :description="$t('visualization.chartsPage.noData')" />
               
               <div v-else class="charts-grid">
                 <div class="chart-container">
@@ -336,7 +336,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Download, Document, Search, FolderOpened, Files, InfoFilled } from '@element-plus/icons-vue'
-import { getGenomeVisualization } from '@/api/visualization'
+import { getGenomeVisualization, getVisualizationResults, getClassSummary } from '@/api/visualization'
 import { getDownloadableFiles, downloadFile } from '@/api/download'
 import { useUserStore } from '@/stores/user'
 import * as echarts from 'echarts'
@@ -352,6 +352,8 @@ const taskId = ref(null)
 const activeTab = ref('detail')
 const loading = ref(false)
 const argData = ref(null)
+/** 种类图数据（DB 模式下由接口返回） */
+const classSummaryFromApi = ref(null)
 
 // 下载相关状态
 const downloadLoading = ref(false)
@@ -383,50 +385,67 @@ const pagination = reactive({
 const searchKeyword = ref('')
 const filterArgType = ref('all')
 
+// 是否为 DB 分页模式（后端已落库，只返回当前页）
+const isDbMode = computed(() => argData.value?.pagination != null)
+
 // 计算属性
 const argResults = computed(() => argData.value?.argResults || [])
-const argPositiveCount = computed(() => argResults.value.filter(r => r.isArg).length)
-const argNegativeCount = computed(() => argResults.value.filter(r => !r.isArg).length)
+const genomeInfo = computed(() => argData.value?.genomeInfo || {})
+const argPositiveCount = computed(() => {
+  const n = genomeInfo.value.argCount
+  if (n !== undefined && n !== null) return n
+  return argResults.value.filter(r => r.isArg).length
+})
+const argNegativeCount = computed(() => {
+  const n = genomeInfo.value.nonArgCount
+  if (n !== undefined && n !== null) return n
+  return argResults.value.filter(r => !r.isArg).length
+})
+const totalCount = computed(() => {
+  const n = genomeInfo.value.totalCount
+  if (n !== undefined && n !== null) return n
+  return argResults.value.length
+})
 
-// 筛选后的结果
+// 筛选后的结果（仅文件模式时前端筛选；DB 模式由后端筛选）
 const filteredResults = computed(() => {
+  if (isDbMode.value) return argResults.value
   let results = argResults.value
-  
-  // 按类型筛选
-  if (filterArgType.value === 'arg') {
-    results = results.filter(r => r.isArg)
-  } else if (filterArgType.value === 'non-arg') {
-    results = results.filter(r => !r.isArg)
-  }
-  
-  // 按关键词搜索
+  if (filterArgType.value === 'arg') results = results.filter(r => r.isArg)
+  else if (filterArgType.value === 'non-arg') results = results.filter(r => !r.isArg)
   if (searchKeyword.value.trim()) {
     const keyword = searchKeyword.value.trim().toLowerCase()
-    results = results.filter(r => 
+    results = results.filter(r =>
       r.id?.toLowerCase().includes(keyword) ||
-      r.argClass?.toLowerCase().includes(keyword)
+      (r.argClass && r.argClass.toLowerCase().includes(keyword))
     )
   }
-  
   return results
 })
 
-// 当前页的数据
+// 表格总数：DB 模式用接口返回的 pagination.total，否则用筛选后长度
+const tableTotal = computed(() => {
+  if (isDbMode.value && argData.value?.pagination)
+    return argData.value.pagination.total ?? 0
+  return filteredResults.value.length
+})
+
+// 当前页的数据：DB 模式即当前页结果，文件模式为前端分页
 const paginatedResults = computed(() => {
+  if (isDbMode.value) return argResults.value
   const start = (pagination.currentPage - 1) * pagination.pageSize
   const end = start + pagination.pageSize
   return filteredResults.value.slice(start, end)
 })
 
-// 统计各 ARG 类别的数量
+// 种类图数据：DB 模式用接口 classSummaryFromApi，否则从当前结果计算
 const argClassStats = computed(() => {
+  if (isDbMode.value && classSummaryFromApi.value && classSummaryFromApi.value.length > 0)
+    return classSummaryFromApi.value.map(({ name, value }) => ({ name, value }))
   const stats = {}
   argResults.value.forEach(r => {
-    if (r.isArg && r.argClass) {
-      stats[r.argClass] = (stats[r.argClass] || 0) + 1
-    }
+    if (r.isArg && r.argClass) stats[r.argClass] = (stats[r.argClass] || 0) + 1
   })
-  // 转换为数组并按数量降序排序
   return Object.entries(stats)
     .map(([name, value]) => ({ name, value }))
     .sort((a, b) => b.value - a.value)
@@ -454,6 +473,18 @@ onUnmounted(() => {
 // 监听标签页切换
 watch(activeTab, async (newTab) => {
   if (newTab === 'charts') {
+    if (isDbMode.value && taskId.value) {
+      try {
+        const res = await getClassSummary(taskId.value)
+        const data = res.data || res
+        classSummaryFromApi.value = data.classSummary || []
+      } catch (e) {
+        console.error('getClassSummary failed', e)
+        classSummaryFromApi.value = []
+      }
+    } else {
+      classSummaryFromApi.value = null
+    }
     await nextTick()
     initCharts()
   }
@@ -479,12 +510,14 @@ function handleTabClick() {
 
 // 处理搜索
 function handleSearch() {
-  pagination.currentPage = 1 // 搜索时重置到第一页
+  pagination.currentPage = 1
+  if (isDbMode.value) fetchResultsPage()
 }
 
 // 处理筛选
 function handleFilter() {
-  pagination.currentPage = 1 // 筛选时重置到第一页
+  pagination.currentPage = 1
+  if (isDbMode.value) fetchResultsPage()
 }
 
 // 处理 BLAST 比对
@@ -509,27 +542,57 @@ function getProgressColor(percentage) {
   return '#909399'  // 灰色 - 很低置信度
 }
 
+// 拉取分页结果（DB 模式）
+async function fetchResultsPage() {
+  if (!taskId.value || !isDbMode.value) return
+  loading.value = true
+  try {
+    const isArg = filterArgType.value === 'arg' ? true : filterArgType.value === 'non-arg' ? false : undefined
+    const keyword = searchKeyword.value?.trim() || undefined
+    const res = await getVisualizationResults(taskId.value, {
+      page: pagination.currentPage,
+      pageSize: pagination.pageSize,
+      isArg,
+      keyword
+    })
+    const data = res.data || res
+    if (argData.value) {
+      argData.value.argResults = data.argResults || []
+      argData.value.pagination = data.pagination || {}
+    }
+  } catch (e) {
+    console.error('fetchResultsPage failed', e)
+    ElMessage.error(t('visualization.messages.loadFailed') + ': ' + (e.response?.data?.message || e.message))
+  } finally {
+    loading.value = false
+  }
+}
+
 // 处理页码变化
 function handlePageChange(page) {
   pagination.currentPage = page
+  if (isDbMode.value) fetchResultsPage()
 }
 
 // 处理每页数量变化
 function handlePageSizeChange(size) {
   pagination.pageSize = size
-  pagination.currentPage = 1 // 重置到第一页
+  pagination.currentPage = 1
+  if (isDbMode.value) fetchResultsPage()
 }
 
 // 加载数据
 async function loadData() {
   loading.value = true
+  classSummaryFromApi.value = null
   try {
     const response = await getGenomeVisualization(taskId.value)
     argData.value = response.data
-    
-    // 加载可下载文件列表
+    if (argData.value?.pagination) {
+      pagination.currentPage = argData.value.pagination.page ?? 1
+      pagination.pageSize = argData.value.pagination.pageSize ?? 100
+    }
     await loadDownloadableFiles()
-    
     ElMessage.success(t('visualization.messages.loadSuccess'))
   } catch (error) {
     console.error('Failed to load data:', error)
@@ -582,38 +645,38 @@ async function handleDownload(type) {
   }
 }
 
-// 下载 ARG 预测结果
-function downloadArgResults() {
+// 下载 ARG 预测结果（DB 模式走后端文件下载，否则用当前数据生成 TSV）
+async function downloadArgResults() {
   try {
-    if (argResults.value.length === 0) {
+    if (totalCount.value === 0) {
       ElMessage.warning(t('visualization.detail.noResults'))
       return
     }
-    
-    const fileName = `task_${taskId.value}_arg_predictions.tsv`
-    
+    if (isDbMode.value) {
+      downloading.arg = true
+      const token = userStore.token ? `Bearer ${userStore.token}` : ''
+      await downloadFile('arg', taskId.value, token)
+      ElMessage.success(t('visualization.messages.downloadSuccess'))
+      return
+    }
     ElMessage.info(t('visualization.messages.preparingDownload'))
-    
-    // 构建 TSV 内容
     let tsvContent = 'id\tis_arg\tpred_prob\targ_class\tclass_prob\tprob\n'
-    
     argResults.value.forEach(result => {
       tsvContent += `${result.id || ''}\t${result.isArg ? 'True' : 'False'}\t${result.predProb ?? ''}\t${result.argClass || ''}\t${result.classProb ?? ''}\t${result.prob ?? ''}\n`
     })
-    
-    // 创建下载
     const blob = new Blob([tsvContent], { type: 'text/tab-separated-values;charset=utf-8;' })
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = fileName
+    a.download = `task_${taskId.value}_arg_predictions.tsv`
     a.click()
     window.URL.revokeObjectURL(url)
-    
     ElMessage.success(t('visualization.messages.downloadSuccess'))
   } catch (error) {
     console.error('download error:', error)
     ElMessage.error(t('visualization.messages.downloadFailed') + ': ' + error.message)
+  } finally {
+    downloading.arg = false
   }
 }
 

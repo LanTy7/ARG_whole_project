@@ -1,5 +1,8 @@
 package com.sy.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sy.mapper.AnalysisTaskMapper;
 import com.sy.mapper.GenomeFileMapper;
 import com.sy.mapper.LoginLogMapper;
@@ -10,16 +13,14 @@ import com.sy.pojo.User;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sy.service.AdminService;
+import com.sy.service.AnalysisTaskService;
+import com.sy.service.GenomeFileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -36,53 +37,58 @@ public class AdminServiceImpl implements AdminService {
     private final AnalysisTaskMapper analysisTaskMapper;
     private final LoginLogMapper loginLogMapper;
     private final ObjectMapper objectMapper;
+    private final GenomeFileService genomeFileService;
+    private final AnalysisTaskService analysisTaskService;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void deleteUser(Long userId) {
         log.info("开始删除用户: userId={}", userId);
-        
+
         User user = userMapper.findById(userId);
         if (user == null) {
             throw new RuntimeException("用户不存在");
         }
-        
-        // 获取用户的所有文件
+
+        // 1. 该用户下所有任务（含文件关联 + MAG 等），先批量删表再按任务删目录和记录
+        List<AnalysisTask> allTasks = analysisTaskMapper.findByUserId(userId);
+        if (!allTasks.isEmpty()) {
+            try {
+                analysisTaskService.deleteTasksAndRelatedDataBatch(allTasks);
+            } catch (Exception e) {
+                log.error("批量删除用户关联任务失败: userId={}", userId, e);
+            }
+        }
+
+        // 2. 删除用户下所有文件（物理文件 + 数据库记录）
         List<GenomeFile> files = genomeFileMapper.findByUserId(userId);
-        
-        // 删除每个文件及其相关的任务和输出目录
         for (GenomeFile file : files) {
             try {
-                deleteFileAndRelatedData(file);
+                if (file.getFilePath() != null) {
+                    java.nio.file.Files.deleteIfExists(java.nio.file.Paths.get(file.getFilePath()));
+                }
+                genomeFileMapper.deleteById(file.getFileId());
             } catch (Exception e) {
                 log.error("删除用户文件失败: fileId={}", file.getFileId(), e);
             }
         }
-        
-        // 数据库外键约束会自动级联删除：
-        // - genome_files (ON DELETE CASCADE)
-        // - analysis_tasks (ON DELETE CASCADE)
-        // - analysis_results (通过analysis_tasks级联删除)
-        // 但是login_logs没有外键约束，需要手动删除（如果需要保留日志则可以不删除）
-        
-        // 删除用户记录（会级联删除相关的表记录）
+
+        // 3. 删除用户记录
         userMapper.deleteById(userId);
-        
         log.info("用户删除成功: userId={}", userId);
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void deleteFile(Long fileId) {
         log.info("管理员删除文件: fileId={}", fileId);
-        
+
         GenomeFile file = genomeFileMapper.selectById(fileId);
         if (file == null) {
             throw new RuntimeException("文件不存在");
         }
-        
-        deleteFileAndRelatedData(file);
-        
+
+        genomeFileService.deleteFileAndRelatedData(file);
         log.info("文件删除成功: fileId={}", fileId);
     }
 
@@ -100,6 +106,57 @@ public class AdminServiceImpl implements AdminService {
         return files.stream()
                 .map(this::convertFileToMap)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Map<String, Object> getUsersPage(int pageNum, int pageSize, String keyword) {
+        QueryWrapper<User> wrapper = new QueryWrapper<>();
+        if (StringUtils.hasText(keyword)) {
+            String k = keyword.trim();
+            wrapper.and(w -> w.like("username", k).or().like("email", k));
+        }
+        wrapper.orderByDesc("created_at");
+        IPage<User> page = userMapper.selectPage(new Page<>(pageNum, pageSize), wrapper);
+        List<Map<String, Object>> list = page.getRecords().stream()
+                .map(this::convertUserToMap)
+                .collect(Collectors.toList());
+        Map<String, Object> result = new HashMap<>();
+        result.put("list", list);
+        result.put("total", page.getTotal());
+        result.put("pageNum", pageNum);
+        result.put("pageSize", pageSize);
+        return result;
+    }
+
+    @Override
+    public Map<String, Object> getFilesPage(int pageNum, int pageSize, String userKeyword, String fileKeyword) {
+        String userK = StringUtils.hasText(userKeyword) ? userKeyword.trim() : null;
+        String fileK = StringUtils.hasText(fileKeyword) ? fileKeyword.trim() : null;
+        if (userK == null && fileK == null) {
+            QueryWrapper<GenomeFile> wrapper = new QueryWrapper<>();
+            wrapper.orderByDesc("upload_time");
+            IPage<GenomeFile> page = genomeFileMapper.selectPage(new Page<>(pageNum, pageSize), wrapper);
+            List<Map<String, Object>> list = page.getRecords().stream()
+                    .map(this::convertFileToMap)
+                    .collect(Collectors.toList());
+            Map<String, Object> result = new HashMap<>();
+            result.put("list", list);
+            result.put("total", page.getTotal());
+            result.put("pageNum", pageNum);
+            result.put("pageSize", pageSize);
+            return result;
+        }
+        IPage<GenomeFile> page = genomeFileMapper.searchFilesWithConditionsPage(
+                new Page<>(pageNum, pageSize), userK, fileK);
+        List<Map<String, Object>> list = page.getRecords().stream()
+                .map(this::convertFileToMap)
+                .collect(Collectors.toList());
+        Map<String, Object> result = new HashMap<>();
+        result.put("list", list);
+        result.put("total", page.getTotal());
+        result.put("pageNum", pageNum);
+        result.put("pageSize", pageSize);
+        return result;
     }
 
     @Override
@@ -181,63 +238,6 @@ public class AdminServiceImpl implements AdminService {
         return files.stream()
                 .map(this::convertFileToMap)
                 .collect(Collectors.toList());
-    }
-
-    /**
-     * 删除文件及其所有相关数据（物理文件、任务输出目录、数据库记录）
-     */
-    private void deleteFileAndRelatedData(GenomeFile file) {
-        Long fileId = file.getFileId();
-        
-        // 1. 获取该文件的所有分析任务
-        List<AnalysisTask> tasks = analysisTaskMapper.findByFileId(fileId);
-        
-        // 2. 删除每个任务的输出目录
-        for (AnalysisTask task : tasks) {
-            if (task.getOutputDir() != null) {
-                try {
-                    deleteDirectory(task.getOutputDir());
-                    log.info("删除任务输出目录: {}", task.getOutputDir());
-                } catch (Exception e) {
-                    log.error("删除任务输出目录失败: {}", task.getOutputDir(), e);
-                }
-            }
-        }
-        
-        // 3. 删除物理基因文件
-        if (file.getFilePath() != null) {
-            try {
-                Files.deleteIfExists(Paths.get(file.getFilePath()));
-                log.info("删除物理文件: {}", file.getFilePath());
-            } catch (IOException e) {
-                log.error("删除物理文件失败: {}", file.getFilePath(), e);
-            }
-        }
-        
-        // 4. 删除数据库记录（会级联删除analysis_tasks和analysis_results）
-        genomeFileMapper.deleteById(fileId);
-        
-        log.info("文件及相关数据删除完成: fileId={}", fileId);
-    }
-
-    /**
-     * 递归删除目录
-     */
-    private void deleteDirectory(String directoryPath) throws IOException {
-        Path path = Paths.get(directoryPath);
-        if (!Files.exists(path)) {
-            return;
-        }
-        
-        if (Files.isDirectory(path)) {
-            // 递归删除目录中的所有文件和子目录
-            Files.walk(path)
-                    .sorted(Comparator.reverseOrder())
-                    .map(Path::toFile)
-                    .forEach(File::delete);
-        } else {
-            Files.deleteIfExists(path);
-        }
     }
 
     /**

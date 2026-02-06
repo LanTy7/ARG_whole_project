@@ -1,6 +1,10 @@
 package com.sy.pojo;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.FieldFill;
 import lombok.Data;
 import java.time.LocalDateTime;
 
@@ -52,5 +56,9 @@ public class AnalysisTask {
     private Long genomeLength;
     
     private Integer prophageCount;
+    
+    /** 总序列数（all_predictions 行数） */
+    @TableField("total_count")
+    private Integer totalCount;
 }
 

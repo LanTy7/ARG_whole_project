@@ -27,10 +27,29 @@ public interface AdminService {
     List<Map<String, Object>> getAllUsers();
     
     /**
+     * 分页获取用户列表（支持关键字搜索）
+     * @param pageNum 页码，从 1 开始
+     * @param pageSize 每页条数
+     * @param keyword 搜索关键字（可选，用户名或邮箱）
+     * @return 分页结果：list、total、pageNum、pageSize
+     */
+    Map<String, Object> getUsersPage(int pageNum, int pageSize, String keyword);
+    
+    /**
      * 获取所有文件列表（包含用户信息）
      * @return 文件列表
      */
     List<Map<String, Object>> getAllFiles();
+    
+    /**
+     * 分页获取文件列表（支持用户/文件关键字搜索）
+     * @param pageNum 页码，从 1 开始
+     * @param pageSize 每页条数
+     * @param userKeyword 用户关键字（可选）
+     * @param fileKeyword 文件关键字（可选）
+     * @return 分页结果：list、total、pageNum、pageSize
+     */
+    Map<String, Object> getFilesPage(int pageNum, int pageSize, String userKeyword, String fileKeyword);
     
     /**
      * 封禁/解封用户

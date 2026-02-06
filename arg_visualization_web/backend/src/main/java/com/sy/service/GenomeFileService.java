@@ -1,5 +1,6 @@
 package com.sy.service;
 
+import com.sy.pojo.GenomeFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -9,6 +10,13 @@ import java.util.Map;
  * 基因组文件服务接口
  */
 public interface GenomeFileService {
+
+    /**
+     * 级联删除文件及其关联数据（不校验权限，供管理员/删除用户等场景调用）
+     * 会删除：该文件下所有任务（及 all_predictions、class_summary、analysis_results、输出目录）、物理文件、genome_files 记录
+     * @param file 文件实体，不能为 null
+     */
+    void deleteFileAndRelatedData(GenomeFile file);
     
     /**
      * 上传基因组文件
@@ -35,7 +43,7 @@ public interface GenomeFileService {
     Map<String, Object> getFileInfo(Long fileId, Long userId);
     
     /**
-     * 删除文件
+     * 删除文件（带权限校验，用户只能删自己的文件）
      * @param fileId 文件ID
      * @param userId 用户ID
      */

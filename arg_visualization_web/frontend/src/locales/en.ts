@@ -551,6 +551,7 @@ export default {
       },
       confirmDelete: 'Are you sure to delete user "{name}"? This will delete all files, tasks and data of this user. This cannot be undone!',
       deleteSuccess: 'User deleted successfully',
+      deleting: 'Deleting…',
       noMatch: 'No matching users found'
     },
     files: {
@@ -577,6 +578,7 @@ export default {
       },
       confirmDelete: 'Are you sure to delete file "{name}"? This will delete all related tasks and analysis results. This cannot be undone!',
       deleteSuccess: 'File deleted successfully',
+      deleting: 'Deleting…',
       noMatch: 'No matching files found'
     },
     logs: {

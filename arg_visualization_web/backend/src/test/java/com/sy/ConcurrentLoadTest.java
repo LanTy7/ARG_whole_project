@@ -62,7 +62,7 @@ public class ConcurrentLoadTest {
     private static final String TEST_DIR_100KB = "/home/zhaoshuy/argnew/test/ncbi_dataset/data/merged_proteins/100KB";
     
     /** 测试用户ID（使用一个已存在的用户） */
-    private static final Long TEST_USER_ID = 3L;
+    private static final Long TEST_USER_ID = 4L;
     
     /** 结果输出目录 */
     private static final String OUTPUT_DIR = "/home/zhaoshuy/argnew/test/output";
@@ -82,7 +82,7 @@ public class ConcurrentLoadTest {
      */
     @Test
     public void testConcurrent10000() throws Exception {
-        runConcurrentTest(TEST_DIR_100KB, "10000_concurrent", 200);  // 并发线程数200
+        runConcurrentTest(TEST_DIR_1MB, "10000_concurrent", 200);  // 并发线程数200
     }
 
     /**

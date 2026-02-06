@@ -45,7 +45,7 @@ public class AdminController {
     }
 
     /**
-     * 获取所有用户列表
+     * 获取所有用户列表（不分页，保留兼容）
      */
     @GetMapping("/users")
     public Result<List<Map<String, Object>>> getAllUsers(HttpServletRequest request) {
@@ -55,6 +55,28 @@ public class AdminController {
             return Result.success(userList);
         } catch (Exception e) {
             log.error("获取用户列表失败", e);
+            return Result.error(e.getMessage());
+        }
+    }
+
+    /**
+     * 分页获取用户列表（支持关键字搜索）
+     * @param pageNum 页码，从 1 开始，默认 1
+     * @param pageSize 每页条数，默认 10
+     * @param keyword 搜索关键字（可选）
+     */
+    @GetMapping("/users/page")
+    public Result<Map<String, Object>> getUsersPage(
+            @RequestParam(value = "pageNum", defaultValue = "1") int pageNum,
+            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
+            @RequestParam(value = "keyword", required = false) String keyword,
+            HttpServletRequest request) {
+        try {
+            checkAdmin(request);
+            Map<String, Object> data = adminService.getUsersPage(pageNum, pageSize, keyword);
+            return Result.success(data);
+        } catch (Exception e) {
+            log.error("分页获取用户列表失败", e);
             return Result.error(e.getMessage());
         }
     }
@@ -97,7 +119,7 @@ public class AdminController {
     }
 
     /**
-     * 获取所有文件列表
+     * 获取所有文件列表（不分页，保留兼容）
      */
     @GetMapping("/files")
     public Result<List<Map<String, Object>>> getAllFiles(HttpServletRequest request) {
@@ -107,6 +129,30 @@ public class AdminController {
             return Result.success(fileList);
         } catch (Exception e) {
             log.error("获取文件列表失败", e);
+            return Result.error(e.getMessage());
+        }
+    }
+
+    /**
+     * 分页获取文件列表（支持用户/文件关键字搜索）
+     * @param pageNum 页码，从 1 开始，默认 1
+     * @param pageSize 每页条数，默认 10
+     * @param userKeyword 用户关键字（可选）
+     * @param fileKeyword 文件关键字（可选）
+     */
+    @GetMapping("/files/page")
+    public Result<Map<String, Object>> getFilesPage(
+            @RequestParam(value = "pageNum", defaultValue = "1") int pageNum,
+            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
+            @RequestParam(value = "userKeyword", required = false) String userKeyword,
+            @RequestParam(value = "fileKeyword", required = false) String fileKeyword,
+            HttpServletRequest request) {
+        try {
+            checkAdmin(request);
+            Map<String, Object> data = adminService.getFilesPage(pageNum, pageSize, userKeyword, fileKeyword);
+            return Result.success(data);
+        } catch (Exception e) {
+            log.error("分页获取文件列表失败", e);
             return Result.error(e.getMessage());
         }
     }

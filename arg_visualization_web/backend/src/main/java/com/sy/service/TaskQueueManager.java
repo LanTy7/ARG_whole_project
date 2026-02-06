@@ -16,7 +16,7 @@ import java.util.concurrent.*;
 @Component
 public class TaskQueueManager {
 
-    @Value("${docker.genomad.max-concurrent:1}")
+    @Value("${queue.max-concurrent:1}")
     private int maxConcurrent;
 
     @Value("${analysis.queue-size:100}")

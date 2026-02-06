@@ -2,7 +2,8 @@ package com.sy.service.impl;
 
 import com.sy.service.DockerService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -16,10 +17,11 @@ import java.util.concurrent.TimeUnit;
  * Docker 服务实现 - ARG 抗性基因检测
  * 调用 Docker 容器执行抗性基因识别和分类
  */
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DockerServiceImpl implements DockerService {
+
+    private static final Logger log = LoggerFactory.getLogger(DockerServiceImpl.class);
     
     private final VisualizationServiceImpl visualizationService;
 
@@ -61,9 +63,10 @@ public class DockerServiceImpl implements DockerService {
 
     /**
      * 运行抗性基因检测（带任务ID，用于取消功能）
+     * @param parseOutput 是否解析 TSV 并返回完整结果；MAG 场景传 false，由后续 persistTaskResultsToDb 落库，避免大结果集进内存
      */
-    public Map<String, Object> runArgDetection(Long taskId, String inputFilePath, String outputDir, Map<String, Object> params) {
-        log.info("开始运行抗性基因检测: inputFile={}, outputDir={}", inputFilePath, outputDir);
+    public Map<String, Object> runArgDetection(Long taskId, String inputFilePath, String outputDir, Map<String, Object> params, boolean parseOutput) {
+        log.info("开始运行抗性基因检测: inputFile={}, outputDir={}, parseOutput={}", inputFilePath, outputDir, parseOutput);
 
         if (!dockerEnabled) {
             log.warn("Docker 未启用，返回模拟数据");
@@ -71,21 +74,17 @@ public class DockerServiceImpl implements DockerService {
         }
 
         try {
-            // 1. 创建输出目录
             File outputDirFile = new File(outputDir);
             if (!outputDirFile.exists()) {
                 outputDirFile.mkdirs();
                 log.info("创建输出目录: {}", outputDir);
             }
 
-            // 2. 构建 ARG 命令
             String command = buildArgCommand(inputFilePath, outputDir, params);
             log.info("执行命令: {}", command);
 
-            // 3. 执行命令
             ProcessResult result = executeCommand(command, taskId);
 
-            // 4. 检查执行结果
             if (result.exitCode != 0) {
                 log.error("ARG 执行失败，退出码: {}", result.exitCode);
                 log.error("stderr: {}", result.stderr);
@@ -94,17 +93,25 @@ public class DockerServiceImpl implements DockerService {
 
             log.info("ARG 执行成功");
 
-            // 5. 解析输出文件
-            Map<String, Object> analysisResult = visualizationService.parseArgOutput(outputDir);
-
-            log.info("分析完成，识别到 {} 个抗性基因", analysisResult.getOrDefault("argCount", 0));
-
-            return analysisResult;
-
+            if (parseOutput) {
+                Map<String, Object> analysisResult = visualizationService.parseArgOutput(outputDir);
+                log.info("分析完成，识别到 {} 个抗性基因", analysisResult.getOrDefault("argCount", 0));
+                return analysisResult;
+            }
+            // MAG 等场景：不解析 TSV，由任务完成后 persistTaskResultsToDb 统一落库
+            Map<String, Object> minimal = new HashMap<>();
+            minimal.put("argResults", Collections.emptyList());
+            minimal.put("argCount", null);
+            return minimal;
         } catch (Exception e) {
             log.error("ARG Docker 分析失败", e);
             throw new RuntimeException("分析失败: " + e.getMessage(), e);
         }
+    }
+
+    /** 兼容旧调用：默认解析输出并返回完整结果 */
+    public Map<String, Object> runArgDetection(Long taskId, String inputFilePath, String outputDir, Map<String, Object> params) {
+        return runArgDetection(taskId, inputFilePath, outputDir, params, true);
     }
 
     /**

@@ -4,6 +4,7 @@ import com.sy.mapper.AnalysisTaskMapper;
 import com.sy.mapper.GenomeFileMapper;
 import com.sy.pojo.AnalysisTask;
 import com.sy.pojo.GenomeFile;
+import com.sy.service.AnalysisTaskService;
 import com.sy.service.GenomeFileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,7 @@ public class GenomeFileServiceImpl implements GenomeFileService {
 
     private final GenomeFileMapper genomeFileMapper;
     private final AnalysisTaskMapper analysisTaskMapper;
+    private final AnalysisTaskService analysisTaskService;
 
     // 文件上传目录（从配置文件读取，如果没有则使用默认值）
     @Value("${file.upload.genome-dir:./uploads/genome}")
@@ -145,35 +147,35 @@ public class GenomeFileServiceImpl implements GenomeFileService {
             throw new RuntimeException("无权删除该文件");
         }
         
-        log.info("开始删除文件: fileId={}, userId={}", fileId, userId);
-        
-        // 1. 获取该文件的所有分析任务
+        log.info("用户删除文件: fileId={}, userId={}", fileId, userId);
+        deleteFileAndRelatedData(file);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteFileAndRelatedData(GenomeFile file) {
+        Long fileId = file.getFileId();
+        log.info("级联删除文件及关联数据: fileId={}", fileId);
+
+        // 1. 该文件下的所有任务，批量删表再按任务删目录和记录
         List<AnalysisTask> tasks = analysisTaskMapper.findByFileId(fileId);
-        
-        // 2. 删除每个任务的输出目录
-        for (AnalysisTask task : tasks) {
-            if (task.getOutputDir() != null) {
-                try {
-                    deleteDirectory(task.getOutputDir());
-                    log.info("删除任务输出目录: {}", task.getOutputDir());
-                } catch (Exception e) {
-                    log.error("删除任务输出目录失败: {}", task.getOutputDir(), e);
-                }
+        if (!tasks.isEmpty()) {
+            analysisTaskService.deleteTasksAndRelatedDataBatch(tasks);
+        }
+
+        // 2. 删除物理基因文件
+        if (file.getFilePath() != null) {
+            try {
+                Files.deleteIfExists(Paths.get(file.getFilePath()));
+                log.info("删除物理文件: {}", file.getFilePath());
+            } catch (IOException e) {
+                log.error("删除物理文件失败: {}", file.getFilePath(), e);
             }
         }
-        
-        // 3. 删除物理基因文件
-        try {
-            Files.deleteIfExists(Paths.get(file.getFilePath()));
-            log.info("删除物理文件: {}", file.getFilePath());
-        } catch (IOException e) {
-            log.error("删除物理文件失败: {}", file.getFilePath(), e);
-        }
-        
-        // 4. 删除数据库记录（会级联删除analysis_tasks和analysis_results）
+
+        // 3. 删除文件数据库记录
         genomeFileMapper.deleteById(fileId);
-        
-        log.info("文件及相关数据删除完成: fileId={}, userId={}", fileId, userId);
+        log.info("文件及关联数据删除完成: fileId={}, 任务数={}", fileId, tasks.size());
     }
 
     @Override

@@ -19,7 +19,10 @@ import java.util.stream.Stream;
 
 /**
  * MAG 分析服务实现
- * 编排 MAG 文件夹的完整分析流程
+ * 编排 MAG 文件夹的完整分析流程：Prodigal 预处理 → 合并 .faa → ARG Docker 分析。
+ * ARG 输出写入 outputDir/arg（all_predictions.tsv、class_summary.tsv），
+ * 任务完成后由 AnalysisTaskServiceImpl 调用 VisualizationService.persistTaskResultsToDb 落库，
+ * 与可视化优化方案一致，避免在 MAG 路径下将完整 TSV 读入内存。
  */
 @Slf4j
 @Service
@@ -86,11 +89,13 @@ public class MagAnalysisServiceImpl implements MagAnalysisService {
             updateTaskStatus(taskId, "ANALYZING");
 
             log.info("阶段 2/2: ARG 分析");
+            // 不解析 TSV，避免大结果集进内存；落库由任务完成后 persistTaskResultsToDb 统一处理
             Map<String, Object> argResult = dockerService.runArgDetection(
                     taskId,
                     mergedFaa.toAbsolutePath().toString(),
                     argOutputDir.toAbsolutePath().toString(),
-                    params
+                    params,
+                    false
             );
 
             updateProgress(taskId, 2, 100, "ARG 分析完成");

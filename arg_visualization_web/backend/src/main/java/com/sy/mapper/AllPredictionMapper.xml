@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sy.mapper.AllPredictionMapper">
+
+    <!-- 批量插入：一条 SQL 多行，适合百万级落库 -->
+    <insert id="insertBatch">
+        INSERT INTO all_predictions (task_id, row_index, sequence_id, is_arg, binary_prob, arg_class, class_prob)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.taskId}, #{item.rowIndex}, #{item.sequenceId}, #{item.isArg}, #{item.binaryProb}, #{item.argClass}, #{item.classProb})
+        </foreach>
+    </insert>
+</mapper>

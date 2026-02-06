@@ -1,5 +1,7 @@
 package com.sy.service;
 
+import com.sy.pojo.AnalysisTask;
+
 import java.util.List;
 import java.util.Map;
 
@@ -49,12 +51,25 @@ public interface AnalysisTaskService {
     void cancelTask(Long taskId, Long userId);
     
     /**
-     * 删除任务
+     * 删除任务（带权限校验，用户只能删自己的任务）
      * @param taskId 任务ID
      * @param userId 用户ID
      */
     void deleteTask(Long taskId, Long userId);
-    
+
+    /**
+     * 级联删除任务及其关联数据（不校验权限，供删除文件/用户等场景调用）
+     * 删除：all_predictions、class_summary、analysis_results、任务输出目录、analysis_tasks 记录
+     * @param taskId 任务ID
+     */
+    void deleteTaskAndRelatedData(Long taskId);
+
+    /**
+     * 批量级联删除多个任务及其关联数据（先按 task_id IN 批量删表，再按任务删目录和记录，减少 round-trip）
+     * @param tasks 任务列表，不能为 null
+     */
+    void deleteTasksAndRelatedDataBatch(List<AnalysisTask> tasks);
+
     /**
      * 获取任务结果
      * @param taskId 任务ID

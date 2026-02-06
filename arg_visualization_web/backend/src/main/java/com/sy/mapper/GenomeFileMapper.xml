@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sy.mapper.GenomeFileMapper">
+
+    <!-- 分页搜索文件（用户/文件关键字），供 MyBatis-Plus 分页插件自动加 LIMIT 与 count -->
+    <select id="searchFilesWithConditionsPage" resultType="com.sy.pojo.GenomeFile">
+        SELECT gf.* FROM genome_files gf
+        LEFT JOIN users u ON gf.user_id = u.user_id
+        WHERE 1=1
+        <if test="userKeyword != null and userKeyword != ''">
+            AND (
+                CAST(gf.user_id AS CHAR) LIKE CONCAT('%', #{userKeyword}, '%')
+                OR CAST(u.user_id AS CHAR) LIKE CONCAT('%', #{userKeyword}, '%')
+                OR u.username LIKE CONCAT('%', #{userKeyword}, '%')
+            )
+        </if>
+        <if test="fileKeyword != null and fileKeyword != ''">
+            AND (
+                CAST(gf.file_id AS CHAR) LIKE CONCAT('%', #{fileKeyword}, '%')
+                OR gf.original_filename LIKE CONCAT('%', #{fileKeyword}, '%')
+            )
+        </if>
+        ORDER BY gf.upload_time DESC
+    </select>
+</mapper>

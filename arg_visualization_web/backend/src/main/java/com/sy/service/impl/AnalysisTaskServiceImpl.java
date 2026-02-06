@@ -1,13 +1,21 @@
 package com.sy.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.sy.mapper.AllPredictionMapper;
 import com.sy.mapper.AnalysisResultMapper;
 import com.sy.mapper.AnalysisTaskMapper;
+import com.sy.mapper.ClassSummaryMapper;
 import com.sy.mapper.GenomeFileMapper;
+import com.sy.pojo.AllPrediction;
+import com.sy.pojo.AnalysisResult;
 import com.sy.pojo.AnalysisTask;
+import com.sy.pojo.ClassSummary;
 import com.sy.pojo.GenomeFile;
 import com.sy.service.AnalysisTaskService;
 import com.sy.service.MagAnalysisService;
 import com.sy.service.TaskQueueManager;
+import com.sy.service.VisualizationService;
+import com.sy.exception.TaskCancelledException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,9 +41,12 @@ public class AnalysisTaskServiceImpl implements AnalysisTaskService {
     private final AnalysisTaskMapper analysisTaskMapper;
     private final AnalysisResultMapper analysisResultMapper;
     private final GenomeFileMapper genomeFileMapper;
+    private final AllPredictionMapper allPredictionMapper;
+    private final ClassSummaryMapper classSummaryMapper;
     private final DockerServiceImpl dockerService;
     private final TaskQueueManager taskQueueManager;
     private final MagAnalysisService magAnalysisService;
+    private final VisualizationService visualizationService;
     
     @Value("${analysis.output-dir:./outputs}")
     private String outputBaseDir;
@@ -172,13 +183,15 @@ public class AnalysisTaskServiceImpl implements AnalysisTaskService {
             throw new RuntimeException("任务已完成，无法取消");
         }
         
-        // 终止进程
+        // 终止 Docker 进程（若仍在跑）
         dockerService.cancelAnalysis(taskId);
-        
+        // 中断执行线程（含落库阶段），否则落库完成后会覆盖为 COMPLETED
+        taskQueueManager.cancelTask(taskId);
+
         task.setStatus("CANCELLED");
         task.setCompletedAt(LocalDateTime.now());
         analysisTaskMapper.updateById(task);
-        
+
         log.info("任务已取消: taskId={}", taskId);
     }
 
@@ -191,9 +204,93 @@ public class AnalysisTaskServiceImpl implements AnalysisTaskService {
         if (!task.getUserId().equals(userId)) {
             throw new RuntimeException("无权删除该任务");
         }
-        
+        log.info("用户删除任务: taskId={}, userId={}", taskId, userId);
+        deleteTaskAndRelatedData(taskId);
+    }
+
+    @Override
+    public void deleteTaskAndRelatedData(Long taskId) {
+        AnalysisTask task = analysisTaskMapper.selectById(taskId);
+        if (task == null) {
+            log.warn("deleteTaskAndRelatedData: 任务不存在, taskId={}", taskId);
+            return;
+        }
+        log.info("级联删除任务及关联数据: taskId={}", taskId);
+
+        // 1. 删除 all_predictions
+        int deletedPredictions = allPredictionMapper.delete(
+                new LambdaQueryWrapper<AllPrediction>().eq(AllPrediction::getTaskId, taskId));
+        log.info("删除任务 {} 的 all_predictions: {} 条", taskId, deletedPredictions);
+
+        // 2. 删除 class_summary
+        int deletedSummary = classSummaryMapper.delete(
+                new LambdaQueryWrapper<ClassSummary>().eq(ClassSummary::getTaskId, taskId));
+        log.info("删除任务 {} 的 class_summary: {} 条", taskId, deletedSummary);
+
+        // 3. 删除 analysis_results（表无 FK 时需显式删；有 CASCADE 时删除任务时会自动删，显式删更稳妥）
+        int deletedResults = analysisResultMapper.delete(
+                new LambdaQueryWrapper<AnalysisResult>().eq(AnalysisResult::getTaskId, taskId));
+        log.info("删除任务 {} 的 analysis_results: {} 条", taskId, deletedResults);
+
+        // 4. 删除任务输出目录
+        if (task.getOutputDir() != null) {
+            try {
+                Path outputPath = Paths.get(task.getOutputDir());
+                if (Files.exists(outputPath)) {
+                    Files.walk(outputPath)
+                            .sorted(Comparator.reverseOrder())
+                            .map(Path::toFile)
+                            .forEach(File::delete);
+                    log.info("删除任务输出目录: {}", task.getOutputDir());
+                }
+            } catch (Exception e) {
+                log.error("删除任务输出目录失败: {}", task.getOutputDir(), e);
+            }
+        }
+
+        // 5. 删除任务记录
         analysisTaskMapper.deleteById(taskId);
-        log.info("任务已删除: taskId={}", taskId);
+        log.info("任务及关联数据删除完成: taskId={}", taskId);
+    }
+
+    /** 批量删除时 IN 子句每批 task_id 数量，避免 SQL 过长 */
+    private static final int BATCH_DELETE_TASK_IDS_SIZE = 200;
+
+    @Override
+    public void deleteTasksAndRelatedDataBatch(List<AnalysisTask> tasks) {
+        if (tasks == null || tasks.isEmpty()) {
+            return;
+        }
+        List<Long> taskIds = tasks.stream().map(AnalysisTask::getTaskId).distinct().collect(Collectors.toList());
+        log.info("批量删除任务及关联数据: 任务数={}", taskIds.size());
+
+        // 1. 按批批量删除 all_predictions、class_summary、analysis_results（减少 round-trip）
+        for (int i = 0; i < taskIds.size(); i += BATCH_DELETE_TASK_IDS_SIZE) {
+            int to = Math.min(i + BATCH_DELETE_TASK_IDS_SIZE, taskIds.size());
+            List<Long> chunk = taskIds.subList(i, to);
+            int p = allPredictionMapper.delete(new LambdaQueryWrapper<AllPrediction>().in(AllPrediction::getTaskId, chunk));
+            int s = classSummaryMapper.delete(new LambdaQueryWrapper<ClassSummary>().in(ClassSummary::getTaskId, chunk));
+            int r = analysisResultMapper.delete(new LambdaQueryWrapper<AnalysisResult>().in(AnalysisResult::getTaskId, chunk));
+            log.debug("批量删除一批: taskIds={}, all_predictions={}, class_summary={}, analysis_results={}", chunk.size(), p, s, r);
+        }
+
+        // 2. 按任务删除输出目录和任务记录
+        for (AnalysisTask task : tasks) {
+            Long taskId = task.getTaskId();
+            if (task.getOutputDir() != null) {
+                try {
+                    Path path = Paths.get(task.getOutputDir());
+                    if (Files.exists(path)) {
+                        Files.walk(path).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+                        log.debug("删除任务输出目录: {}", task.getOutputDir());
+                    }
+                } catch (Exception e) {
+                    log.error("删除任务输出目录失败: taskId={}", taskId, e);
+                }
+            }
+            analysisTaskMapper.deleteById(taskId);
+        }
+        log.info("批量删除任务及关联数据完成: 任务数={}", taskIds.size());
     }
 
     @Override
@@ -260,30 +357,50 @@ public class AnalysisTaskServiceImpl implements AnalysisTaskService {
             // 执行抗性基因检测
             Map<String, Object> result = dockerService.runArgDetection(taskId, inputFilePath, outputDir, params);
             
+            // 先落库再标记完成，避免用户点击「查看结果」时拿到不完整数据
             task.setProgress(90);
             analysisTaskMapper.updateById(task);
+            log.info("ARG 模型执行完成，开始持久化结果: taskId={}", taskId);
             
-            // 更新任务状态
+            try {
+                visualizationService.persistTaskResultsToDb(taskId);
+            } catch (TaskCancelledException e) {
+                log.info("任务已取消，停止落库: taskId={}", taskId);
+                return;
+            } catch (Exception ex) {
+                log.warn("落库失败，使用结果中的数量: taskId={}", taskId, ex);
+                List<Map<String, Object>> argResults = (List<Map<String, Object>>) result.get("argResults");
+                if (argResults != null) {
+                    long argCount = argResults.stream().filter(r -> Boolean.TRUE.equals(r.get("isArg"))).count();
+                    task.setProphageCount((int) argCount);
+                    analysisTaskMapper.updateById(task);
+                }
+            }
+
+            // 若已被用户取消，不再覆盖为 COMPLETED
+            task = analysisTaskMapper.selectById(taskId);
+            if (task != null && "CANCELLED".equals(task.getStatus())) {
+                log.info("任务已取消，不更新为完成: taskId={}", taskId);
+                return;
+            }
+            // 持久化完成后再标记任务为 COMPLETED，前端此时才能看到完整数据
             task.setStatus("COMPLETED");
             task.setProgress(100);
             task.setCompletedAt(LocalDateTime.now());
-            
-            // 保存 ARG 数量
-            List<Map<String, Object>> argResults = (List<Map<String, Object>>) result.get("argResults");
-            if (argResults != null) {
-                long argCount = argResults.stream().filter(r -> Boolean.TRUE.equals(r.get("isArg"))).count();
-                task.setProphageCount((int) argCount);
-            }
-            
             analysisTaskMapper.updateById(task);
-            log.info("分析任务完成: taskId={}", taskId);
-            
+            log.info("分析任务完成（已落库）: taskId={}", taskId);
+
+        } catch (TaskCancelledException e) {
+            log.info("任务已取消: taskId={}", taskId);
         } catch (Exception e) {
             log.error("分析任务失败: taskId={}", taskId, e);
-            task.setStatus("FAILED");
-            task.setErrorMessage(e.getMessage());
-            task.setCompletedAt(LocalDateTime.now());
-            analysisTaskMapper.updateById(task);
+            task = analysisTaskMapper.selectById(taskId);
+            if (task != null && !"CANCELLED".equals(task.getStatus())) {
+                task.setStatus("FAILED");
+                task.setErrorMessage(e.getMessage());
+                task.setCompletedAt(LocalDateTime.now());
+                analysisTaskMapper.updateById(task);
+            }
         }
     }
 
@@ -475,26 +592,47 @@ public class AnalysisTaskServiceImpl implements AnalysisTaskService {
             // 执行 MAG 分析（包含 Prodigal 预处理 + ARG 分析）
             Map<String, Object> result = magAnalysisService.analyzeMag(taskId, magDir, outputDir, params);
             
-            // 更新任务状态
+            // 先落库再标记完成，避免用户点击「查看结果」时拿到不完整数据
+            task.setProgress(90);
+            analysisTaskMapper.updateById(task);
+            log.info("MAG 分析执行完成，开始持久化结果: taskId={}", taskId);
+            
+            try {
+                visualizationService.persistTaskResultsToDb(taskId);
+            } catch (TaskCancelledException e) {
+                log.info("MAG 任务已取消，停止落库: taskId={}", taskId);
+                return;
+            } catch (Exception ex) {
+                log.warn("落库失败，使用结果中的数量: taskId={}", taskId, ex);
+                Object argCountObj = result.get("argCount");
+                if (argCountObj != null) {
+                    task.setProphageCount(((Number) argCountObj).intValue());
+                    analysisTaskMapper.updateById(task);
+                }
+            }
+
+            task = analysisTaskMapper.selectById(taskId);
+            if (task != null && "CANCELLED".equals(task.getStatus())) {
+                log.info("MAG 任务已取消，不更新为完成: taskId={}", taskId);
+                return;
+            }
             task.setStatus("COMPLETED");
             task.setProgress(100);
             task.setCompletedAt(LocalDateTime.now());
-            
-            // 保存 ARG 数量
-            Object argCountObj = result.get("argCount");
-            if (argCountObj != null) {
-                task.setProphageCount((Integer) argCountObj);
-            }
-            
             analysisTaskMapper.updateById(task);
-            log.info("MAG 分析任务完成: taskId={}", taskId);
-            
+            log.info("MAG 分析任务完成（已落库）: taskId={}", taskId);
+
+        } catch (TaskCancelledException e) {
+            log.info("MAG 任务已取消: taskId={}", taskId);
         } catch (Exception e) {
             log.error("MAG 分析任务失败: taskId={}", taskId, e);
-            task.setStatus("FAILED");
-            task.setErrorMessage(e.getMessage());
-            task.setCompletedAt(LocalDateTime.now());
-            analysisTaskMapper.updateById(task);
+            task = analysisTaskMapper.selectById(taskId);
+            if (task != null && !"CANCELLED".equals(task.getStatus())) {
+                task.setStatus("FAILED");
+                task.setErrorMessage(e.getMessage());
+                task.setCompletedAt(LocalDateTime.now());
+                analysisTaskMapper.updateById(task);
+            }
         }
     }
 }

@@ -140,6 +140,17 @@
               </template>
             </el-table-column>
           </el-table>
+          <div class="pagination-wrap">
+            <el-pagination
+              v-model:current-page="userPagination.pageNum"
+              v-model:page-size="userPagination.pageSize"
+              :page-sizes="[10, 20, 50, 100]"
+              :total="userPagination.total"
+              layout="total, sizes, prev, pager, next"
+              @current-change="onUserPageChange"
+              @size-change="onUserSizeChange"
+            />
+          </div>
         </el-tab-pane>
 
         <!-- 文件管理 -->
@@ -215,6 +226,17 @@
               </template>
             </el-table-column>
           </el-table>
+          <div class="pagination-wrap">
+            <el-pagination
+              v-model:current-page="filePagination.pageNum"
+              v-model:page-size="filePagination.pageSize"
+              :page-sizes="[10, 20, 50, 100]"
+              :total="filePagination.total"
+              layout="total, sizes, prev, pager, next"
+              @current-change="onFilePageChange"
+              @size-change="onFileSizeChange"
+            />
+          </div>
         </el-tab-pane>
       </el-tabs>
     </el-card>
@@ -235,13 +257,11 @@ import {
   Search,
 } from '@element-plus/icons-vue';
 import {
-  getAllUsers,
+  getUsersPage,
   deleteUser,
-  getAllFiles,
+  getFilesPage,
   deleteFile,
   getStatistics,
-  searchUsers,
-  searchFiles,
 } from '@/api/admin';
 import { currentLocale } from '@/locales';
 
@@ -263,6 +283,19 @@ const statistics = ref({
 const userList = ref([]);
 const fileList = ref([]);
 
+// 用户分页
+const userPagination = ref({
+  pageNum: 1,
+  pageSize: 10,
+  total: 0,
+});
+// 文件分页
+const filePagination = ref({
+  pageNum: 1,
+  pageSize: 10,
+  total: 0,
+});
+
 const searchKeyword = ref({
   users: '',
   files: {
@@ -281,13 +314,22 @@ const fetchStatistics = async () => {
   }
 };
 
-// 获取用户列表
-const fetchUsers = async () => {
+// 获取用户列表（分页，可选关键字）
+const fetchUsers = async (resetPage = true) => {
+  if (resetPage) userPagination.value.pageNum = 1;
   loading.value.users = true;
   try {
-    const res = await getAllUsers();
-    userList.value = res.data;
-    searchKeyword.value.users = ''; // 清空搜索关键字
+    const params = {
+      pageNum: userPagination.value.pageNum,
+      pageSize: userPagination.value.pageSize,
+    };
+    if (searchKeyword.value.users?.trim()) {
+      params.keyword = searchKeyword.value.users.trim();
+    }
+    const res = await getUsersPage(params);
+    userList.value = res.data?.list ?? [];
+    userPagination.value.total = res.data?.total ?? 0;
+    if (resetPage) searchKeyword.value.users = '';
   } catch (error) {
     ElMessage.error(t('admin.messages.getUsersFailed') + ': ' + (error.message || ''));
   } finally {
@@ -295,35 +337,48 @@ const fetchUsers = async () => {
   }
 };
 
-// 搜索用户
+// 搜索用户（第 1 页）
 const handleSearchUsers = async () => {
-  if (!searchKeyword.value.users || !searchKeyword.value.users.trim()) {
-    fetchUsers();
-    return;
-  }
-  
-  loading.value.users = true;
-  try {
-    const res = await searchUsers(searchKeyword.value.users.trim());
-    userList.value = res.data;
-    if (res.data.length === 0) {
-      ElMessage.info(t('admin.users.noMatch'));
-    }
-  } catch (error) {
-    ElMessage.error(t('admin.messages.searchUsersFailed') + ': ' + (error.message || ''));
-  } finally {
-    loading.value.users = false;
+  userPagination.value.pageNum = 1;
+  await fetchUsers(false);
+  if (userList.value.length === 0 && searchKeyword.value.users?.trim()) {
+    ElMessage.info(t('admin.users.noMatch'));
   }
 };
 
-// 获取文件列表
-const fetchFiles = async () => {
+// 用户分页变更
+const onUserPageChange = (page) => {
+  userPagination.value.pageNum = page;
+  fetchUsers(false);
+};
+const onUserSizeChange = (size) => {
+  userPagination.value.pageSize = size;
+  userPagination.value.pageNum = 1;
+  fetchUsers(false);
+};
+
+// 获取文件列表（分页，可选关键字）
+const fetchFiles = async (resetPage = true) => {
+  if (resetPage) {
+    filePagination.value.pageNum = 1;
+    searchKeyword.value.files.user = '';
+    searchKeyword.value.files.file = '';
+  }
   loading.value.files = true;
   try {
-    const res = await getAllFiles();
-    fileList.value = res.data;
-    searchKeyword.value.files.user = ''; // 清空搜索关键字
-    searchKeyword.value.files.file = ''; // 清空搜索关键字
+    const params = {
+      pageNum: filePagination.value.pageNum,
+      pageSize: filePagination.value.pageSize,
+    };
+    if (searchKeyword.value.files.user?.trim()) {
+      params.userKeyword = searchKeyword.value.files.user.trim();
+    }
+    if (searchKeyword.value.files.file?.trim()) {
+      params.fileKeyword = searchKeyword.value.files.file.trim();
+    }
+    const res = await getFilesPage(params);
+    fileList.value = res.data?.list ?? [];
+    filePagination.value.total = res.data?.total ?? 0;
   } catch (error) {
     ElMessage.error(t('admin.messages.getFilesFailed') + ': ' + (error.message || ''));
   } finally {
@@ -331,35 +386,27 @@ const fetchFiles = async () => {
   }
 };
 
-// 搜索文件
+// 搜索文件（第 1 页）
 const handleSearchFiles = async () => {
-  const userKeyword = searchKeyword.value.files.user?.trim() || '';
-  const fileKeyword = searchKeyword.value.files.file?.trim() || '';
-  
-  // 如果两个关键字都为空，刷新列表
-  if (!userKeyword && !fileKeyword) {
-    fetchFiles();
-    return;
-  }
-  
-  loading.value.files = true;
-  try {
-    const res = await searchFiles(
-      userKeyword || null,
-      fileKeyword || null
-    );
-    fileList.value = res.data;
-    if (res.data.length === 0) {
-      ElMessage.info(t('admin.files.noMatch'));
-    }
-  } catch (error) {
-    ElMessage.error(t('admin.messages.searchFilesFailed') + ': ' + (error.message || ''));
-  } finally {
-    loading.value.files = false;
+  filePagination.value.pageNum = 1;
+  await fetchFiles(false);
+  if (fileList.value.length === 0 && (searchKeyword.value.files.user?.trim() || searchKeyword.value.files.file?.trim())) {
+    ElMessage.info(t('admin.files.noMatch'));
   }
 };
 
-// 删除用户
+// 文件分页变更
+const onFilePageChange = (page) => {
+  filePagination.value.pageNum = page;
+  fetchFiles(false);
+};
+const onFileSizeChange = (size) => {
+  filePagination.value.pageSize = size;
+  filePagination.value.pageNum = 1;
+  fetchFiles(false);
+};
+
+// 删除用户（乐观更新：先从列表移除，后台请求完成后失败则恢复）
 const handleDeleteUser = async (row) => {
   try {
     await ElMessageBox.confirm(
@@ -373,11 +420,24 @@ const handleDeleteUser = async (row) => {
       }
     );
 
-    await deleteUser(row.userId);
-    ElMessage.success(t('admin.users.deleteSuccess'));
-    fetchUsers();
-    fetchFiles();
-    fetchStatistics();
+    const userId = row.userId;
+    const idx = userList.value.findIndex((u) => u.userId === userId);
+    const backup = idx >= 0 ? userList.value[idx] : null;
+    if (idx >= 0) {
+      userList.value = userList.value.filter((u) => u.userId !== userId);
+    }
+    const loadingMsg = ElMessage({ type: 'info', message: t('admin.users.deleting') || '正在删除…', duration: 0 });
+    try {
+      await deleteUser(userId);
+      loadingMsg.close();
+      ElMessage.success(t('admin.users.deleteSuccess'));
+      fetchStatistics();
+      fetchUsers(false);
+    } catch (err) {
+      loadingMsg.close();
+      if (backup) userList.value = [...userList.value.slice(0, idx), backup, ...userList.value.slice(idx)];
+      ElMessage.error(t('admin.messages.deleteUserFailed') + ': ' + (err.message || ''));
+    }
   } catch (error) {
     if (error !== 'cancel' && error !== 'close') {
       ElMessage.error(t('admin.messages.deleteUserFailed') + ': ' + (error.message || ''));
@@ -385,7 +445,7 @@ const handleDeleteUser = async (row) => {
   }
 };
 
-// 删除文件
+// 删除文件（乐观更新：先从列表移除，后台请求完成后失败则恢复）
 const handleDeleteFile = async (row) => {
   try {
     await ElMessageBox.confirm(
@@ -399,10 +459,24 @@ const handleDeleteFile = async (row) => {
       }
     );
 
-    await deleteFile(row.fileId);
-    ElMessage.success(t('admin.files.deleteSuccess'));
-    fetchFiles();
-    fetchStatistics();
+    const fileId = row.fileId;
+    const idx = fileList.value.findIndex((f) => f.fileId === fileId);
+    const backup = idx >= 0 ? fileList.value[idx] : null;
+    if (idx >= 0) {
+      fileList.value = fileList.value.filter((f) => f.fileId !== fileId);
+    }
+    const loadingMsg = ElMessage({ type: 'info', message: t('admin.files.deleting') || '正在删除…', duration: 0 });
+    try {
+      await deleteFile(fileId);
+      loadingMsg.close();
+      ElMessage.success(t('admin.files.deleteSuccess'));
+      fetchStatistics();
+      fetchFiles(false);
+    } catch (err) {
+      loadingMsg.close();
+      if (backup) fileList.value = [...fileList.value.slice(0, idx), backup, ...fileList.value.slice(idx)];
+      ElMessage.error(t('admin.messages.deleteFileFailed') + ': ' + (err.message || ''));
+    }
   } catch (error) {
     if (error !== 'cancel' && error !== 'close') {
       ElMessage.error(t('admin.messages.deleteFileFailed') + ': ' + (error.message || ''));
@@ -581,6 +655,12 @@ onMounted(() => {
 
 .data-table {
   background: transparent !important;
+}
+
+.pagination-wrap {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
 }
 
 /* 强制覆盖所有可能的白色背景 */
