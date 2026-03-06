@@ -200,6 +200,13 @@ public class DockerServiceImpl implements DockerService {
             pb.command("bash", "-c", command);
         }
 
+        // 设置 Docker 环境变量（如果系统环境中有）
+        String dockerHost = System.getenv("DOCKER_HOST");
+        if (dockerHost != null && !dockerHost.isEmpty()) {
+            pb.environment().put("DOCKER_HOST", dockerHost);
+            log.debug("设置 DOCKER_HOST: {}", dockerHost);
+        }
+
         pb.redirectErrorStream(false);
         Process process = pb.start();
 

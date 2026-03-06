@@ -1,0 +1,24 @@
+{
+  "version": "1.2",
+  "dbname": "ARG_DB",
+  "dbtype": "Protein",
+  "db-version": 5,
+  "description": "ARG Database",
+  "number-of-letters": 6459869,
+  "number-of-sequences": 17345,
+  "last-updated": "2026-03-06T08:59:00",
+  "number-of-volumes": 1,
+  "bytes-total": 9563063,
+  "bytes-to-cache": 6616071,
+  "files": [
+    "ARG_DB.pdb",
+    "ARG_DB.phr",
+    "ARG_DB.pin",
+    "ARG_DB.pog",
+    "ARG_DB.pos",
+    "ARG_DB.pot",
+    "ARG_DB.psq",
+    "ARG_DB.ptf",
+    "ARG_DB.pto"
+  ]
+}

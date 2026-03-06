@@ -1,6 +1,51 @@
+# ==================== macOS ====================
 .DS_Store
+.AppleDouble
+.LSOverride
+
+# ==================== VS Code ====================
 .vscode/
+
+# ==================== Python (Jupyter/Workflow) ====================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ==================== Java/Maven (Backend) ====================
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.iml
+.idea/
+.classpath
+.project
+.settings/
+.factorypath
+
+# ==================== Docker ====================
+*.tar
+
+# ==================== Logs ====================
+*.log
+logs/
+
+# ==================== Temp ====================
+*.tmp
+*.temp
+/tmp/
+
+# ==================== Project Specific ====================
 .AGENTS.md
 .CLAUDE.md
 .PROJECT.md
-.README.md 
+.README.md

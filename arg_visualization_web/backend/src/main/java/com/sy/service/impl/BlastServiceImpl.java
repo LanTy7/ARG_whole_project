@@ -227,7 +227,7 @@ public class BlastServiceImpl implements BlastService {
 
             // 3. 构建 Docker 命令
             String command = String.format(
-                "docker run --rm " +
+                "docker run --rm --platform linux/amd64 " +
                 "-v %s:/query:ro " +
                 "-v %s:/blast_db:ro " +
                 "-v %s:/output " +
