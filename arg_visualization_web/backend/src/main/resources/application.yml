@@ -80,7 +80,7 @@ docker:
   command-prefix: ${DOCKER_COMMAND_PREFIX:}
   # ARG 配置
   arg:
-    image-name: ${ARG_IMAGE:arg-bilstm:latest}
+    image-name: ${ARG_IMAGE:arg-bilstm:v2.0}
     model-path: ${ARG_MODEL_PATH:/app/models}
     input-mount: ${ARG_INPUT_MOUNT:/input}
     output-mount: ${ARG_OUTPUT_MOUNT:/output}
