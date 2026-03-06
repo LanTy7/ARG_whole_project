@@ -60,6 +60,8 @@ def run_end_to_end(input_file, output_dir, model_dir, threshold=0.5):
     
     if total_seqs == 0:
         print("[WARNING] 输入文件为空")
+        # 即使输入为空，也要生成所有输出文件
+        create_empty_outputs(output_dir, records)
         return
     
     # 5. 批量预测
@@ -73,7 +75,7 @@ def run_end_to_end(input_file, output_dir, model_dir, threshold=0.5):
     print(f"       - ARG: {arg_count}")
     print(f"       - Non-ARG: {non_arg_count}")
     
-    # 7. 保存结果
+    # 7. 保存结果（始终生成全部4个文件）
     print(f"[4/4] 保存结果: {output_dir}")
     
     # 7.1 将 top_classes 转为 JSON 字符串以便保存到 TSV
@@ -81,30 +83,35 @@ def run_end_to_end(input_file, output_dir, model_dir, threshold=0.5):
         if r.get('top_classes'):
             r['top_classes'] = json.dumps(r['top_classes'], ensure_ascii=False)
     
-    # 7.2 全部预测结果 (TSV)
+    # 7.2 全部预测结果 (TSV) - 始终生成
     df_all = pd.DataFrame(results)
     df_all.to_csv(os.path.join(output_dir, "all_predictions.tsv"), sep='\t', index=False)
     
-    # 7.3 仅ARG结果 (TSV)
+    # 7.3 仅ARG结果 (TSV) - 始终生成（即使为空）
     df_arg = df_all[df_all['is_arg'] == True]
     df_arg.to_csv(os.path.join(output_dir, "arg_predictions.tsv"), sep='\t', index=False)
     
-    # 7.4 ARG序列 (FASTA)
+    # 7.4 ARG序列 (FASTA) - 始终生成（即使为空）
     arg_ids = set(df_arg['id'].tolist())
     arg_records = [r for r in records if r.id in arg_ids]
+    fasta_path = os.path.join(output_dir, "arg_sequences.fasta")
     if arg_records:
-        # 添加预测信息到description (注意: results 中的 top_classes 已经是 JSON 字符串)
+        # 添加预测信息到description
         id_to_result = {r['id']: r for r in results if r['is_arg']}
         for record in arg_records:
             res = id_to_result[record.id]
             record.description = f"{record.id} | ARG_class={res['arg_class']} | class_prob={res['class_prob']} | binary_prob={res['binary_prob']}"
-        
-        SeqIO.write(arg_records, os.path.join(output_dir, "arg_sequences.fasta"), "fasta")
+        SeqIO.write(arg_records, fasta_path, "fasta")
+    else:
+        # 没有ARG时，写入空文件（带注释）
+        with open(fasta_path, 'w') as f:
+            f.write("# No ARG sequences found\n")
     
-    # 7.5 类别统计
+    # 7.5 类别统计 (TSV) - 始终生成（即使为空）
+    summary_path = os.path.join(output_dir, "class_summary.tsv")
     if not df_arg.empty:
         class_counts = df_arg['arg_class'].value_counts()
-        class_counts.to_csv(os.path.join(output_dir, "class_summary.tsv"), sep='\t', header=['count'])
+        class_counts.to_csv(summary_path, sep='\t', header=['count'])
         
         print("\n" + "=" * 50)
         print("ARG 类别分布:")
@@ -112,12 +119,39 @@ def run_end_to_end(input_file, output_dir, model_dir, threshold=0.5):
         for cls, count in class_counts.items():
             print(f"  {cls}: {count}")
         print("=" * 50)
+    else:
+        # 没有ARG时，写入空表头
+        with open(summary_path, 'w') as f:
+            f.write("arg_class\tcount\n")
     
     print(f"\n[完成] 结果已保存到: {output_dir}")
     print(f"  - all_predictions.tsv   (所有序列预测结果)")
     print(f"  - arg_predictions.tsv   (仅ARG序列)")
     print(f"  - arg_sequences.fasta   (ARG序列FASTA)")
     print(f"  - class_summary.tsv     (类别统计)")
+
+
+def create_empty_outputs(output_dir, records):
+    """
+    当输入为空时，创建空的输出文件
+    """
+    # all_predictions.tsv
+    pd.DataFrame(columns=['id', 'is_arg', 'binary_prob', 'arg_class', 'class_prob', 'top_classes']).to_csv(
+        os.path.join(output_dir, "all_predictions.tsv"), sep='\t', index=False)
+    
+    # arg_predictions.tsv
+    pd.DataFrame(columns=['id', 'is_arg', 'binary_prob', 'arg_class', 'class_prob', 'top_classes']).to_csv(
+        os.path.join(output_dir, "arg_predictions.tsv"), sep='\t', index=False)
+    
+    # arg_sequences.fasta
+    with open(os.path.join(output_dir, "arg_sequences.fasta"), 'w') as f:
+        f.write("# No sequences in input file\n")
+    
+    # class_summary.tsv
+    with open(os.path.join(output_dir, "class_summary.tsv"), 'w') as f:
+        f.write("arg_class\tcount\n")
+    
+    print(f"[完成] 空结果已保存到: {output_dir}")
 
 
 def main():
@@ -162,4 +196,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
