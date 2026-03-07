@@ -36,11 +36,11 @@ export default {
     inputType: '输入类型',
     inputTypes: {
       sequence: '蛋白质序列',
-      file: 'FASTA 文件',
+      file: '蛋白质文件',
       mag: 'MAG 文件夹'
     },
     magName: 'MAG 名称',
-    magNamePlaceholder: '可选，不填则自动生成',
+    magNamePlaceholder: '(可选)不填则自动生成',
     fileType: '文件类型',
     fileTypePlaceholder: '请选择文件类型',
     fileTypes: {
@@ -48,10 +48,12 @@ export default {
       fasta: 'FASTA',
       faa: 'FAA (蛋白质序列)'
     },
+    fileName: '文件名',
+    fileNamePlaceholder: '（可选）',
     description: '文件描述',
     descriptionPlaceholder: '请输入文件描述（可选）',
     uploadContent: '上传内容',
-    sequencePlaceholder: '在此粘贴或输入蛋白质序列（FASTA格式）',
+    sequencePlaceholder: '>AAN59974.1 histone H2A [Homo sapiens]\nMSGRGKQGGKARAKAKTRSSRAGLQFPVGRVHRLLRKGNYAERVGAGAPVYLAAVLEYLTAEILELAGNAARDNKKTRIIPRHLQLAIRNDEELNKLLGKVTIAQGGVLPNIQAVLLPKKTESHHKAKGK\n...',
     sequenceTip: '文本内容将直接被上传到服务器进行分析',
     dragText: '将文件拖到此处，或',
     clickUpload: '点击上传',
@@ -62,7 +64,7 @@ export default {
     },
     magFolderText: '点击选择 MAG 文件夹，或将文件夹拖到此处',
     magFilesText: '点击选择多个文件，或将文件拖到此处',
-    magFileTip: '支持 .fa / .fasta / .fna 格式',
+    magFileTip: '仅支持核酸序列 .fa / .fasta / .fna（不支持 .faa）',
     selected: '已选择',
     filesCount: '{count} 个文件',
     clear: '清空',
@@ -113,7 +115,7 @@ export default {
     },
     messages: {
       onlyOneFile: '每次只能上传一个文件',
-      noValidFiles: '未找到有效的 FASTA 文件（.fa/.fasta/.fna）',
+      noValidFiles: '未找到有效的核酸 FASTA 文件（.fa/.fasta/.fna）',
       selectedFiles: '已选择 {count} 个有效文件',
       enterText: '请输入要上传的文本内容',
       selectFile: '请选择要上传的文件',
@@ -128,7 +130,11 @@ export default {
       taskCreated: '抗性基因分析任务已创建',
       createTaskFailed: '创建任务失败',
       fileDeleted: '文件已删除',
-      unsupportedFormat: '不支持的文件格式: {name}'
+      unsupportedFormat: '不支持的文件格式: {name}',
+      invalidFileType: '文件类型不符合要求，仅支持 .fasta / .fa / .faa / .fna',
+      invalidFastaFormat: 'FASTA 格式不正确：每条记录必须为一行 ">" 开头的头部 + 一行序列',
+      readFileFailed: '读取文件失败',
+      fileNameOnlyOneDot: '文件名只能包含一个点（.）'
     },
     confirmAnalyze: '文件上传成功，是否立即开始抗性基因分析？',
     confirmAnalyzeTitle: '提示',

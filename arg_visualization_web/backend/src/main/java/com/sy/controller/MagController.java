@@ -31,7 +31,7 @@ public class MagController {
     @Value("${file.upload.mag-dir:./uploads/mag}")
     private String magUploadDir;
 
-    // 允许的 FASTA 文件扩展名
+    // 允许的核酸 FASTA 文件扩展名（MAG 仅支持核酸，需 Prodigal 预测）
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of(
             "fa", "fasta", "fna"
     );
@@ -76,17 +76,18 @@ public class MagController {
             }
 
             if (validFiles.isEmpty()) {
-                return Result.error("没有找到有效的 FASTA 文件（支持 .fa, .fasta, .fna）");
+                return Result.error("没有找到有效的核酸 FASTA 文件（支持 .fa, .fasta, .fna）");
             }
 
-            // 生成 MAG 名称
+            // 生成 MAG 名称（展示/任务用）
             if (magName == null || magName.trim().isEmpty()) {
                 magName = "MAG_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
             }
 
-            // 创建 MAG 目录
+            // 创建 MAG 目录：使用用户输入的名称（消毒后）+ userId + 时间戳，保证唯一且可读
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-            String magDirName = "mag_" + userId + "_" + timestamp;
+            String safeName = sanitizeDirName(magName.trim());
+            String magDirName = safeName + "_" + userId + "_" + timestamp;
             Path magDir = Paths.get(magUploadDir, magDirName);
             Files.createDirectories(magDir);
 
@@ -198,6 +199,20 @@ public class MagController {
             log.error("创建 MAG 分析任务失败", e);
             return Result.error("创建任务失败: " + e.getMessage());
         }
+    }
+
+    /**
+     * 将用户输入的 MAG 名称消毒为可作目录名的字符串（仅保留字母数字、下划线、横线、一个点）
+     */
+    private String sanitizeDirName(String name) {
+        if (name == null || name.isEmpty()) {
+            return "MAG";
+        }
+        String safe = name.replaceAll("[^a-zA-Z0-9_\\-\\.]", "_").replaceAll("_+", "_").replaceAll("\\.+", ".");
+        if (safe.isEmpty()) {
+            return "MAG";
+        }
+        return safe.length() > 80 ? safe.substring(0, 80) : safe;
     }
 
     /**

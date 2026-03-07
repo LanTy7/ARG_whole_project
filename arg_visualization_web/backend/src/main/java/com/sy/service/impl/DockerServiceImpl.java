@@ -137,9 +137,9 @@ public class DockerServiceImpl implements DockerService {
         cmd.append("docker run --rm ");
 
         // GPU 支持
-        if (useGpu) {
-            cmd.append("--gpus all ");
-        }
+        // if (useGpu) {
+        //     cmd.append("--gpus all ");
+        // }
 
         // 挂载输入目录（只读）
         cmd.append("-v ").append(normalizedInputDir).append(":").append(argInputMount).append(":ro ");

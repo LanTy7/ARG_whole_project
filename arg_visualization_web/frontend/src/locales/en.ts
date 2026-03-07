@@ -36,11 +36,11 @@ export default {
     inputType: 'Input Type',
     inputTypes: {
       sequence: 'Protein Sequence',
-      file: 'FASTA File',
+      file: 'Protein File',
       mag: 'MAG Folder'
     },
     magName: 'MAG Name',
-    magNamePlaceholder: 'Optional, auto-generated if empty',
+    magNamePlaceholder: '(Optional), auto-generated if empty',
     fileType: 'File Type',
     fileTypePlaceholder: 'Select file type',
     fileTypes: {
@@ -48,10 +48,12 @@ export default {
       fasta: 'FASTA',
       faa: 'FAA (Protein Sequence)'
     },
+    fileName: 'File name',
+    fileNamePlaceholder: '(Optional)',
     description: 'Description',
     descriptionPlaceholder: 'Enter file description (optional)',
     uploadContent: 'Upload Content',
-    sequencePlaceholder: 'Paste or enter protein sequence here (FASTA format)',
+    sequencePlaceholder: '>AAN59974.1 histone H2A [Homo sapiens]\nMSGRGKQGGKARAKAKTRSSRAGLQFPVGRVHRLLRKGNYAERVGAGAPVYLAAVLEYLTAEILELAGNAARDNKKTRIIPRHLQLAIRNDEELNKLLGKVTIAQGGVLPNIQAVLLPKKTESHHKAKGK\n...',
     sequenceTip: 'Text content will be uploaded directly for analysis',
     dragText: 'Drop file here, or',
     clickUpload: 'click to upload',
@@ -62,7 +64,7 @@ export default {
     },
     magFolderText: 'Click to select MAG folder, or drop folder here',
     magFilesText: 'Click to select multiple files, or drop files here',
-    magFileTip: 'Supports .fa / .fasta / .fna format',
+    magFileTip: 'Nucleotide sequences only: .fa / .fasta / .fna (no .faa)',
     selected: 'Selected',
     filesCount: '{count} files',
     clear: 'Clear',
@@ -113,7 +115,7 @@ export default {
     },
     messages: {
       onlyOneFile: 'Only one file allowed at a time',
-      noValidFiles: 'No valid FASTA files found (.fa/.fasta/.fna)',
+      noValidFiles: 'No valid nucleotide FASTA files found (.fa/.fasta/.fna)',
       selectedFiles: 'Selected {count} valid files',
       enterText: 'Please enter text content to upload',
       selectFile: 'Please select a file to upload',
@@ -128,7 +130,11 @@ export default {
       taskCreated: 'ARG analysis task created',
       createTaskFailed: 'Failed to create task',
       fileDeleted: 'File deleted',
-      unsupportedFormat: 'Unsupported format: {name}'
+      unsupportedFormat: 'Unsupported format: {name}',
+      invalidFileType: 'Invalid file type. Only .fasta / .fa / .faa / .fna are supported',
+      invalidFastaFormat: 'Invalid FASTA format: each record must be one line starting with ">" followed by one sequence line',
+      readFileFailed: 'Failed to read file',
+      fileNameOnlyOneDot: 'File name may only contain one dot (.)'
     },
     confirmAnalyze: 'File uploaded successfully. Start ARG analysis now?',
     confirmAnalyzeTitle: 'Confirm',

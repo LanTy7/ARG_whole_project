@@ -36,7 +36,7 @@ public class MagAnalysisServiceImpl implements MagAnalysisService {
     @Value("${analysis.output-dir:./genome_outputs}")
     private String outputBaseDir;
 
-    // FASTA 文件扩展名
+    // 核酸 FASTA 文件扩展名（MAG 仅支持核酸）
     private static final List<String> FASTA_EXTENSIONS = Arrays.asList(
             ".fa", ".fasta", ".fna"
     );

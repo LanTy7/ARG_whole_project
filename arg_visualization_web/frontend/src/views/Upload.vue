@@ -17,14 +17,17 @@
           </el-radio-group>
         </el-form-item>
 
-        <!-- MAG 名称（仅 MAG 模式） -->
+        <!-- MAG 名称（仅 MAG 模式，只能包含一个点，上传后代替系统生成的名称） -->
         <el-form-item v-if="inputType === 'mag'" :label="$t('upload.magName')">
           <el-input
             v-model="uploadForm.magName"
             :placeholder="$t('upload.magNamePlaceholder')"
+            maxlength="200"
+            show-word-limit
+            @input="onMagNameInput"
           />
         </el-form-item>
-        
+
         <!-- 文件类型（非 MAG 模式） -->
         <el-form-item v-if="inputType !== 'mag'" :label="$t('upload.fileType')">
           <el-select v-model="uploadForm.fileType" :placeholder="$t('upload.fileTypePlaceholder')" style="width: 100%">
@@ -32,6 +35,17 @@
             <el-option :label="$t('upload.fileTypes.fasta')" value="fasta" />
             <el-option :label="$t('upload.fileTypes.faa')" value="faa" />
           </el-select>
+        </el-form-item>
+
+        <!-- 文件名（序列/单文件模式：上传时替换为此时输入的文件名） -->
+        <el-form-item v-if="inputType === 'sequence' || inputType === 'file'" :label="$t('upload.fileName')">
+          <el-input
+            v-model="uploadForm.fileName"
+            :placeholder="$t('upload.fileNamePlaceholder')"
+            maxlength="200"
+            show-word-limit
+            @input="onFileNameInput"
+          />
         </el-form-item>
         
         <el-form-item :label="$t('upload.description')">
@@ -68,6 +82,7 @@
                 :on-exceed="handleExceed"
                 drag
                 class="upload-demo"
+                accept=".fasta,.fa,.faa,.fna"
               >
                 <el-icon class="el-icon--upload"><UploadFilled /></el-icon>
                 <div class="el-upload__text">
@@ -269,7 +284,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, computed, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { UploadFilled, Upload, Refresh, FolderOpened } from '@element-plus/icons-vue'
@@ -295,11 +310,12 @@ const magFolderName = ref('')
 const isDragOver = ref(false)
 
 const uploadForm = reactive({
+  magName: '',
+  fileName: '',
   file: null,
   fileType: 'auto-detect',
   description: '',
-  textContent: '',
-  magName: ''
+  textContent: ''
 })
 
 const uploadProgress = reactive({
@@ -321,18 +337,92 @@ const canUpload = computed(() => {
   return false
 })
 
+// FASTA 格式校验：只看前两行（忽略空行）：
+// 第 1 行必须以 '>' 开头；第 2 行必须为英文序列（字母）
+const FASTA_HEADER_REGEX = /^>.+$/
+const FASTA_SEQUENCE_REGEX = /^[A-Za-z]+$/
+const isValidFasta = (text) => {
+  const lines = String(text || '')
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0)
+  if (lines.length < 2) return false
+  return FASTA_HEADER_REGEX.test(lines[0]) && FASTA_SEQUENCE_REGEX.test(lines[1])
+}
+
+// 读取文件前若干行（用于校验，最多读约 50KB 足够 10 行）
+const readFileHead = (file, maxBytes = 51200) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = () => reject(reader.error)
+    reader.readAsText(file.slice(0, Math.min(maxBytes, file.size)))
+  })
+
 // 切换输入类型
 const handleInputTypeChange = () => {
   uploadForm.file = null
   uploadForm.textContent = ''
+  uploadForm.magName = ''
+  uploadForm.fileName = ''
   magFileList.value = []
   magFolderName.value = ''
   uploadRef.value?.clearFiles()
   magUploadRef.value?.clearFiles()
 }
 
+// 文件名输入：只允许一个 .
+const onFileNameInput = (val) => {
+  if (!val || typeof val !== 'string') return
+  const dots = val.match(/\./g)
+  if (dots && dots.length > 1) {
+    const parts = val.split('.')
+    const fixed = parts[0] + '.' + parts.slice(1).join('')
+    uploadForm.fileName = fixed
+    nextTick(() => ElMessage.warning(t('upload.messages.fileNameOnlyOneDot')))
+  }
+}
+
+// MAG 名称输入：只允许一个 .
+const onMagNameInput = (val) => {
+  if (!val || typeof val !== 'string') return
+  const dots = val.match(/\./g)
+  if (dots && dots.length > 1) {
+    const parts = val.split('.')
+    const fixed = parts[0] + '.' + parts.slice(1).join('')
+    uploadForm.magName = fixed
+    nextTick(() => ElMessage.warning(t('upload.messages.fileNameOnlyOneDot')))
+  }
+}
+
 // 单文件改变
-const handleFileChange = (file) => {
+const handleFileChange = async (file) => {
+  const name = file.name || file.raw?.name || ''
+  const ext = name.split('.').pop()?.toLowerCase()
+  const validExtensions = ['fasta', 'fa', 'faa', 'fna']
+
+  if (!ext || !validExtensions.includes(ext)) {
+    ElMessage.error(t('upload.messages.invalidFileType'))
+    uploadRef.value?.clearFiles()
+    uploadForm.file = null
+    return
+  }
+
+  try {
+    const head = await readFileHead(file.raw)
+    if (!isValidFasta(head)) {
+      ElMessage.error(t('upload.messages.invalidFastaFormat'))
+      uploadRef.value?.clearFiles()
+      uploadForm.file = null
+      return
+    }
+  } catch {
+    ElMessage.error(t('upload.messages.readFileFailed'))
+    uploadRef.value?.clearFiles()
+    uploadForm.file = null
+    return
+  }
+
   uploadForm.file = file.raw
 }
 
@@ -396,11 +486,11 @@ const processSelectedFiles = (files, isFolder) => {
   
   magFileList.value = validFiles
   magFolderName.value = folderName || ''
-  
+
   if (folderName && !uploadForm.magName) {
     uploadForm.magName = folderName
   }
-  
+
   ElMessage.success(t('upload.messages.selectedFiles', { count: validFiles.length }))
 }
 
@@ -465,11 +555,11 @@ const onDropFolder = async (event) => {
   
   magFileList.value = validFiles
   magFolderName.value = folderName
-  
+
   if (folderName && !uploadForm.magName) {
     uploadForm.magName = folderName
   }
-  
+
   ElMessage.success(t('upload.messages.selectedFiles', { count: validFiles.length }))
 }
 
@@ -544,8 +634,15 @@ const handleNormalUpload = async () => {
       return
     }
     const text = uploadForm.textContent.trim()
+    if (!isValidFasta(text)) {
+      ElMessage.error(t('upload.messages.invalidFastaFormat'))
+      return
+    }
     const blob = new Blob([text], { type: 'text/plain;charset=utf-8' })
-    const virtualFileName = `pasted_sequence_${Date.now()}.fasta`
+    const customName = uploadForm.fileName && uploadForm.fileName.trim()
+    const virtualFileName = customName
+      ? (/\.(fasta|fa|faa|fna)$/i.test(customName) ? customName : customName + '.fasta')
+      : `pasted_sequence_${Date.now()}.fasta`
     uploadForm.file = new File([blob], virtualFileName, { type: 'text/plain;charset=utf-8' })
   } else if (inputType.value === 'file') {
     if (!uploadForm.file) {
@@ -570,7 +667,19 @@ const handleNormalUpload = async () => {
     uploadProgress.stage = 0
     
     const formData = new FormData()
-    formData.append('file', uploadForm.file)
+    let fileToSend = uploadForm.file
+    if (inputType.value === 'file' && uploadForm.fileName && uploadForm.fileName.trim()) {
+      const custom = uploadForm.fileName.trim()
+      const hasExt = custom.includes('.')
+      if (hasExt) {
+        fileToSend = new File([uploadForm.file], custom, { type: uploadForm.file.type })
+      } else {
+        const origName = uploadForm.file.name || ''
+        const origExt = origName.includes('.') ? origName.substring(origName.lastIndexOf('.')) : '.fasta'
+        fileToSend = new File([uploadForm.file], custom + origExt, { type: uploadForm.file.type })
+      }
+    }
+    formData.append('file', fileToSend)
     formData.append('fileType', uploadForm.fileType)
     if (uploadForm.description) {
       formData.append('description', uploadForm.description)
@@ -625,7 +734,21 @@ const handleMagUpload = async () => {
     ElMessage.warning(t('upload.messages.selectMagFiles'))
     return
   }
-  
+
+  const toValidate = magFileList.value.slice(0, Math.min(5, magFileList.value.length))
+  for (const f of toValidate) {
+    try {
+      const head = await readFileHead(f)
+      if (!isValidFasta(head)) {
+        ElMessage.error(t('upload.messages.invalidFastaFormat') + ` (${f.name})`)
+        return
+      }
+    } catch {
+      ElMessage.error(t('upload.messages.readFileFailed') + ` (${f.name})`)
+      return
+    }
+  }
+
   try {
     uploading.value = true
     uploadProgress.show = true
@@ -640,8 +763,8 @@ const handleMagUpload = async () => {
       formData.append('files', file)
     }
     
-    if (uploadForm.magName) {
-      formData.append('magName', uploadForm.magName)
+    if (uploadForm.magName && uploadForm.magName.trim()) {
+      formData.append('magName', uploadForm.magName.trim())
     }
     if (uploadForm.description) {
       formData.append('description', uploadForm.description)
@@ -717,11 +840,12 @@ const startAnalysis = async (fileId) => {
 
 // 重置表单
 const handleReset = () => {
+  uploadForm.magName = ''
+  uploadForm.fileName = ''
   uploadForm.file = null
   uploadForm.fileType = 'auto-detect'
   uploadForm.description = ''
   uploadForm.textContent = ''
-  uploadForm.magName = ''
   magFileList.value = []
   magFolderName.value = ''
   magUploadMode.value = 'folder'
