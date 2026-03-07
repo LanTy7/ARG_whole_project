@@ -4,6 +4,10 @@ ARG 预测器
 提供两阶段预测:
 1. 二分类: 判断序列是否为ARG
 2. 多分类: 对ARG进行类型分类
+
+更新说明：
+- 与新的训练代码保持一致
+- 支持 BiLSTMModel（二分类）和带 Masked Global Pooling 的 BiLSTMClassifier（多分类）
 """
 
 import os
@@ -11,7 +15,7 @@ import torch
 import numpy as np
 from io import StringIO
 from Bio import SeqIO
-from model_definition import BiLSTMBinary, BiLSTMClassifier
+from model_definition import BiLSTMModel, BiLSTMClassifier
 
 
 class ARGPredictor:
@@ -40,7 +44,7 @@ class ARGPredictor:
         self.binary_config = binary_ckpt['config']
         self.binary_max_length = self.binary_config.get('max_length', 1000)
         
-        self.binary_model = BiLSTMBinary(self.binary_config).to(self.device)
+        self.binary_model = BiLSTMModel(self.binary_config).to(self.device)
         self.binary_model.load_state_dict(binary_ckpt['model_state_dict'])
         self.binary_model.eval()
         
@@ -61,6 +65,7 @@ class ARGPredictor:
         
         print(f"[INFO] 模型加载完成 | Device: {self.device}")
         print(f"[INFO] 二分类配置: {self.binary_config}")
+        print(f"[INFO] 多分类配置: {self.multi_config}")
         print(f"[INFO] 多分类类别: {self.class_names}")
 
     def _preprocess_binary(self, sequence):
@@ -83,6 +88,8 @@ class ARGPredictor:
     def _preprocess_multi(self, sequence):
         """
         多分类模型预处理: One-hot编码
+        
+        输出 shape: (1, max_length, 21)，用于 Masked Global Pooling
         """
         # 氨基酸编码字典 (与训练一致)
         amino_acids = 'ACDEFGHIKLMNPQRSTVWY'
@@ -99,7 +106,8 @@ class ARGPredictor:
         sequence = sequence.upper()
         encoding = np.zeros((max_len, 21), dtype=np.float32)
         
-        for i in range(min(len(sequence), max_len)):
+        seq_len = min(len(sequence), max_len)
+        for i in range(seq_len):
             aa = sequence[i]
             if aa in aa_dict:
                 idx = aa_dict[aa]
@@ -113,9 +121,9 @@ class ARGPredictor:
             else:
                 encoding[i, :20] = 0.05  # 未知字符
         
-        # 填充位置
-        if len(sequence) < max_len:
-            encoding[len(sequence):, 20] = 1.0
+        # 填充位置标记为 PAD (index=20)
+        if seq_len < max_len:
+            encoding[seq_len:, 20] = 1.0
         
         return torch.tensor([encoding], dtype=torch.float32).to(self.device)
 
@@ -314,4 +322,3 @@ class ARGPredictor:
             all_results.extend(batch_results)
         
         return all_results
-
