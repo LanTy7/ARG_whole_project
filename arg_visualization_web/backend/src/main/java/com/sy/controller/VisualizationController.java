@@ -125,4 +125,20 @@ public class VisualizationController {
             return Result.error("导出数据失败: " + e.getMessage());
         }
     }
+
+    /**
+     * 获取所有 ARG 序列（用于网络图展示）
+     */
+    @GetMapping("/genome/{taskId}/arg-sequences")
+    public Result<Map<String, Object>> getAllArgSequences(
+            @PathVariable Long taskId,
+            @RequestHeader("Authorization") String token) {
+        try {
+            Long userId = jwtUtil.getUserIdFromToken(token.replace("Bearer ", ""));
+            return Result.success(visualizationService.getAllArgSequences(taskId, userId));
+        } catch (Exception e) {
+            log.error("获取所有 ARG 序列失败", e);
+            return Result.error("获取 ARG 序列失败: " + e.getMessage());
+        }
+    }
 }

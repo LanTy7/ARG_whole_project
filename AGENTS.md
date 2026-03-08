@@ -99,6 +99,10 @@ backend/src/main/java/com/sy/
 │   ├── GenomeFileController.java   # 基因组文件管理
 │   ├── MagController.java          # MAG分析
 │   └── VisualizationController.java # 结果可视化
+│       - `/genome/{taskId}` - 获取可视化数据
+│       - `/genome/{taskId}/results` - 分页查询预测结果
+│       - `/genome/{taskId}/class-summary` - 获取类别统计
+│       - `/genome/{taskId}/arg-sequences` - 获取所有 ARG 序列（网络图专用）
 ├── service/                         # 服务接口层
 │   ├── DockerService.java          # Docker调用接口
 │   ├── MagAnalysisService.java     # MAG分析接口
@@ -133,12 +137,17 @@ frontend/src/
 │   ├── task.js                     # 任务管理
 │   ├── mag.js                      # MAG分析
 │   ├── blast.js                    # BLAST比对
-│   └── ...
+│   └── visualization.js            # 可视化数据获取（含网络图专用接口）
 ├── views/                           # 页面视图
 │   ├── Login.vue                   # 登录页
 │   ├── Home.vue                    # 首页
 │   ├── Upload.vue                  # 文件上传
-│   ├── Visualization.vue           # 结果可视化
+│   ├── Visualization.vue           # 结果可视化（含网络图、饼图、柱状图）
+│   │   ├── 详情标签页 - 表格展示预测结果（支持分页）
+│   │   └── 图表标签页 - ECharts 可视化
+│   │       ├── 饼图 - ARG/非ARG分布
+│   │       ├── 柱状图 - ARG 类别统计
+│   │       └── 网络图 - ARG 类别与序列关系图（智能采样）
 │   ├── History.vue                 # 历史记录
 │   └── Admin.vue                   # 管理后台
 ├── components/                      # 公共组件
@@ -298,6 +307,22 @@ MagAnalysisServiceImpl 编排：
 提取序列 → 运行 ncbi/blast 容器 → 解析比对结果 → 返回
 ```
 
+### 4. ARG 网络图可视化流程
+
+**数据流**：
+- **DB 模式（数据已落库）**：前端获取分页数据 → 切换到图表页时调用 `getAllArgSequences` 获取全部 ARG 序列 → 智能采样渲染网络图
+- **文件模式**：直接解析 TSV 文件 → 前端处理全部数据 → 渲染网络图
+
+**智能采样策略**：
+- 总序列 > 1000：每类显示前 20 个概率最高的序列
+- 总序列 > 500：每类显示前 30 个
+- 总序列 > 200：每类显示前 40 个
+- 其他：每类显示前 50 个
+- 类别节点显示 `(显示数/总数)`，如 `氨基糖苷类 (20/156)`
+
+**新增后端接口**：
+- `GET /api/visualization/genome/{taskId}/arg-sequences` - 获取所有 ARG 序列（用于网络图）
+
 ## 开发约定
 
 ### 代码风格
@@ -305,6 +330,21 @@ MagAnalysisServiceImpl 编排：
 - **后端**: 遵循 Spring Boot 惯例，使用 Lombok 简化代码，接口返回统一 Result 对象
 - **前端**: Vue 3 Composition API 风格，使用 Pinia 管理状态，axios 封装请求
 - **Python**: 遵循 PEP 8，使用类型注解，详细的 docstring
+
+### 可视化图表规范
+
+**网络图（ARG 关系图）**：
+- **数据来源**：DB 模式下通过 `getAllArgSequences` 接口获取全部 ARG 序列
+- **智能采样**：节点数过多时自动采样，每类别最多显示前 50 个（按概率排序）
+- **初始布局**：力引导布局（force layout），使用 `circular` 初始分布
+- **交互控制**：支持滚轮缩放（0.05x ~ 5x）、拖拽平移、点击节点触发 BLAST
+- **性能优化**：总节点数控制在 200-500 以内，确保渲染流畅
+- **中文支持**：所有标签、提示使用中文，类别名映射（Unknown → 未知类别）
+
+**柱状图/饼图**：
+- 使用 ECharts 5.x 版本
+- 统一使用青绿色系配色方案
+- 支持响应式布局和窗口大小变化自适应
 
 ### 异常处理
 

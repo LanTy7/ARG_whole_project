@@ -315,6 +315,23 @@ export default {
       argRatio: 'ARG 占比',
       categories: 'ARG 类别数'
     },
+    statsOverview: {
+      totalSequences: '总序列数',
+      argSequences: '抗性基因 (ARG)',
+      nonArgSequences: '非抗性基因',
+      argRatio: 'ARG 占比',
+      totalLabel: '总序列数'
+    },
+    networkChart: {
+      title: 'ARG 关系网络图',
+      desc: '展示 ARG 类别与代表性序列的关系网络，节点大小表示序列数量，点击查看详情',
+      noData: '暂无抗性基因数据',
+      loading: '正在加载网络图数据...',
+      hintZoom: '滚轮/双指捏合：缩放',
+      hintPan: '拖拽/单指滑动：平移',
+      hintClick: '点击节点：查看详情',
+      reset: '重置'
+    },
     charts: {
       distribution: 'ARG 类型分布',
       confidence: '预测置信度分布',

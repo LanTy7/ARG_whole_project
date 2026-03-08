@@ -248,18 +248,123 @@
               
               <el-empty v-if="totalCount === 0" :description="$t('visualization.chartsPage.noData')" />
               
-              <div v-else class="charts-grid">
-                <div class="chart-container">
-                  <h4>{{ $t('visualization.chartsPage.pieTitle') }}</h4>
-                  <p class="chart-desc">{{ $t('visualization.chartsPage.pieDesc') }}</p>
-                  <div ref="pieChartRef" class="chart" style="height: 400px;"></div>
+              <div v-else>
+                <!-- 统计概览卡片 -->
+                <div class="stats-overview">
+                  <div class="stat-card-teal">
+                    <div class="stat-icon-bg">
+                      <el-icon><Document /></el-icon>
+                    </div>
+                    <div class="stat-info">
+                      <div class="stat-value-teal">{{ totalCount }}</div>
+                      <div class="stat-label-teal">{{ $t('visualization.statsOverview.totalSequences') }}</div>
+                    </div>
+                  </div>
+                  <div class="stat-card-teal arg">
+                    <div class="stat-icon-bg arg">
+                      <el-icon><CircleCheck /></el-icon>
+                    </div>
+                    <div class="stat-info">
+                      <div class="stat-value-teal arg">{{ argPositiveCount }}</div>
+                      <div class="stat-label-teal">{{ $t('visualization.statsOverview.argSequences') }}</div>
+                    </div>
+                  </div>
+                  <div class="stat-card-teal non-arg">
+                    <div class="stat-icon-bg non-arg">
+                      <el-icon><CircleClose /></el-icon>
+                    </div>
+                    <div class="stat-info">
+                      <div class="stat-value-teal non-arg">{{ argNegativeCount }}</div>
+                      <div class="stat-label-teal">{{ $t('visualization.statsOverview.nonArgSequences') }}</div>
+                    </div>
+                  </div>
+                  <div class="stat-card-teal ratio">
+                    <div class="stat-icon-bg ratio">
+                      <el-icon><DataAnalysis /></el-icon>
+                    </div>
+                    <div class="stat-info">
+                      <div class="stat-value-teal ratio">{{ ((argPositiveCount / totalCount) * 100).toFixed(1) }}%</div>
+                      <div class="stat-label-teal">{{ $t('visualization.statsOverview.argRatio') }}</div>
+                    </div>
+                  </div>
                 </div>
                 
-                <div class="chart-container">
-                  <h4>{{ $t('visualization.chartsPage.barTitle') }}</h4>
-                  <p class="chart-desc">{{ $t('visualization.chartsPage.barDesc') }}</p>
-                  <div ref="barChartRef" class="chart" style="height: 400px;"></div>
-                  <el-empty v-if="argClassStats.length === 0 && argPositiveCount > 0" :description="$t('visualization.chartsPage.noCategory')" />
+                <div class="charts-grid">
+                  <div class="chart-container enhanced">
+                    <div class="chart-header">
+                      <h4>{{ $t('visualization.chartsPage.pieTitle') }}</h4>
+                      <p class="chart-desc">{{ $t('visualization.chartsPage.pieDesc') }}</p>
+                    </div>
+                    <div ref="pieChartRef" class="chart" style="height: 400px;"></div>
+                  </div>
+                  
+                  <div class="chart-container enhanced">
+                    <div class="chart-header">
+                      <h4>{{ $t('visualization.chartsPage.barTitle') }}</h4>
+                      <p class="chart-desc">{{ $t('visualization.chartsPage.barDesc') }}</p>
+                    </div>
+                    <div ref="barChartRef" class="chart" style="height: 400px;"></div>
+                    <el-empty v-if="argClassStats.length === 0 && argPositiveCount > 0" :description="$t('visualization.chartsPage.noCategory')" />
+                  </div>
+                </div>
+                
+                <!-- ARG 关系网络图 -->
+                <div class="chart-container enhanced network-chart-container">
+                  <div class="chart-header">
+                    <h4>{{ $t('visualization.networkChart.title') || 'ARG 关系网络图' }}</h4>
+                    <p class="chart-desc">
+                      {{ $t('visualization.networkChart.desc') || '展示 ARG 类别与代表性序列的关系网络' }}
+                      (共 {{ allArgSequences ? allArgSequences.length : argPositiveCount }} 个序列
+                      <el-tag v-if="(allArgSequences ? allArgSequences.length : argPositiveCount) > 200" 
+                              type="warning" size="small" style="margin-left: 8px;">
+                        仅显示概率最高的代表性序列
+                      </el-tag>
+                      )
+                    </p>
+                    <!-- 操作说明 -->
+                    <div class="network-controls-hint">
+                      <el-alert type="info" :closable="false" class="network-hint-alert">
+                        <template #title>
+                          <div class="hint-content">
+                            <span class="hint-item">
+                              <el-icon><ZoomIn /></el-icon>
+                              <span>{{ $t('visualization.networkChart.hintZoom') || '滚轮/双指捏合：缩放' }}</span>
+                            </span>
+                            <span class="hint-item">
+                              <el-icon><Rank /></el-icon>
+                              <span>{{ $t('visualization.networkChart.hintPan') || '拖拽/单指滑动：平移' }}</span>
+                            </span>
+                            <span class="hint-item">
+                              <el-icon><Mouse /></el-icon>
+                              <span>{{ $t('visualization.networkChart.hintClick') || '点击节点：查看详情' }}</span>
+                            </span>
+                          </div>
+                        </template>
+                      </el-alert>
+                      <!-- 缩放控制按钮 -->
+                      <div class="zoom-controls">
+                        <el-button-group>
+                          <el-button size="small" @click="zoomNetwork(1.2)">
+                            <el-icon><ZoomIn /></el-icon>
+                          </el-button>
+                          <el-button size="small" @click="resetNetworkZoom">
+                            <el-icon><Refresh /></el-icon>
+                            {{ $t('visualization.networkChart.reset') || '重置' }}
+                          </el-button>
+                          <el-button size="small" @click="zoomNetwork(0.8)">
+                            <el-icon><ZoomOut /></el-icon>
+                          </el-button>
+                        </el-button-group>
+                      </div>
+                    </div>
+                  </div>
+                  <div v-if="argPositiveCount === 0" class="network-empty">
+                    <el-empty :description="$t('visualization.networkChart.noData') || '暂无抗性基因数据'" />
+                  </div>
+                  <div v-else-if="networkChartLoading" class="network-empty" v-loading="networkChartLoading">
+                    <el-empty :description="$t('visualization.networkChart.loading') || '正在加载网络图数据...'" />
+                  </div>
+                  <div v-else ref="networkChartRef" class="chart network-chart" style="height: 1000px;"></div>
                 </div>
               </div>
             </div>
@@ -364,8 +469,8 @@ import { ref, reactive, computed, onMounted, watch, nextTick, onUnmounted } from
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
-import { Download, Document, Search, FolderOpened, Files, InfoFilled, DocumentCopy } from '@element-plus/icons-vue'
-import { getGenomeVisualization, getVisualizationResults, getClassSummary } from '@/api/visualization'
+import { Download, Document, Search, FolderOpened, Files, InfoFilled, DocumentCopy, CircleCheck, CircleClose, DataAnalysis, ZoomIn, ZoomOut, Rank, Mouse, Refresh } from '@element-plus/icons-vue'
+import { getGenomeVisualization, getVisualizationResults, getClassSummary, getAllArgSequences } from '@/api/visualization'
 import { getSequence } from '@/api/blast'
 import { getDownloadableFiles, downloadFile } from '@/api/download'
 import { useUserStore } from '@/stores/user'
@@ -384,6 +489,10 @@ const loading = ref(false)
 const argData = ref(null)
 /** 种类图数据（DB 模式下由接口返回） */
 const classSummaryFromApi = ref(null)
+/** 所有 ARG 序列（用于网络图展示，DB 模式下会单独获取全部数据） */
+const allArgSequences = ref(null)
+/** 网络图数据加载状态 */
+const networkChartLoading = ref(false)
 
 // 下载相关状态
 const downloadLoading = ref(false)
@@ -408,8 +517,10 @@ const sequenceLoading = ref({})
 // 图表 ref
 const pieChartRef = ref(null)
 const barChartRef = ref(null)
+const networkChartRef = ref(null)
 let pieChartInstance = null
 let barChartInstance = null
+let networkChartInstance = null
 
 // 分页和筛选状态
 const pagination = reactive({
@@ -502,22 +613,36 @@ onUnmounted(() => {
   window.removeEventListener('resize', handleResize)
   pieChartInstance?.dispose()
   barChartInstance?.dispose()
+  networkChartInstance?.dispose()
 })
 
 // 监听标签页切换
 watch(activeTab, async (newTab) => {
   if (newTab === 'charts') {
+    // 重置网络图数据
+    allArgSequences.value = null
+    
     if (isDbMode.value && taskId.value) {
+      // DB 模式下需要单独获取类别统计和所有 ARG 序列（用于网络图）
+      networkChartLoading.value = true
       try {
-        const res = await getClassSummary(taskId.value)
-        const data = res.data || res
-        classSummaryFromApi.value = data.classSummary || []
+        const [classRes, argRes] = await Promise.all([
+          getClassSummary(taskId.value),
+          getAllArgSequences(taskId.value)
+        ])
+        classSummaryFromApi.value = classRes.data?.classSummary || []
+        allArgSequences.value = argRes.data?.argSequences || []
       } catch (e) {
-        console.error('getClassSummary failed', e)
+        console.error('Failed to load chart data:', e)
         classSummaryFromApi.value = []
+        allArgSequences.value = []
+      } finally {
+        networkChartLoading.value = false
       }
     } else {
+      // 文件模式下使用已有数据
       classSummaryFromApi.value = null
+      allArgSequences.value = null
     }
     await nextTick()
     initCharts()
@@ -535,6 +660,7 @@ watch(locale, () => {
 function handleResize() {
   pieChartInstance?.resize()
   barChartInstance?.resize()
+  networkChartInstance?.resize()
 }
 
 // 处理标签页点击
@@ -778,9 +904,10 @@ function getArgRowClassName({ row }) {
 function initCharts() {
   initPieChart()
   initBarChart()
+  initNetworkChart()
 }
 
-// 初始化饼图 - ARG 与非 ARG 数量分布
+// 初始化饼图 - ARG 与非 ARG 数量分布（科技感环形图）
 function initPieChart() {
   if (!pieChartRef.value) return
   
@@ -792,72 +919,107 @@ function initPieChart() {
     backgroundColor: 'transparent',
     tooltip: {
       trigger: 'item',
-      backgroundColor: 'rgba(255, 255, 255, 0.98)',
-      borderColor: 'rgba(0, 136, 204, 0.5)',
-      borderWidth: 2,
+      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+      borderColor: '#2a9d8f',
+      borderWidth: 1,
       textStyle: {
-        color: '#2c3e50'
+        color: '#1a3a36'
       },
       formatter: (params) => {
-        const unit = t('visualization.chartPie.labelUnit')
-        return `<strong style="color: #0088cc;">${params.name}</strong><br/>${t('visualization.chartPie.tooltipCount')}: ${params.value}${unit ? ' ' + unit : ''}<br/>${t('visualization.chartPie.tooltipPercent')}: ${params.percent}%`
+        const unit = t('visualization.chartPie.labelUnit') || ''
+        const countLabel = t('visualization.chartPie.tooltipCount') || 'Count'
+        const percentLabel = t('visualization.chartPie.tooltipPercent') || 'Percent'
+        return `<div style="font-weight:600;color:#2a9d8f;margin-bottom:4px;">${params.name}</div>
+                <div>${countLabel}: <strong>${params.value}</strong> ${unit}</div>
+                <div>${percentLabel}: <strong>${params.percent}%</strong></div>`
       }
     },
     legend: {
       orient: 'horizontal',
-      bottom: 20,
+      bottom: 15,
+      itemGap: 20,
       textStyle: {
-        color: '#2c3e50',
-        fontSize: 14,
+        color: '#1a3a36',
+        fontSize: 13,
         fontWeight: 500
       },
-      itemWidth: 20,
-      itemHeight: 14
+      itemWidth: 14,
+      itemHeight: 14,
+      icon: 'circle'
     },
     series: [
+      // 外圈装饰
+      {
+        type: 'pie',
+        radius: ['68%', '72%'],
+        center: ['50%', '45%'],
+        silent: true,
+        itemStyle: {
+          color: 'rgba(42, 157, 143, 0.1)'
+        },
+        data: [{ value: 1 }],
+        label: { show: false }
+      },
+      // 主环形图
       {
         name: t('visualization.chartPie.seriesName'),
         type: 'pie',
-        radius: ['35%', '65%'],
+        radius: ['45%', '65%'],
         center: ['50%', '45%'],
         avoidLabelOverlap: true,
         itemStyle: {
-          borderRadius: 8,
+          borderRadius: 10,
           borderColor: '#fff',
           borderWidth: 3,
-          shadowBlur: 15,
-          shadowColor: 'rgba(0, 0, 0, 0.15)'
+          shadowBlur: 20,
+          shadowColor: 'rgba(42, 157, 143, 0.3)'
         },
         label: {
           show: true,
           position: 'outside',
           formatter: (params) => {
-            const unit = t('visualization.chartPie.labelUnit')
-            return params.name + '\n' + params.value + (unit ? ' ' + unit : '') + ' (' + params.percent + '%)'
+            const unit = t('visualization.chartPie.labelUnit') || ''
+            return `{name|${params.name}}\n{value|${params.value}${unit}} {percent|${params.percent}%}`
           },
-          fontSize: 13,
-          fontWeight: 600,
-          color: '#2c3e50',
-          lineHeight: 20
+          rich: {
+            name: {
+              fontSize: 13,
+              fontWeight: 600,
+              color: '#1a3a36',
+              lineHeight: 22
+            },
+            value: {
+              fontSize: 14,
+              fontWeight: 700,
+              color: '#2a9d8f'
+            },
+            percent: {
+              fontSize: 12,
+              color: '#666',
+              fontWeight: 500
+            }
+          }
         },
         labelLine: {
           show: true,
           length: 20,
-          length2: 30,
+          length2: 25,
           lineStyle: {
-            color: 'rgba(0, 136, 204, 0.5)',
+            color: 'rgba(42, 157, 143, 0.4)',
             width: 2
           }
         },
         emphasis: {
+          scale: true,
+          scaleSize: 10,
           label: {
             show: true,
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: 'bold'
           },
           itemStyle: {
-            shadowBlur: 25,
-            shadowColor: 'rgba(0, 136, 204, 0.4)'
+            shadowBlur: 30,
+            shadowColor: 'rgba(42, 157, 143, 0.5)'
           }
         },
         data: [
@@ -867,8 +1029,11 @@ function initPieChart() {
             itemStyle: { 
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
                 { offset: 0, color: '#2a9d8f' },
-                { offset: 1, color: '#3dccc7' }
-              ])
+                { offset: 0.5, color: '#3dccc7' },
+                { offset: 1, color: '#2a9d8f' }
+              ]),
+              shadowBlur: 20,
+              shadowColor: 'rgba(42, 157, 143, 0.4)'
             }
           },
           { 
@@ -877,11 +1042,44 @@ function initPieChart() {
             itemStyle: { 
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
                 { offset: 0, color: '#a8b5b3' },
-                { offset: 1, color: '#d1dcd9' }
+                { offset: 0.5, color: '#d1dcd9' },
+                { offset: 1, color: '#a8b5b3' }
               ])
             }
           }
         ]
+      },
+      // 中心文字
+      {
+        type: 'pie',
+        radius: ['0%', '35%'],
+        center: ['50%', '45%'],
+        silent: true,
+        itemStyle: {
+          color: 'transparent'
+        },
+        label: {
+          show: true,
+          position: 'center',
+          formatter: () => {
+            return `{total|${totalCount.value}}\n{label|${t('visualization.statsOverview.totalLabel')}}`
+          },
+          rich: {
+            total: {
+              fontSize: 36,
+              fontWeight: 700,
+              color: '#2a9d8f',
+              lineHeight: 42
+            },
+            label: {
+              fontSize: 14,
+              color: '#666',
+              fontWeight: 500
+            }
+          }
+        },
+        data: [{ value: 1 }],
+        animation: false
       }
     ]
   }
@@ -889,7 +1087,7 @@ function initPieChart() {
   pieChartInstance.setOption(option, true)
 }
 
-// 初始化柱状图 - 各 ARG 类别分布
+// 初始化柱状图 - 各 ARG 类别分布（科技感柱状图）
 function initBarChart() {
   if (!barChartRef.value) return
   
@@ -904,93 +1102,90 @@ function initBarChart() {
     return
   }
   
-  // 生成渐变色 - 青绿色系
-  const colors = [
-    ['#2a9d8f', '#4db8ab'],
-    ['#238b7e', '#46a89b'],
-    ['#3dccc7', '#6dd9d5'],
-    ['#1a7a6f', '#3a9e92'],
-    ['#4ecdc4', '#7dd8d1'],
-    ['#0d5c54', '#2a857a'],
-    ['#6dd5c0', '#96e0d1'],
-    ['#147a6b', '#369e8f'],
-    ['#5dbeb5', '#86cfc8'],
-    ['#0f8b7e', '#33a89a']
-  ]
+  // 统一使用青绿色渐变
+  const getGradient = (index) => {
+    const opacity = 1 - (index * 0.08)
+    return new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+      { offset: 0, color: `rgba(42, 157, 143, ${Math.max(0.7, opacity)})` },
+      { offset: 0.5, color: `rgba(61, 204, 199, ${Math.max(0.5, opacity - 0.2)})` },
+      { offset: 1, color: `rgba(42, 157, 143, ${Math.max(0.4, opacity - 0.3)})` }
+    ])
+  }
   
   const option = {
     backgroundColor: 'transparent',
     tooltip: {
       trigger: 'axis',
-      backgroundColor: 'rgba(255, 255, 255, 0.98)',
-      borderColor: 'rgba(0, 136, 204, 0.5)',
-      borderWidth: 2,
+      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+      borderColor: '#2a9d8f',
+      borderWidth: 1,
       textStyle: {
-        color: '#2c3e50'
+        color: '#1a3a36'
       },
       axisPointer: {
         type: 'shadow',
         shadowStyle: {
-          color: 'rgba(0, 136, 204, 0.1)'
+          color: 'rgba(42, 157, 143, 0.15)'
         }
       },
       formatter: (params) => {
         const data = params[0]
-        const unit = t('visualization.chartPie.labelUnit')
-        return `<strong style="color: #0088cc;">${data.name}</strong><br/>${t('visualization.chartBar.tooltipCount')}: ${data.value}${unit ? ' ' + unit : ''}`
+        const unit = t('visualization.chartPie.labelUnit') || ''
+        const countLabel = t('visualization.chartBar.tooltipCount') || 'Count'
+        return `<div style="font-weight:600;color:#2a9d8f;margin-bottom:4px;">${data.name}</div>
+                <div>${countLabel}: <strong>${data.value}</strong> ${unit}</div>`
       }
     },
     grid: {
       left: '3%',
       right: '4%',
-      bottom: stats.length > 5 ? '25%' : '15%',
-      top: '10%',
+      bottom: stats.length > 5 ? '22%' : '12%',
+      top: '15%',
       containLabel: true
     },
     xAxis: {
       type: 'category',
       data: stats.map(s => s.name),
       axisLabel: {
-        color: '#2c3e50',
+        color: '#1a3a36',
         fontSize: 12,
         fontWeight: 500,
-        rotate: stats.length > 5 ? 45 : 0,
+        rotate: stats.length > 5 ? 35 : 0,
         interval: 0
       },
       axisLine: {
         lineStyle: {
-          color: 'rgba(0, 136, 204, 0.3)'
+          color: 'rgba(42, 157, 143, 0.3)',
+          width: 2
         }
       },
       axisTick: {
         alignWithLabel: true,
         lineStyle: {
-          color: 'rgba(0, 136, 204, 0.3)'
+          color: 'rgba(42, 157, 143, 0.3)'
         }
       }
     },
     yAxis: {
       type: 'value',
-      name: t('visualization.chartBar.yAxisName'),
+      name: t('visualization.chartBar.yAxisName') || '数量',
       nameTextStyle: {
-        color: '#0088cc',
+        color: '#2a9d8f',
         fontSize: 13,
-        fontWeight: 600
+        fontWeight: 600,
+        padding: [0, 0, 0, -10]
       },
       axisLabel: {
-        color: '#606266',
+        color: '#666',
         fontSize: 12
       },
       axisLine: {
-        show: true,
-        lineStyle: {
-          color: 'rgba(0, 136, 204, 0.3)'
-        }
+        show: false
       },
       splitLine: {
         lineStyle: {
           type: 'dashed',
-          color: 'rgba(0, 136, 204, 0.15)'
+          color: 'rgba(42, 157, 143, 0.1)'
         }
       }
     },
@@ -998,33 +1193,33 @@ function initBarChart() {
       {
         name: t('visualization.chartBar.seriesName'),
         type: 'bar',
-        barWidth: stats.length > 8 ? '50%' : '40%',
+        barWidth: stats.length > 8 ? '55%' : '45%',
         data: stats.map((s, index) => ({
           value: s.value,
           itemStyle: {
-            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              { offset: 0, color: colors[index % colors.length][0] },
-              { offset: 1, color: colors[index % colors.length][1] }
-            ]),
-            borderRadius: [6, 6, 0, 0],
-            shadowBlur: 8,
-            shadowColor: 'rgba(0, 0, 0, 0.15)',
-            shadowOffsetY: 4
+            color: getGradient(index),
+            borderRadius: [8, 8, 0, 0],
+            shadowBlur: 10,
+            shadowColor: 'rgba(42, 157, 143, 0.3)',
+            shadowOffsetY: 5
           }
         })),
         label: {
           show: true,
           position: 'top',
-          color: '#0088cc',
-          fontSize: 12,
-          fontWeight: 600
+          color: '#2a9d8f',
+          fontSize: 13,
+          fontWeight: 700,
+          formatter: '{c}'
         },
         emphasis: {
           itemStyle: {
-            shadowBlur: 15,
-            shadowColor: 'rgba(0, 136, 204, 0.4)'
+            shadowBlur: 20,
+            shadowColor: 'rgba(42, 157, 143, 0.5)',
+            borderRadius: [10, 10, 0, 0]
           }
-        }
+        },
+        animationDelay: (idx) => idx * 50
       }
     ],
     dataZoom: stats.length > 10 ? [{
@@ -1033,14 +1228,466 @@ function initBarChart() {
       start: 0,
       end: Math.min(100, (10 / stats.length) * 100),
       height: 20,
-      bottom: 5
+      bottom: 5,
+      borderColor: 'rgba(42, 157, 143, 0.2)',
+      fillerColor: 'rgba(42, 157, 143, 0.15)',
+      handleStyle: {
+        color: '#2a9d8f'
+      }
     }] : []
   }
   
   barChartInstance.setOption(option, true)
 }
 
-// 下载图表图片
+// 初始化网络图 - ARG 类别与序列关系网络（全新优化版本）
+function initNetworkChart() {
+  if (!networkChartRef.value) return
+
+  if (!networkChartInstance) {
+    networkChartInstance = echarts.init(networkChartRef.value)
+  }
+
+  // 使用所有 ARG 序列（如果已加载），否则使用当前页的 ARG 序列
+  const sourceData = allArgSequences.value || argResults.value
+  const argSequences = sourceData.filter(r => r.isArg)
+
+  if (argSequences.length === 0) {
+    networkChartInstance.clear()
+    return
+  }
+
+  // 按类别分组，并对每个类别的序列按概率排序
+  const classGroups = {}
+  argSequences.forEach(seq => {
+    const className = seq.argClass || 'Unknown'
+    if (!classGroups[className]) {
+      classGroups[className] = []
+    }
+    classGroups[className].push(seq)
+  })
+
+  // 对每个类别内的序列按预测概率排序（高概率在前）
+  Object.keys(classGroups).forEach(className => {
+    classGroups[className].sort((a, b) => (b.predProb || 0) - (a.predProb || 0))
+  })
+
+  // 类别颜色映射 - 使用更丰富的配色方案
+  const classColors = [
+    '#2a9d8f', '#e76f51', '#264653', '#e9c46a', '#f4a261',
+    '#a8dadc', '#457b9d', '#1d3557', '#e63946', '#a8e6cf',
+    '#ffd3b6', '#ff8b94', '#6c5b7b', '#c06c84', '#f67280'
+  ]
+
+  // 生成节点和连接
+  const nodes = []
+  const links = []
+  const categories = []
+
+  // 计算布局参数
+  const categoryCount = Object.keys(classGroups).length
+  const totalArgCount = argSequences.length
+
+  // 采样策略：每个类别显示的序列数
+  let maxSeqPerCategory = 50
+  if (totalArgCount > 1000) {
+    maxSeqPerCategory = 15
+  } else if (totalArgCount > 500) {
+    maxSeqPerCategory = 25
+  } else if (totalArgCount > 200) {
+    maxSeqPerCategory = 35
+  }
+
+  // ==================== 创建节点 ====================
+
+  // 1. 中心根节点（ARG 总数）- 文字显示在节点内部
+  const rootNode = {
+    id: 'ARG_ROOT',
+    name: `ARG\n${argSequences.length}`,
+    symbolSize: 110,
+    value: argSequences.length,
+    category: 0,
+    itemStyle: {
+      color: new echarts.graphic.RadialGradient(0.5, 0.5, 0.8, [
+        { offset: 0, color: '#3dccc7' },
+        { offset: 0.6, color: '#2a9d8f' },
+        { offset: 1, color: '#1a7a6f' }
+      ]),
+      shadowBlur: 50,
+      shadowColor: 'rgba(42, 157, 143, 0.6)',
+      borderWidth: 3,
+      borderColor: '#fff'
+    },
+    label: {
+      show: true,
+      position: 'inside',
+      distance: 0,
+      fontSize: 22,
+      fontWeight: 'bold',
+      color: '#fff',
+      lineHeight: 28,
+      formatter: (params) => {
+        const count = params.data.value
+        return `{title|ARG}\n{count|${count}}`
+      },
+      rich: {
+        title: {
+          fontSize: 24,
+          fontWeight: 'bold',
+          color: '#fff',
+          lineHeight: 30,
+          align: 'center'
+        },
+        count: {
+          fontSize: 20,
+          fontWeight: 'bold',
+          color: 'rgba(255,255,255,0.95)',
+          lineHeight: 28,
+          align: 'center'
+        }
+      }
+    }
+  }
+  nodes.push(rootNode)
+
+  // 2. 创建类别节点（在根节点周围环形分布）
+  let categoryIndex = 1
+  const categoryEntries = Object.entries(classGroups)
+  const radiusStep = 180 // 类别环半径
+
+  categoryEntries.forEach(([className, sequences], index) => {
+    const color = classColors[index % classColors.length]
+    const displayCount = Math.min(sequences.length, maxSeqPerCategory)
+    const totalCount = sequences.length
+
+    // 类别名称处理
+    const displayClassName = className === 'Unknown' || className === 'unknown' ? 'Unknown' : className
+
+    // 类别节点位置（沿圆环分布）
+    const angle = (index / categoryCount) * Math.PI * 2 - Math.PI / 2
+    const x = Math.cos(angle) * radiusStep
+    const y = Math.sin(angle) * radiusStep
+
+    // 类别节点
+    const classNodeId = `CLASS_${className}`
+    const classNodeSize = Math.min(75, 45 + Math.sqrt(sequences.length) * 4)
+
+    const classNode = {
+      id: classNodeId,
+      name: displayClassName,
+      symbolSize: classNodeSize,
+      value: sequences.length,
+      category: categoryIndex,
+      x: x,
+      y: y,
+      itemStyle: {
+        color: new echarts.graphic.RadialGradient(0.5, 0.5, 0.7, [
+          { offset: 0, color: color },
+          { offset: 0.7, color: shadeColor(color, -20) },
+          { offset: 1, color: shadeColor(color, -40) }
+        ]),
+        shadowBlur: 30,
+        shadowColor: `${color}60`,
+        borderWidth: 2,
+        borderColor: '#fff'
+      },
+      label: {
+        show: true,
+        position: 'outside',
+        distance: 8,
+        fontSize: 12,
+        fontWeight: 600,
+        color: '#333',
+        backgroundColor: 'rgba(255,255,255,0.9)',
+        borderRadius: 4,
+        padding: [4, 8],
+        formatter: () => `${displayClassName}\n${displayCount}/${totalCount}`
+      }
+    }
+    nodes.push(classNode)
+
+    // 连接根节点到类别节点
+    links.push({
+      source: 'ARG_ROOT',
+      target: classNodeId,
+      value: sequences.length,
+      lineStyle: {
+        color: {
+          type: 'linear',
+          x: 0, y: 0, x2: 1, y2: 1,
+          colorStops: [
+            { offset: 0, color: '#3dccc7' },
+            { offset: 1, color: color }
+          ]
+        },
+        width: Math.min(6, 2 + Math.sqrt(sequences.length) / 4),
+        opacity: 0.6,
+        curveness: 0.2
+      }
+    })
+
+    // 3. 创建序列节点（在类别节点周围分布）
+    const displaySequences = sequences.slice(0, maxSeqPerCategory)
+    const seqRadius = 120 // 序列节点距离类别节点的半径
+
+    displaySequences.forEach((seq, seqIndex) => {
+      const seqNodeId = `SEQ_${seq.id}`
+      const seqProb = seq.predProb || 0
+
+      // 序列节点在类别周围呈扇形分布
+      const seqAngle = angle + (seqIndex - displaySequences.length / 2) / displaySequences.length * Math.PI * 0.6
+      const seqDist = seqRadius + (seqIndex % 3) * 30 // 错落分布
+
+      // 节点大小根据概率调整
+      const seqNodeSize = 10 + seqProb * 25
+
+      // 序列节点
+      const seqNode = {
+        id: seqNodeId,
+        name: seq.id.length > 20 ? seq.id.substring(0, 17) + '...' : seq.id,
+        fullName: seq.id,
+        symbolSize: seqNodeSize,
+        value: seqProb,
+        category: categoryIndex,
+        x: Math.cos(seqAngle) * (radiusStep + seqDist),
+        y: Math.sin(seqAngle) * (radiusStep + seqDist),
+        originalData: seq,
+        itemStyle: {
+          color: new echarts.graphic.RadialGradient(0.5, 0.5, 0.6, [
+            { offset: 0, color: shadeColor(color, 20) },
+            { offset: 1, color: color }
+          ]),
+          opacity: 0.7 + seqProb * 0.3,
+          borderWidth: 1,
+          borderColor: '#fff'
+        },
+        label: {
+          show: false
+        }
+      }
+      nodes.push(seqNode)
+
+      // 连接类别节点到序列节点
+      links.push({
+        source: classNodeId,
+        target: seqNodeId,
+        lineStyle: {
+          color: color,
+          width: 0.5 + seqProb * 1.5,
+          opacity: 0.2 + seqProb * 0.3
+        }
+      })
+    })
+
+    categories.push({
+      name: displayClassName,
+      itemStyle: { color }
+    })
+
+    categoryIndex++
+  })
+
+  // 计算合适的初始缩放（自动适应容器宽度）
+  const nodeCount = nodes.length
+
+  // 获取容器的实际宽度
+  const containerWidth = networkChartRef.value?.clientWidth || 800
+
+  // 计算节点分布范围
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
+  nodes.forEach(node => {
+    if (node.x !== undefined) {
+      minX = Math.min(minX, node.x)
+      maxX = Math.max(maxX, node.x)
+      minY = Math.min(minY, node.y)
+      maxY = Math.max(maxY, node.y)
+    }
+  })
+
+  // 计算网络图的实际宽度和高度
+  const graphWidth = maxX - minX + 200 // 加上边距
+  const graphHeight = maxY - minY + 200
+
+  // 根据容器宽度计算缩放比例，使网络图完整显示
+  const scaleByWidth = containerWidth / graphWidth
+  const initialZoom = Math.min(1.0, Math.max(0.3, scaleByWidth * 0.9))
+
+  const option = {
+    backgroundColor: 'transparent',
+    tooltip: {
+      trigger: 'item',
+      backgroundColor: 'rgba(255, 255, 255, 0.98)',
+      borderColor: '#2a9d8f',
+      borderWidth: 2,
+      padding: [12, 16],
+      textStyle: {
+        color: '#333'
+      },
+      formatter: (params) => {
+        if (params.dataType === 'node') {
+          const data = params.data
+          let html = `<div style="font-weight:600;color:#2a9d8f;margin-bottom:8px;font-size:14px;border-bottom:1px solid #eee;padding-bottom:6px;">${data.name || data.fullName || 'ARG'}</div>`
+
+          if (data.id === 'ARG_ROOT') {
+            html += `<div style="display:flex;align-items:center;gap:8px;">`
+            html += `<span style="background:linear-gradient(135deg,#2a9d8f,#3dccc7);width:12px;height:12px;border-radius:50%;display:inline-block;"></span>`
+            html += `<span>Total: <strong style="font-size:18px;color:#2a9d8f;">${data.value}</strong> sequences</span>`
+            html += `</div>`
+          } else if (data.id.startsWith('CLASS_')) {
+            html += `<div style="display:flex;align-items:center;gap:8px;">`
+            html += `<span style="background:${categories[data.category - 1]?.itemStyle?.color || '#2a9d8f'};width:12px;height:12px;border-radius:50%;display:inline-block;"></span>`
+            html += `<span>Count: <strong>${data.value}</strong></span>`
+            html += `</div>`
+          } else if (data.originalData) {
+            const seq = data.originalData
+            html += `<div style="margin-bottom:6px;">`
+            html += `<div style="color:#666;font-size:12px;margin-bottom:4px;">Sequence ID:</div>`
+            html += `<div style="font-family:monospace;font-size:12px;word-break:break-all;">${seq.id}</div>`
+            html += `</div>`
+            html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid #eee;">`
+            html += `<span>Probability:</span>`
+            html += `<span style="background:linear-gradient(90deg,#2a9d8f,#3dccc7);color:#fff;padding:2px 10px;border-radius:10px;font-weight:600;">${(seq.predProb * 100).toFixed(1)}%</span>`
+            html += `</div>`
+            if (seq.argClass) {
+              html += `<div style="margin-top:6px;"><span class="arg-tag" style="background:#e8f5f3;color:#2a9d8f;padding:2px 8px;border-radius:4px;font-size:11px;">${seq.argClass}</span></div>`
+            }
+            html += `<div style="margin-top:10px;color:#999;font-size:11px;text-align:center;">Click to BLAST →</div>`
+          }
+          return html
+        }
+        return ''
+      }
+    },
+    legend: {
+      show: true,
+      orient: 'vertical',
+      right: 15,
+      top: 60,
+      bottom: 20,
+      width: 120,
+      itemWidth: 14,
+      itemHeight: 14,
+      itemGap: 8,
+      textStyle: {
+        color: '#333',
+        fontSize: 11
+      },
+      data: categories.map(c => c.name),
+      formatter: (name) => {
+        const cat = categories.find(c => c.name === name)
+        return `{name|${name}}`
+      },
+      textStyle: {
+        rich: {
+          name: {
+            fontSize: 11,
+            color: '#333'
+          }
+        }
+      }
+    },
+    animationDurationUpdate: 1500,
+    animationEasingUpdate: 'quinticInOut',
+    series: [
+      {
+        type: 'graph',
+        layout: 'force',
+        data: nodes,
+        links: links,
+        categories: categories,
+        roam: true,
+        draggable: true,
+        zoom: initialZoom,
+        force: {
+          repulsion: Math.max(800, 2000 - nodeCount * 2),
+          gravity: 0.05,
+          edgeLength: [60, 150],
+          layoutAnimation: true,
+          friction: 0.1,
+          initLayout: 'none' // 使用预设位置
+        },
+        emphasis: {
+          focus: 'adjacency',
+          scale: true,
+          lineStyle: {
+            width: 3,
+            opacity: 0.8
+          },
+          itemStyle: {
+            shadowBlur: 40,
+            shadowColor: 'rgba(42, 157, 143, 0.8)'
+          }
+        },
+        lineStyle: {
+          curveness: 0.15,
+          opacity: 0.4
+        },
+        label: {
+          show: false
+        },
+        symbol: 'circle',
+        scaleLimit: {
+          min: 0.1,
+          max: 3
+        },
+        z: 10
+      }
+    ]
+  }
+
+  networkChartInstance.setOption(option, true)
+
+  // 添加点击事件
+  networkChartInstance.off('click')
+  networkChartInstance.on('click', (params) => {
+    if (params.dataType === 'node' && params.data.originalData) {
+      const seq = params.data.originalData
+      handleBlast(seq)
+    }
+  })
+
+  console.log(`[Network Chart] Total nodes: ${nodes.length}, Categories: ${categoryCount}`)
+}
+
+// 颜色辅助函数 - 使颜色变亮或变暗
+function shadeColor(color, percent) {
+  const num = parseInt(color.replace('#', ''), 16)
+  const amt = Math.round(2.55 * percent)
+  const R = (num >> 16) + amt
+  const G = (num >> 8 & 0x00FF) + amt
+  const B = (num & 0x0000FF) + amt
+  return '#' + (
+    0x1000000 +
+    (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
+    (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
+    (B < 255 ? (B < 1 ? 0 : B) : 255)
+  ).toString(16).slice(1)
+}
+
+// 网络图缩放控制
+function zoomNetwork(scaleFactor) {
+  if (!networkChartInstance) return
+  const option = networkChartInstance.getOption()
+  const series = option.series[0]
+  const currentZoom = series.zoom || 1
+  const newZoom = Math.max(0.05, Math.min(5, currentZoom * scaleFactor))
+  
+  networkChartInstance.setOption({
+    series: [{
+      zoom: newZoom
+    }]
+  })
+}
+
+// 重置网络图缩放
+function resetNetworkZoom() {
+  if (!networkChartInstance) return
+  networkChartInstance.dispatchAction({
+    type: 'restore'
+  })
+}
+
+// 下载图表图片（使用青绿色主题背景）
 function downloadChartImages() {
   try {
     ElMessage.info(t('visualization.messages.chartsGenerating'))
@@ -1052,7 +1699,7 @@ function downloadChartImages() {
       const pieUrl = pieChartInstance.getDataURL({
         type: 'png',
         pixelRatio: 2,
-        backgroundColor: '#ffffff'
+        backgroundColor: '#f8fdfc'
       })
       const a1 = document.createElement('a')
       a1.href = pieUrl
@@ -1067,7 +1714,7 @@ function downloadChartImages() {
         const barUrl = barChartInstance.getDataURL({
           type: 'png',
           pixelRatio: 2,
-          backgroundColor: '#ffffff'
+          backgroundColor: '#f8fdfc'
         })
         const a2 = document.createElement('a')
         a2.href = barUrl
@@ -1603,6 +2250,126 @@ h3 {
   padding: 20px;
 }
 
+/* 统计概览卡片 - 科技感设计 */
+.stats-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.stat-card-teal {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fdfc 100%);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid rgba(42, 157, 143, 0.15);
+  box-shadow: 0 4px 16px rgba(42, 157, 143, 0.08);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card-teal::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #2a9d8f 0%, #3dccc7 100%);
+}
+
+.stat-card-teal.arg::before {
+  background: linear-gradient(180deg, #2a9d8f 0%, #4db8ab 100%);
+}
+
+.stat-card-teal.non-arg::before {
+  background: linear-gradient(180deg, #a8b5b3 0%, #d1dcd9 100%);
+}
+
+.stat-card-teal.ratio::before {
+  background: linear-gradient(180deg, #e9c46a 0%, #f4a261 100%);
+}
+
+.stat-card-teal:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(42, 157, 143, 0.15);
+  border-color: rgba(42, 157, 143, 0.25);
+}
+
+.stat-icon-bg {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(42, 157, 143, 0.1) 0%, rgba(61, 204, 199, 0.15) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-icon-bg.arg {
+  background: linear-gradient(135deg, rgba(42, 157, 143, 0.15) 0%, rgba(61, 204, 199, 0.2) 100%);
+}
+
+.stat-icon-bg.non-arg {
+  background: linear-gradient(135deg, rgba(168, 181, 179, 0.15) 0%, rgba(209, 220, 217, 0.2) 100%);
+}
+
+.stat-icon-bg.ratio {
+  background: linear-gradient(135deg, rgba(233, 196, 106, 0.15) 0%, rgba(244, 162, 97, 0.2) 100%);
+}
+
+.stat-icon-bg .el-icon {
+  font-size: 26px;
+  color: #2a9d8f;
+}
+
+.stat-icon-bg.arg .el-icon {
+  color: #2a9d8f;
+}
+
+.stat-icon-bg.non-arg .el-icon {
+  color: #a8b5b3;
+}
+
+.stat-icon-bg.ratio .el-icon {
+  color: #e9c46a;
+}
+
+.stat-info {
+  flex: 1;
+}
+
+.stat-value-teal {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2a9d8f;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+.stat-value-teal.arg {
+  color: #2a9d8f;
+}
+
+.stat-value-teal.non-arg {
+  color: #888;
+}
+
+.stat-value-teal.ratio {
+  color: #e9a93f;
+}
+
+.stat-label-teal {
+  font-size: 13px;
+  color: #666;
+  font-weight: 500;
+}
+
 .charts-header {
   display: flex;
   justify-content: space-between;
@@ -1646,22 +2413,35 @@ h3 {
   transition: all 0.3s ease;
 }
 
-.chart-container:hover {
-  border-color: rgba(42, 157, 143, 0.3);
-  box-shadow: 0 6px 24px rgba(42, 157, 143, 0.12);
+.chart-container.enhanced {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fdfc 100%);
+  border: 1px solid rgba(42, 157, 143, 0.12);
+  box-shadow: 0 4px 20px rgba(42, 157, 143, 0.1);
+}
+
+.chart-container.enhanced:hover {
+  transform: translateY(-2px);
+  border-color: rgba(42, 157, 143, 0.25);
+  box-shadow: 0 8px 28px rgba(42, 157, 143, 0.15);
+}
+
+.chart-header {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(42, 157, 143, 0.1);
 }
 
 .chart-container h4 {
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   font-size: 16px;
-  color: #2a9d8f;
+  color: #1a3a36;
   font-weight: 600;
 }
 
 .chart-container .chart-desc {
-  color: #909399;
-  font-size: 13px;
-  margin: 0 0 16px;
+  color: #888;
+  font-size: 12px;
+  margin: 0;
   line-height: 1.5;
 }
 
@@ -1670,6 +2450,82 @@ h3 {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 253, 252, 0.95) 100%);
   border-radius: 8px;
   border: 1px solid rgba(42, 157, 143, 0.12);
+}
+
+/* 网络图容器 */
+.network-chart-container {
+  grid-column: 1 / -1;
+  min-height: 1050px;
+}
+
+.network-chart {
+  height: 1000px !important;
+  /* 优化触控体验 */
+  touch-action: pan-x pan-y pinch-zoom;
+  user-select: none;
+  -webkit-user-select: none;
+  /* 确保网络图有合适的背景 */
+  background: linear-gradient(135deg, rgba(42, 157, 143, 0.02) 0%, rgba(61, 204, 199, 0.03) 100%);
+  border-radius: 8px;
+}
+
+.network-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 1000px;
+}
+
+/* 网络图操作提示 */
+.network-controls-hint {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.network-hint-alert {
+  padding: 8px 12px;
+}
+
+.network-hint-alert :deep(.el-alert__title) {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.hint-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+}
+
+.hint-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #1a3a36;
+  font-size: 13px;
+}
+
+.hint-item .el-icon {
+  color: #2a9d8f;
+  font-size: 14px;
+}
+
+/* 缩放控制按钮 */
+.zoom-controls {
+  display: flex;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.zoom-controls .el-button {
+  padding: 6px 12px;
+}
+
+.zoom-controls .el-icon {
+  font-size: 14px;
 }
 </style>
 

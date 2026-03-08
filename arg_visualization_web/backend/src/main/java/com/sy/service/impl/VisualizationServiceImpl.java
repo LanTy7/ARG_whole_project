@@ -743,6 +743,29 @@ public class VisualizationServiceImpl implements VisualizationService {
         }
     }
 
+    @Override
+    public Map<String, Object> getAllArgSequences(Long taskId, Long userId) {
+        validateTask(taskId, userId);
+        
+        // 从数据库查询所有预测为 ARG 的序列
+        LambdaQueryWrapper<AllPrediction> q = new LambdaQueryWrapper<AllPrediction>()
+                .eq(AllPrediction::getTaskId, taskId)
+                .eq(AllPrediction::getIsArg, true)
+                .orderByAsc(AllPrediction::getRowIndex);
+        
+        List<AllPrediction> list = allPredictionMapper.selectList(q);
+        List<Map<String, Object>> argSequences = list.stream()
+                .map(this::allPredictionToMap)
+                .collect(Collectors.toList());
+        
+        log.info("获取所有 ARG 序列: taskId={}, count={}", taskId, argSequences.size());
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("argSequences", argSequences);
+        result.put("totalCount", argSequences.size());
+        return result;
+    }
+
     /**
      * 验证任务
      */

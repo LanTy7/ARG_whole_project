@@ -66,3 +66,15 @@ export function exportVisualizationData(taskId) {
     responseType: 'blob'
   })
 }
+
+/**
+ * 获取所有 ARG 序列（用于网络图展示）
+ * @param {number} taskId - 任务ID
+ * @returns {Promise} 所有预测为 ARG 的序列列表
+ */
+export function getAllArgSequences(taskId) {
+  return request({
+    url: `/visualization/genome/${taskId}/arg-sequences`,
+    method: 'get'
+  })
+}

@@ -315,6 +315,23 @@ export default {
       argRatio: 'ARG Ratio',
       categories: 'ARG Categories'
     },
+    statsOverview: {
+      totalSequences: 'Total Sequences',
+      argSequences: 'ARG Sequences',
+      nonArgSequences: 'Non-ARG Sequences',
+      argRatio: 'ARG Ratio',
+      totalLabel: 'Total Sequences'
+    },
+    networkChart: {
+      title: 'ARG Relationship Network',
+      desc: 'Shows the relationship between ARG categories and representative sequences. Node size indicates sequence count, click for details',
+      noData: 'No ARG data available',
+      loading: 'Loading network chart data...',
+      hintZoom: 'Scroll/Pinch: Zoom',
+      hintPan: 'Drag/Swipe: Pan',
+      hintClick: 'Click node: Details',
+      reset: 'Reset'
+    },
     charts: {
       distribution: 'ARG Type Distribution',
       confidence: 'Prediction Confidence Distribution',

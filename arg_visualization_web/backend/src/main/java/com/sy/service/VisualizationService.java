@@ -50,5 +50,13 @@ public interface VisualizationService {
      * 导出可视化数据
      */
     Map<String, Object> exportVisualizationData(Long taskId, Long userId);
+    
+    /**
+     * 获取所有 ARG 序列（用于网络图展示）
+     * @param taskId 任务ID
+     * @param userId 用户ID
+     * @return 所有预测为 ARG 的序列列表
+     */
+    Map<String, Object> getAllArgSequences(Long taskId, Long userId);
 }
 
