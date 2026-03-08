@@ -1002,7 +1002,7 @@ onMounted(() => {
 :deep(.el-select__wrapper:hover),
 :deep(.el-select__wrapper.is-focused) {
   border-color: var(--theme-border-7);
-  box-shadow: 0 0 0 1px rgba(120, 90, 70, 0.15);
+  box-shadow: 0 0 0 1px rgba(42, 157, 143, 0.2);
 }
 
 :deep(.el-select__placeholder) {
@@ -1014,15 +1014,15 @@ onMounted(() => {
 }
 
 :deep(.el-button--default) {
-  background: rgba(240, 220, 202, 0.9);
-  border: 1px solid var(--theme-border-5);
-  color: var(--theme-accent);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(42, 157, 143, 0.3);
+  color: #2a9d8f;
 }
 
 :deep(.el-button--default:hover) {
-  background: rgb(230, 210, 190);
-  border-color: var(--theme-border-7);
-  color: var(--theme-accent);
+  background: rgba(232, 246, 245, 0.9);
+  border-color: rgba(42, 157, 143, 0.5);
+  color: #238b7e;
 }
 
 /* 主按钮统一用 theme 按钮色 */
@@ -1135,8 +1135,8 @@ onMounted(() => {
 /* 文件夹上传区域 */
 .folder-upload-area {
   padding: 40px 20px;
-  background: rgba(0, 255, 255, 0.05);
-  border: 2px dashed rgba(103, 194, 58, 0.4);
+  background: rgba(42, 157, 143, 0.03);
+  border: 2px dashed rgba(42, 157, 143, 0.3);
   border-radius: 8px;
   text-align: center;
   cursor: pointer;
@@ -1144,19 +1144,19 @@ onMounted(() => {
 }
 
 .folder-upload-area:hover {
-  border-color: rgba(103, 194, 58, 0.7);
-  background: rgba(103, 194, 58, 0.08);
+  border-color: rgba(42, 157, 143, 0.5);
+  background: rgba(42, 157, 143, 0.06);
 }
 
 .folder-upload-area.drag-over {
-  border-color: #67C23A;
-  background: rgba(103, 194, 58, 0.15);
+  border-color: #2a9d8f;
+  background: rgba(42, 157, 143, 0.1);
   transform: scale(1.01);
 }
 
 .folder-upload-area .folder-icon {
   font-size: 48px;
-  color: rgba(103, 194, 58, 0.7);
+  color: rgba(42, 157, 143, 0.6);
   margin-bottom: 12px;
 }
 
@@ -1167,7 +1167,7 @@ onMounted(() => {
 }
 
 .folder-upload-area .upload-tip {
-  color: rgba(92, 64, 51, 0.6);
+  color: rgba(26, 58, 54, 0.55);
   font-size: 12px;
 }
 
@@ -1184,13 +1184,13 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
-  color: rgba(92, 64, 51, 0.9);
+  color: rgba(26, 58, 54, 0.85);
   font-size: 14px;
 }
 
 .mag-file-header .el-icon {
   margin-right: 6px;
-  color: #67C23A;
+  color: #2a9d8f;
 }
 
 .mag-file-list {
@@ -1230,7 +1230,7 @@ onMounted(() => {
 .progress-text {
   margin-top: 16px;
   text-align: center;
-  color: rgba(92, 64, 51, 0.9);
+  color: rgba(26, 58, 54, 0.85);
 }
 
 .stage-info {
@@ -1244,7 +1244,7 @@ onMounted(() => {
 }
 
 :deep(.el-step__title) {
-  color: rgba(92, 64, 51, 0.8);
+  color: rgba(26, 58, 54, 0.7);
   font-size: 13px;
 }
 
@@ -1254,7 +1254,7 @@ onMounted(() => {
 }
 
 :deep(.el-step__title.is-finish) {
-  color: #67C23A;
+  color: #2a9d8f;
 }
 
 .files-card {

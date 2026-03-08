@@ -435,26 +435,26 @@ const handleRegister = (event) => {
 </script>
 
 <style scoped>
-/* 背景与侧边栏一致 */
+/* 青绿色渐变背景 */
 .login-container {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: var(--theme-gradient-sidebar);
+  background: linear-gradient(135deg, #e8f6f5 0%, #f0f9f8 50%, #f5fbfa 100%);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 }
 
-/* 登录表单用主题主色，与背景区分 */
+/* 登录表单用白色卡片，青绿色边框 */
 .login-box {
   width: 450px;
   padding: 40px;
-  background: var(--theme-bg);
-  border: 1px solid var(--theme-border-2);
+  background: #ffffff;
+  border: 1px solid rgba(42, 157, 143, 0.15);
   border-radius: 16px;
-  box-shadow: 0 12px 40px var(--theme-shadow-3), 0 0 0 1px var(--theme-border);
+  box-shadow: 0 12px 40px rgba(42, 157, 143, 0.12), 0 0 0 1px rgba(42, 157, 143, 0.05);
   position: relative;
 }
 
@@ -473,7 +473,7 @@ const handleRegister = (event) => {
 .login-header h1 {
   margin: 0 0 8px 0;
   font-size: 28px;
-  color: var(--theme-text);
+  color: #1a3a36;
 }
 
 .login-header p {

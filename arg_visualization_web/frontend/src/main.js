@@ -5,6 +5,7 @@ import pinia from './stores';
 import ElementPlus from 'element-plus';
 import 'element-plus/dist/index.css';
 import './assets/theme.css';
+import './assets/main.css';
 import * as ElementPlusIconsVue from '@element-plus/icons-vue';
 import i18n from './locales';
 
@@ -21,6 +22,29 @@ app.use(i18n);
 
 // Element Plus 使用 ConfigProvider 组件来动态切换语言
 // 在 App.vue 中包裹 el-config-provider 实现
-app.use(ElementPlus);
+app.use(ElementPlus, {
+  // 配置 Element Plus 主题色为青绿色
+  zIndex: 3000,
+});
+
+// 动态设置 Element Plus CSS 变量以匹配青绿色主题
+const setElementPlusTheme = () => {
+  const root = document.documentElement;
+  // Element Plus 主色
+  root.style.setProperty('--el-color-primary', '#2a9d8f');
+  root.style.setProperty('--el-color-primary-light-3', '#4db8ab');
+  root.style.setProperty('--el-color-primary-light-5', '#7dcdc4');
+  root.style.setProperty('--el-color-primary-light-7', '#aedef0');
+  root.style.setProperty('--el-color-primary-light-8', '#d1f0ec');
+  root.style.setProperty('--el-color-primary-light-9', '#e8f6f5');
+  root.style.setProperty('--el-color-primary-dark-2', '#238b7e');
+};
+
+// 页面加载时设置主题
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', setElementPlusTheme);
+} else {
+  setElementPlusTheme();
+}
 
 app.mount('#app');

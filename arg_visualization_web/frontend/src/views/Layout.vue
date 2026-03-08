@@ -159,16 +159,16 @@ onMounted(async () => {
 
 .sidebar {
   width: 260px;
-  background: linear-gradient(180deg, var(--theme-bg-3) 0%, var(--theme-bg-2) 35%, var(--theme-bg-5) 100%);
-  border-right: 1px solid var(--theme-border-2);
+  background: linear-gradient(180deg, #e8f6f5 0%, #f0f9f8 50%, #f5fbfa 100%);
+  border-right: 1px solid rgba(42, 157, 143, 0.15);
   display: flex;
   flex-direction: column;
-  box-shadow: 2px 0 16px var(--theme-shadow);
+  box-shadow: 2px 0 16px rgba(42, 157, 143, 0.1);
   position: relative;
   overflow: hidden;
 }
 
-/* 方案2：同色系竖向渐变 + 轻微条纹纹理 */
+/* 青绿色系纹理装饰 */
 .sidebar::before {
   content: '';
   position: absolute;
@@ -177,8 +177,8 @@ onMounted(async () => {
     105deg,
     transparent,
     transparent 12px,
-    var(--theme-bg-overlay-4) 12px,
-    var(--theme-bg-overlay-4) 13.5px
+    rgba(42, 157, 143, 0.03) 12px,
+    rgba(42, 157, 143, 0.03) 13.5px
   );
   opacity: 0.7;
   pointer-events: none;
@@ -189,7 +189,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   border-bottom: 1px solid var(--theme-border-3);
-  background: var(--theme-bg-1);
+  background: var(--theme-bg);
   position: relative;
   overflow: hidden;
 }
@@ -269,15 +269,15 @@ onMounted(async () => {
 }
 
 :deep(.el-menu-item.is-active) {
-  background: linear-gradient(135deg, rgba(var(--theme-primary), 0.9) 0%, rgba(220, 200, 180, 0.95) 100%);
-  color: var(--theme-accent);
-  border-color: var(--theme-border-6);
-  box-shadow: 0 2px 12px var(--theme-shadow-3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, rgba(42, 157, 143, 0.15) 0%, rgba(61, 204, 199, 0.1) 100%);
+  color: #2a9d8f;
+  border-color: rgba(42, 157, 143, 0.3);
+  box-shadow: 0 2px 12px rgba(42, 157, 143, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 :deep(.el-menu-item.is-active .el-icon) {
-  color: var(--theme-accent);
-  filter: drop-shadow(0 1px 2px var(--theme-shadow-3));
+  color: #2a9d8f;
+  filter: drop-shadow(0 1px 2px rgba(42, 157, 143, 0.2));
 }
 
 .sidebar-footer {
@@ -297,14 +297,14 @@ onMounted(async () => {
 }
 
 .auth-button.el-button--primary {
-  background: var(--theme-gradient-card);
-  color: var(--theme-accent);
-  border-color: var(--theme-border-7);
+  background: linear-gradient(135deg, #2a9d8f 0%, #3dccc7 100%);
+  color: #ffffff;
+  border-color: #238b7e;
 }
 
 .auth-button.el-button--primary:hover {
-  background: var(--theme-gradient-button);
-  box-shadow: 0 4px 16px var(--theme-shadow-4);
+  background: linear-gradient(135deg, #238b7e 0%, #2a9d8f 100%);
+  box-shadow: 0 4px 16px rgba(42, 157, 143, 0.3);
   transform: translateY(-2px);
 }
 
@@ -328,7 +328,7 @@ onMounted(async () => {
   flex: 1;
   overflow-y: auto;
   padding: 24px;
-  background: var(--theme-gradient-bg);
+  background: linear-gradient(135deg, #f5fafa 0%, #f0f7f6 50%, #f8fcfc 100%);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

@@ -112,9 +112,9 @@ onMounted(() => {
 
 .welcome-card {
   margin-bottom: 24px;
-  background: var(--theme-gradient-welcome);
-  border: 1px solid var(--theme-border-2);
-  box-shadow: 0 8px 32px var(--theme-shadow-2);
+  background: linear-gradient(135deg, #e8f6f5 0%, #f0f9f8 50%, #f5fbfa 100%);
+  border: 1px solid rgba(42, 157, 143, 0.15);
+  box-shadow: 0 8px 32px rgba(42, 157, 143, 0.1);
 }
 
 :deep(.welcome-card .el-card__body) {
@@ -124,7 +124,7 @@ onMounted(() => {
 .welcome-content {
   text-align: center;
   padding: 80px 40px;
-  background: var(--theme-gradient-card);
+  background: linear-gradient(135deg, #ffffff 0%, #f8fdfc 100%);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -139,8 +139,8 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at 20% 50%, var(--theme-bg-overlay-2) 0%, transparent 50%),
-              radial-gradient(circle at 80% 80%, var(--theme-bg-overlay-2) 0%, transparent 50%);
+  background: radial-gradient(circle at 20% 50%, rgba(42, 157, 143, 0.05) 0%, transparent 50%),
+              radial-gradient(circle at 80% 80%, rgba(61, 204, 199, 0.05) 0%, transparent 50%);
   pointer-events: none;
   z-index: 0;
 }
@@ -156,8 +156,8 @@ onMounted(() => {
     45deg,
     transparent,
     transparent 10px,
-    var(--theme-bg-overlay) 10px,
-    var(--theme-bg-overlay) 20px
+    rgba(42, 157, 143, 0.02) 10px,
+    rgba(42, 157, 143, 0.02) 20px
   );
   animation: slide 20s linear infinite;
 }
@@ -251,32 +251,32 @@ onMounted(() => {
 }
 
 .actions :deep(.el-button--primary) {
-  background: var(--theme-gradient-button);
-  border: 1px solid var(--theme-border-7);
-  color: var(--theme-accent);
-  box-shadow: 0 4px 16px var(--theme-shadow-3);
+  background: linear-gradient(135deg, #2a9d8f 0%, #3dccc7 100%);
+  border: 1px solid #238b7e;
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(42, 157, 143, 0.25);
 }
 
 .actions :deep(.el-button--primary:hover) {
-  background: var(--theme-gradient-sidebar);
+  background: linear-gradient(135deg, #238b7e 0%, #2a9d8f 100%);
   transform: translateY(-2px);
-  box-shadow: 0 6px 24px var(--theme-shadow-4);
+  box-shadow: 0 6px 24px rgba(42, 157, 143, 0.35);
 }
 
 .actions :deep(.el-button--default) {
-  background: var(--theme-gradient-card);
+  background: linear-gradient(135deg, #ffffff 0%, #f8fdfc 100%);
   backdrop-filter: blur(10px);
-  border: 1px solid var(--theme-border-6);
-  color: var(--theme-accent);
-  box-shadow: 0 2px 12px var(--theme-shadow-2);
+  border: 1px solid rgba(42, 157, 143, 0.3);
+  color: #2a9d8f;
+  box-shadow: 0 2px 12px rgba(42, 157, 143, 0.1);
 }
 
 .actions :deep(.el-button--default:hover) {
-  background: var(--theme-gradient-sidebar);
-  border-color: var(--theme-border-7);
-  color: var(--theme-accent);
+  background: linear-gradient(135deg, #f0f9f8 0%, #e8f6f5 100%);
+  border-color: rgba(42, 157, 143, 0.4);
+  color: #238b7e;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px var(--theme-shadow-3);
+  box-shadow: 0 6px 20px rgba(42, 157, 143, 0.2);
 }
 
 .stats-row {
@@ -285,11 +285,11 @@ onMounted(() => {
 
 .stat-card {
   cursor: default;
-  border: 1px solid var(--theme-border-2);
+  border: 1px solid rgba(42, 157, 143, 0.12);
   border-radius: 16px;
-  box-shadow: 0 6px 20px var(--theme-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  box-shadow: 0 6px 20px rgba(42, 157, 143, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.5);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  background: var(--theme-gradient-card);
+  background: linear-gradient(135deg, #ffffff 0%, #f8fdfc 100%);
   backdrop-filter: blur(10px);
   position: relative;
   overflow: hidden;
@@ -302,7 +302,7 @@ onMounted(() => {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, var(--theme-bg-overlay-3), transparent);
+  background: linear-gradient(90deg, transparent, rgba(42, 157, 143, 0.06), transparent);
   transition: left 0.6s;
 }
 
@@ -316,8 +316,8 @@ onMounted(() => {
 
 .stat-card:hover {
   transform: translateY(-8px) scale(1.02);
-  border-color: var(--theme-border-5);
-  box-shadow: 0 12px 32px var(--theme-shadow-3), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  border-color: rgba(42, 157, 143, 0.25);
+  box-shadow: 0 12px 32px rgba(42, 157, 143, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 .stat-content {
@@ -347,12 +347,12 @@ onMounted(() => {
 .stat-value {
   font-size: 42px;
   font-weight: 700;
-  color: var(--theme-accent);
-  text-shadow: 0 1px 2px var(--theme-shadow-3);
+  color: #2a9d8f;
+  text-shadow: 0 1px 2px rgba(42, 157, 143, 0.15);
   line-height: 1;
   margin-bottom: 10px;
   transition: all 0.4s;
-  background: var(--theme-gradient-accent);
+  background: linear-gradient(135deg, #2a9d8f 0%, #3dccc7 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

@@ -177,7 +177,6 @@
                   <el-table-column label="BLAST" width="100" align="center" fixed="right">
                     <template #default="{ row }">
                       <el-button
-                        v-if="row.isArg"
                         type="primary"
                         size="small"
                         :icon="Search"
@@ -186,7 +185,6 @@
                       >
                         BLAST
                       </el-button>
-                      <span v-else style="color: #ccc;">-</span>
                     </template>
                   </el-table-column>
                 </el-table>
@@ -536,9 +534,9 @@ function formatProb(prob) {
 
 // 获取进度条颜色（根据概率值）
 function getProgressColor(percentage) {
-  if (percentage >= 70) return '#67C23A'  // 绿色 - 高置信度
-  if (percentage >= 50) return '#409EFF'  // 蓝色 - 中置信度
-  if (percentage >= 30) return '#E6A23C'  // 橙色 - 低置信度
+  if (percentage >= 70) return '#2a9d8f'  // 青绿色 - 高置信度
+  if (percentage >= 50) return '#3dccc7'  // 浅青绿 - 中置信度
+  if (percentage >= 30) return '#e9c46a'  // 橙黄色 - 低置信度
   return '#909399'  // 灰色 - 很低置信度
 }
 
@@ -777,8 +775,8 @@ function initPieChart() {
             name: t('visualization.chartPie.argName'),
             itemStyle: { 
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                { offset: 0, color: '#67C23A' },
-                { offset: 1, color: '#95d475' }
+                { offset: 0, color: '#2a9d8f' },
+                { offset: 1, color: '#3dccc7' }
               ])
             }
           },
@@ -787,8 +785,8 @@ function initPieChart() {
             name: t('visualization.chartPie.nonArgName'),
             itemStyle: { 
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                { offset: 0, color: '#909399' },
-                { offset: 1, color: '#C0C4CC' }
+                { offset: 0, color: '#a8b5b3' },
+                { offset: 1, color: '#d1dcd9' }
               ])
             }
           }
@@ -815,18 +813,18 @@ function initBarChart() {
     return
   }
   
-  // 生成渐变色
+  // 生成渐变色 - 青绿色系
   const colors = [
-    ['#409EFF', '#79bbff'],
-    ['#67C23A', '#95d475'],
-    ['#E6A23C', '#eebe77'],
-    ['#F56C6C', '#fab6b6'],
-    ['#9C27B0', '#ce93d8'],
-    ['#00BCD4', '#4dd0e1'],
-    ['#FF5722', '#ff8a65'],
-    ['#795548', '#a1887f'],
-    ['#607D8B', '#90a4ae'],
-    ['#3F51B5', '#7986cb']
+    ['#2a9d8f', '#4db8ab'],
+    ['#238b7e', '#46a89b'],
+    ['#3dccc7', '#6dd9d5'],
+    ['#1a7a6f', '#3a9e92'],
+    ['#4ecdc4', '#7dd8d1'],
+    ['#0d5c54', '#2a857a'],
+    ['#6dd5c0', '#96e0d1'],
+    ['#147a6b', '#369e8f'],
+    ['#5dbeb5', '#86cfc8'],
+    ['#0f8b7e', '#33a89a']
   ]
   
   const option = {
@@ -1006,41 +1004,41 @@ function downloadChartImages() {
   padding: 20px;
 }
 
-/* 亮色主题 - 与科技青色主题搭配 */
+/* 青绿色主题 */
 :deep(.el-card) {
-  background: linear-gradient(135deg, #ffffff 0%, #f8feff 100%);
-  border: 2px solid rgba(0, 180, 255, 0.2);
-  box-shadow: 0 4px 20px rgba(0, 180, 255, 0.1);
-  color: #2c3e50;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fdfc 100%);
+  border: 1px solid rgba(42, 157, 143, 0.15);
+  box-shadow: 0 4px 20px rgba(42, 157, 143, 0.08);
+  color: #1a3a36;
 }
 
 :deep(.el-card__header) {
-  background: linear-gradient(135deg, rgba(0, 180, 255, 0.08) 0%, rgba(0, 200, 255, 0.12) 100%);
-  border-bottom: 2px solid rgba(0, 180, 255, 0.25);
-  color: #0088cc;
+  background: linear-gradient(135deg, rgba(42, 157, 143, 0.06) 0%, rgba(61, 204, 199, 0.1) 100%);
+  border-bottom: 1px solid rgba(42, 157, 143, 0.2);
+  color: #2a9d8f;
   font-weight: 600;
 }
 
 :deep(.el-descriptions__label) {
-  color: #0088cc;
-  background: rgba(0, 180, 255, 0.08);
+  color: #2a9d8f;
+  background: rgba(42, 157, 143, 0.06);
   font-weight: 600;
 }
 
 :deep(.el-descriptions__content) {
-  color: #2c3e50;
+  color: #1a3a36;
   background: #ffffff;
 }
 
 :deep(.el-table) {
   background: #ffffff;
-  color: #2c3e50;
+  color: #1a3a36;
 }
 
 :deep(.el-table th.el-table__cell) {
-  background: linear-gradient(135deg, rgba(0, 180, 255, 0.12) 0%, rgba(0, 200, 255, 0.18) 100%);
-  color: #0088cc;
-  border-bottom: 2px solid rgba(0, 180, 255, 0.3);
+  background: linear-gradient(135deg, rgba(42, 157, 143, 0.1) 0%, rgba(61, 204, 199, 0.15) 100%);
+  color: #2a9d8f;
+  border-bottom: 1px solid rgba(42, 157, 143, 0.25);
   font-weight: 600;
 }
 
@@ -1049,8 +1047,8 @@ function downloadChartImages() {
 }
 
 :deep(.el-table td.el-table__cell) {
-  border-bottom: 1px solid rgba(0, 180, 255, 0.1);
-  color: #2c3e50;
+  border-bottom: 1px solid rgba(42, 157, 143, 0.1);
+  color: #1a3a36;
 }
 
 :deep(.el-tabs__item) {
@@ -1059,17 +1057,17 @@ function downloadChartImages() {
 }
 
 :deep(.el-tabs__item.is-active) {
-  color: #0088cc;
+  color: #2a9d8f;
   font-weight: 600;
 }
 
 :deep(.el-tabs__active-bar) {
-  background-color: #0088cc;
+  background-color: #2a9d8f;
 }
 
 h3, h4, h5 {
-  color: #0088cc;
-  text-shadow: 0 2px 4px rgba(0, 136, 204, 0.15);
+  color: #2a9d8f;
+  text-shadow: 0 2px 4px rgba(42, 157, 143, 0.12);
   font-weight: 600;
 }
 
@@ -1091,7 +1089,7 @@ h3, h4, h5 {
   align-items: center;
   gap: 8px;
   font-weight: 600;
-  color: #0088cc;
+  color: #2a9d8f;
 }
 
 .download-card .card-header .el-icon {
@@ -1113,15 +1111,15 @@ h3, h4, h5 {
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  background: rgba(0, 136, 204, 0.03);
-  border: 1px solid rgba(0, 136, 204, 0.15);
+  background: rgba(42, 157, 143, 0.03);
+  border: 1px solid rgba(42, 157, 143, 0.15);
   border-radius: 8px;
   transition: all 0.3s ease;
 }
 
 .download-item:hover {
-  background: rgba(0, 136, 204, 0.08);
-  border-color: rgba(0, 136, 204, 0.25);
+  background: rgba(42, 157, 143, 0.06);
+  border-color: rgba(42, 157, 143, 0.25);
 }
 
 .download-item.download-all {
@@ -1142,7 +1140,7 @@ h3, h4, h5 {
 
 .download-info .file-icon {
   font-size: 32px;
-  color: #0088cc;
+  color: #2a9d8f;
 }
 
 .file-details {
@@ -1236,7 +1234,7 @@ h3 {
 
 /* BLAST 按钮样式 */
 .blast-btn {
-  background: linear-gradient(135deg, #0088cc 0%, #00b4ff 100%);
+  background: linear-gradient(135deg, #2a9d8f 0%, #3dccc7 100%);
   border: none;
   font-weight: 500;
   padding: 4px 10px;
@@ -1244,9 +1242,9 @@ h3 {
 }
 
 .blast-btn:hover {
-  background: linear-gradient(135deg, #0077b3 0%, #0099dd 100%);
+  background: linear-gradient(135deg, #238b7e 0%, #2a9d8f 100%);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 136, 204, 0.3);
+  box-shadow: 0 4px 12px rgba(42, 157, 143, 0.3);
 }
 
 .blast-btn:active {
@@ -1263,8 +1261,8 @@ h3 {
 }
 
 .arg-class-tag:hover {
-  background-color: rgba(0, 136, 204, 0.15);
-  border-color: #0088cc;
+  background-color: rgba(42, 157, 143, 0.12);
+  border-color: #2a9d8f;
 }
 
 .arg-class-tag .info-icon {
@@ -1274,7 +1272,7 @@ h3 {
 }
 
 .arg-class-tag:hover .info-icon {
-  color: #0088cc;
+  color: #2a9d8f;
 }
 
 /* Top-5 分类弹窗样式 */
@@ -1300,7 +1298,7 @@ h3 {
 }
 
 .top-classes-content .top-class-item:hover {
-  background-color: rgba(0, 136, 204, 0.05);
+  background-color: rgba(42, 157, 143, 0.05);
 }
 
 .top-classes-content .top-class-first {
@@ -1357,9 +1355,9 @@ h3 {
   gap: 16px;
   margin-bottom: 16px;
   padding: 12px 16px;
-  background: linear-gradient(135deg, rgba(0, 180, 255, 0.05) 0%, rgba(0, 200, 255, 0.08) 100%);
+  background: linear-gradient(135deg, rgba(42, 157, 143, 0.04) 0%, rgba(61, 204, 199, 0.06) 100%);
   border-radius: 8px;
-  border: 1px solid rgba(0, 180, 255, 0.15);
+  border: 1px solid rgba(42, 157, 143, 0.12);
 }
 
 .filter-info {
@@ -1375,31 +1373,31 @@ h3 {
   justify-content: flex-end;
   margin-top: 20px;
   padding-top: 16px;
-  border-top: 1px solid rgba(0, 180, 255, 0.15);
+  border-top: 1px solid rgba(42, 157, 143, 0.12);
 }
 
 :deep(.el-pagination) {
   --el-pagination-bg-color: transparent;
-  --el-pagination-hover-color: #0088cc;
+  --el-pagination-hover-color: #2a9d8f;
 }
 
 :deep(.el-pagination .el-pager li) {
-  background: rgba(0, 180, 255, 0.05);
-  color: #2c3e50;
-  border: 1px solid rgba(0, 180, 255, 0.2);
+  background: rgba(42, 157, 143, 0.04);
+  color: #1a3a36;
+  border: 1px solid rgba(42, 157, 143, 0.15);
   border-radius: 4px;
   margin: 0 2px;
 }
 
 :deep(.el-pagination .el-pager li.is-active) {
-  background: linear-gradient(135deg, #0088cc 0%, #00b4ff 100%);
+  background: linear-gradient(135deg, #2a9d8f 0%, #3dccc7 100%);
   color: #ffffff;
-  border-color: #0088cc;
+  border-color: #2a9d8f;
 }
 
 :deep(.el-pagination .el-pager li:hover:not(.is-active)) {
-  color: #0088cc;
-  background: rgba(0, 180, 255, 0.1);
+  color: #2a9d8f;
+  background: rgba(42, 157, 143, 0.08);
 }
 
 /* 结果可视化初始页面的空状态样式：外层卡片和内部都用主题背景 */
@@ -1428,7 +1426,7 @@ h3 {
 }
 
 .visualization-container :deep(.el-empty__image svg) {
-  fill: rgba(0, 180, 255, 0.4) !important;
+  fill: rgba(42, 157, 143, 0.4) !important;
 }
 
 .visualization-container :deep(.el-empty__image) {
@@ -1462,7 +1460,7 @@ h3 {
 .charts-header h3 {
   margin: 0;
   font-size: 20px;
-  color: #0088cc;
+  color: #2a9d8f;
   font-weight: 600;
 }
 
@@ -1485,23 +1483,23 @@ h3 {
 }
 
 .chart-container {
-  background: linear-gradient(135deg, rgba(0, 180, 255, 0.03) 0%, rgba(0, 200, 255, 0.06) 100%);
+  background: linear-gradient(135deg, rgba(42, 157, 143, 0.03) 0%, rgba(61, 204, 199, 0.05) 100%);
   padding: 20px;
   border-radius: 12px;
-  border: 2px solid rgba(0, 180, 255, 0.2);
-  box-shadow: 0 4px 16px rgba(0, 180, 255, 0.1);
+  border: 1px solid rgba(42, 157, 143, 0.15);
+  box-shadow: 0 4px 16px rgba(42, 157, 143, 0.08);
   transition: all 0.3s ease;
 }
 
 .chart-container:hover {
-  border-color: rgba(0, 180, 255, 0.4);
-  box-shadow: 0 6px 24px rgba(0, 180, 255, 0.15);
+  border-color: rgba(42, 157, 143, 0.3);
+  box-shadow: 0 6px 24px rgba(42, 157, 143, 0.12);
 }
 
 .chart-container h4 {
   margin: 0 0 8px;
   font-size: 16px;
-  color: #0088cc;
+  color: #2a9d8f;
   font-weight: 600;
 }
 
@@ -1514,9 +1512,9 @@ h3 {
 
 .chart {
   width: 100%;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 254, 255, 0.95) 100%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 253, 252, 0.95) 100%);
   border-radius: 8px;
-  border: 1px solid rgba(0, 180, 255, 0.15);
+  border: 1px solid rgba(42, 157, 143, 0.12);
 }
 </style>
 
