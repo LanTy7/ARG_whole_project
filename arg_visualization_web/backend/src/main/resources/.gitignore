@@ -1,0 +1,13 @@
+# 本地环境配置文件（包含敏感信息和本地路径）
+application.yml
+application.properties
+application-*.yml
+application-*.properties
+
+# 但保留模板文件供参考
+!application-example.yml
+
+# 但保留以下文件：
+# messages*.properties - 国际化资源
+# com/sy/mapper/**/*.xml - MyBatis Mapper XML
+!.gitignore

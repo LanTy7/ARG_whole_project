@@ -1,0 +1,141 @@
+# application-example.yml
+# ================================
+# 本地开发环境配置模板
+# ================================
+# 使用说明：
+# 1. 复制本文件为 application.yml
+# 2. 根据你的本地环境修改以下配置
+# 3. application.yml 已被 .gitignore 忽略，不会提交到仓库
+
+mybatis-plus:
+  mapper-locations: classpath*:com/sy/mapper/**/*.xml
+
+server:
+  port: 8080
+  tomcat:
+    max-connections: 10000
+    threads:
+      max: 200
+      min-spare: 10
+    connection-timeout: 300000
+
+spring:
+  # ================================
+  # 数据库配置（必填）
+  # ================================
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/arg_visualization?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowMultiQueries=true
+    username: root
+    password: your_mysql_password
+
+  # 文件上传配置
+  servlet:
+    multipart:
+      max-file-size: 524288000
+      max-request-size: 524288000
+      file-size-threshold: 10485760
+      location: ${java.io.tmpdir}
+      enabled: true
+      resolve-lazily: false
+  
+  # 邮件服务器配置（可选，用于发送验证码）
+  mail:
+    host: smtp.qq.com
+    port: 587
+    username: your_qq_email@qq.com
+    password: your_email_auth_code
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+    default-encoding: UTF-8
+
+  # Redis 配置（可选，用于缓存和验证码）
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      password:
+      database: 0
+      timeout: 10000
+      lettuce:
+        pool:
+          max-active: 8
+          max-wait: -1
+          max-idle: 8
+          min-idle: 0
+
+# 邮件调试配置
+email:
+  debug-mode: true
+  debug-recipient: your_email@qq.com
+
+# JWT 配置（可选，使用默认即可）
+jwt:
+  secret: springbot-jwt-secret-key-2024-secure-and-long-enough
+  expiration: 86400000
+
+# ================================
+# 文件上传路径配置（根据系统修改）
+# ================================
+file:
+  upload:
+    # macOS 示例: /Users/yourname/Documents/arg/uploads/genome
+    # Linux 示例: /home/www/arg/uploads/genome
+    # Windows 示例: C:/arg/uploads/genome
+    genome-dir: ${GENOME_UPLOAD_HOST_PATH:/tmp/arg/uploads/genome}
+    mag-dir: ${MAG_UPLOAD_HOST_PATH:/tmp/arg/uploads/genome}
+    max-size: 524288000
+
+# ================================
+# Docker 配置（根据本地环境修改）
+# ================================
+docker:
+  enabled: true
+  command-prefix: ${DOCKER_COMMAND_PREFIX:}
+  
+  # ARG 推理配置
+  arg:
+    # 镜像选择：
+    # - arg-bilstm:v2.1 (ARM64, Apple Silicon Mac)
+    # - arg-bilstm:v2.1-amd64 (AMD64, Linux服务器)
+    image-name: arg-bilstm:v2.1
+    model-path: /app/models
+    input-mount: /input
+    output-mount: /output
+    use-gpu: false  # Mac 设为 false，有NVIDIA显卡可设为 true
+  
+  # Prodigal 基因预测配置
+  prodigal:
+    image-name: prodigal:latest
+    timeout: 600
+    parallel-threads: 8
+    use-meta-mode: true
+
+# 任务队列配置
+queue:
+  max-concurrent: 7
+
+# 分析任务配置
+analysis:
+  # 输出目录（根据系统修改）
+  output-dir: ${ANALYSIS_OUTPUT_HOST_PATH:/tmp/arg/outputs}
+  timeout: 3600
+  queue-size: 100
+
+# ================================
+# BLAST 比对配置（根据本地路径修改）
+# ================================
+blast:
+  enabled: true
+  # BLAST 数据库路径（必填）
+  # 示例: /Users/yourname/Documents/ARG_whole_project/blast_db/db/ARG_DB
+  db-path: /path/to/your/blast_db/db/ARG_DB
+  image-name: ncbi/blast:latest
+  evalue: 1e-5
+  max-hits: 10
+  threads: 4

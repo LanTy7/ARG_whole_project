@@ -44,3 +44,10 @@ logs/
 # ==================== OS ====================
 .DS_Store
 Thumbs.db
+
+# ==================== Local Config ====================
+# 本地环境配置文件（包含敏感信息、本地路径等）
+src/main/resources/application*.yml
+src/main/resources/application*.properties
+!src/main/resources/.gitignore
+!src/main/resources/application-example.yml
