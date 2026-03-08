@@ -98,7 +98,38 @@
                   style="margin-top: 16px;"
                   :row-class-name="getArgRowClassName"
                   max-height="500"
+                  @expand-change="handleExpandChange"
                 >
+                  <!-- 展开列：显示氨基酸序列 -->
+                  <el-table-column type="expand" width="50">
+                    <template #default="{ row }">
+                      <div class="sequence-expand-content" v-loading="sequenceLoading[row.id]">
+                        <div class="sequence-header">
+                          <div class="sequence-info">
+                            <el-icon><Document /></el-icon>
+                            <span class="sequence-id">{{ row.id }}</span>
+                            <el-tag type="info" size="small" v-if="sequenceData[row.id]">
+                              {{ sequenceData[row.id].length }} aa
+                            </el-tag>
+                          </div>
+                          <el-button 
+                            type="primary" 
+                            size="small" 
+                            :icon="DocumentCopy"
+                            @click="copySequence(row.id)"
+                            v-if="sequenceData[row.id]"
+                          >
+                            {{ $t('visualization.copySequence') || '复制序列' }}
+                          </el-button>
+                        </div>
+                        <div class="sequence-body" v-if="sequenceData[row.id]">
+                          <pre class="sequence-text">{{ formatSequence(sequenceData[row.id]) }}</pre>
+                        </div>
+                        <el-empty v-else-if="!sequenceLoading[row.id]" :description="$t('visualization.noSequenceData') || '暂无序列数据'" />
+                      </div>
+                    </template>
+                  </el-table-column>
+                  
                   <el-table-column type="index" :label="$t('common.index') || '#'" width="70" align="center">
                     <template #default="scope">
                       {{ (pagination.currentPage - 1) * pagination.pageSize + scope.$index + 1 }}
@@ -333,8 +364,9 @@ import { ref, reactive, computed, onMounted, watch, nextTick, onUnmounted } from
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
-import { Download, Document, Search, FolderOpened, Files, InfoFilled } from '@element-plus/icons-vue'
+import { Download, Document, Search, FolderOpened, Files, InfoFilled, DocumentCopy } from '@element-plus/icons-vue'
 import { getGenomeVisualization, getVisualizationResults, getClassSummary } from '@/api/visualization'
+import { getSequence } from '@/api/blast'
 import { getDownloadableFiles, downloadFile } from '@/api/download'
 import { useUserStore } from '@/stores/user'
 import * as echarts from 'echarts'
@@ -368,6 +400,10 @@ const downloading = reactive({
 const blastDrawerVisible = ref(false)
 const currentBlastSequenceId = ref('')
 const currentBlastArgClass = ref('')
+
+// 序列查看相关状态
+const sequenceData = ref({})
+const sequenceLoading = ref({})
 
 // 图表 ref
 const pieChartRef = ref(null)
@@ -523,6 +559,61 @@ function handleBlast(row) {
   currentBlastSequenceId.value = row.id
   currentBlastArgClass.value = row.argClass || ''
   blastDrawerVisible.value = true
+}
+
+// 处理表格行展开/收起
+async function handleExpandChange(row, expandedRows) {
+  const rowId = row.id
+  // 如果展开且还没有加载过序列数据
+  if (expandedRows.includes(row) && !sequenceData.value[rowId]) {
+    sequenceLoading.value[rowId] = true
+    try {
+      const res = await getSequence(taskId.value, rowId)
+      sequenceData.value[rowId] = res.data?.sequence || res.data
+    } catch (error) {
+      console.error('获取序列失败:', error)
+      ElMessage.error(t('visualization.sequenceLoadFailed') || '获取序列失败')
+      sequenceData.value[rowId] = null
+    } finally {
+      sequenceLoading.value[rowId] = false
+    }
+  }
+}
+
+// 格式化序列显示（每60个字符一行）
+function formatSequence(sequence) {
+  if (!sequence) return ''
+  // 移除所有空白字符
+  const cleanSeq = sequence.replace(/\s/g, '')
+  // 每60个字符一行
+  const lines = []
+  for (let i = 0; i < cleanSeq.length; i += 60) {
+    lines.push(cleanSeq.substring(i, i + 60))
+  }
+  return lines.join('\n')
+}
+
+// 复制序列到剪贴板
+async function copySequence(sequenceId) {
+  const sequence = sequenceData.value[sequenceId]
+  if (!sequence) return
+  
+  try {
+    await navigator.clipboard.writeText(sequence)
+    ElMessage.success(t('visualization.sequenceCopied') || '序列已复制到剪贴板')
+  } catch (error) {
+    console.error('复制失败:', error)
+    // 降级方案
+    const textarea = document.createElement('textarea')
+    textarea.value = sequence
+    textarea.style.position = 'fixed'
+    textarea.style.opacity = '0'
+    document.body.appendChild(textarea)
+    textarea.select()
+    document.execCommand('copy')
+    document.body.removeChild(textarea)
+    ElMessage.success(t('visualization.sequenceCopied') || '序列已复制到剪贴板')
+  }
 }
 
 // 格式化概率（与预测概率一致，保留两位小数）
@@ -1167,6 +1258,70 @@ h3, h4, h5 {
 
 .detail-content {
   padding: 20px;
+}
+
+/* 序列展开行样式 */
+.sequence-expand-content {
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(42, 157, 143, 0.03) 0%, rgba(61, 204, 199, 0.05) 100%);
+  border-radius: 8px;
+  border: 1px solid rgba(42, 157, 143, 0.1);
+}
+
+.sequence-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(42, 157, 143, 0.15);
+}
+
+.sequence-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sequence-info .el-icon {
+  font-size: 20px;
+  color: #2a9d8f;
+}
+
+.sequence-id {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a3a36;
+}
+
+.sequence-body {
+  background: #fff;
+  border-radius: 6px;
+  padding: 16px;
+  border: 1px solid rgba(42, 157, 143, 0.1);
+}
+
+.sequence-text {
+  margin: 0;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 13px;
+  line-height: 1.8;
+  color: #1a3a36;
+  word-break: break-all;
+  white-space: pre-wrap;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* 表格展开按钮样式 */
+:deep(.el-table__expand-icon) {
+  color: #2a9d8f;
+  font-size: 14px;
+}
+
+:deep(.el-table__expand-icon:hover) {
+  color: #238b7e;
 }
 
 .detail-header {

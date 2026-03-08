@@ -364,6 +364,9 @@ export default {
       noHits: '未找到匹配序列',
       hitId: '匹配ID'
     },
+    copySequence: '复制序列',
+    sequenceCopied: '序列已复制到剪贴板',
+    sequenceLoadFailed: '获取序列失败',
     download: {
       all: '下载全部结果',
       argOnly: '仅下载 ARG',

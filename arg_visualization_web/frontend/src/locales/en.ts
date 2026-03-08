@@ -364,6 +364,9 @@ export default {
       noHits: 'No matching sequences found',
       hitId: 'Hit ID'
     },
+    copySequence: 'Copy Sequence',
+    sequenceCopied: 'Sequence copied to clipboard',
+    sequenceLoadFailed: 'Failed to load sequence',
     download: {
       all: 'Download All Results',
       argOnly: 'Download ARG Only',
